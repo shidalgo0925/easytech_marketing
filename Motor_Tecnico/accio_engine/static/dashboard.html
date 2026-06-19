@@ -363,18 +363,20 @@
       const statusLabel = c => {
         if (c.status === 'active') return '<span class="conn-ok">Activo</span>';
         if (c.status === 'needs_auth') return '<span class="conn-warn">Falta OAuth</span>';
+        if (c.status === 'stub') return '<span class="conn-plan">Estructura (sin API)</span>';
         return '<span class="conn-plan">Planificado</span>';
       };
       document.getElementById('connectorsTable').innerHTML = `
-        <table><thead><tr><th>Fase</th><th>Canal</th><th>Estado</th><th>Cola</th><th>Publicados</th><th>Siguiente</th><th>Acción</th></tr></thead>
+        <table><thead><tr><th>Fase</th><th>Canal</th><th>Modo</th><th>Estado</th><th>Cola</th><th>Publicados</th><th>Siguiente</th><th>Acción</th></tr></thead>
         <tbody>${items.map(c => `<tr>
           <td>${c.phase}</td>
           <td>${c.name}</td>
+          <td><code>${c.implementation||'—'}</code></td>
           <td>${statusLabel(c)}</td>
           <td>${c.pending ?? '—'}</td>
           <td>${c.published ?? '—'}</td>
           <td><code>${c.next || '—'}</code></td>
-          <td>${c.auth_url ? `<a href="${c.auth_url}" target="_blank">Conectar</a>` : (c.note || '—')}</td>
+          <td>${c.auth_url ? `<a href="${c.auth_url}" target="_blank">Conectar</a>` : (c.docs ? `<span class="conn-plan">${c.docs}</span>` : '—')}</td>
         </tr>`).join('')}</tbody></table>`;
     }
 

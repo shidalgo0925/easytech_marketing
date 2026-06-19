@@ -163,6 +163,36 @@
       "utm": "instagram_post2",
       "flyer_num": 11,
       "text": "Diagnóstico tecnológico GRATIS esta semana 🔍\n\nRevisamos tu stack (ERP, FE, inventario) y te damos un plan claro — sin venta disfrazada.\n\nDM DIAGNÓSTICO o WhatsApp +507 6688-4938\n\n#Panama #EasyTech #Odoo #TransformacionDigital #PYME #ConsultoriaTI"
+    },
+    {
+      "id": "google_business_01_fe_odoo",
+      "platform": "google_business",
+      "status": "pending",
+      "scheduled_at": "2026-08-01T13:00:00-05:00",
+      "flyer": "flyers/03_facturacion_electronica.png",
+      "utm": "gbp_post1",
+      "flyer_num": 3,
+      "text": "¿Su negocio en Panamá ya integra Facturación Electrónica con su operación diaria?\n\nEasyTech Services — Odoo + FE autorizada DGI.\n\n📱 +507 6688-4938\n📄 https://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "youtube_01_demo",
+      "platform": "youtube",
+      "status": "pending",
+      "scheduled_at": "2026-08-15T13:00:00-05:00",
+      "flyer": "flyers/12_demo_plataformas.png",
+      "utm": "youtube_post1",
+      "flyer_num": 12,
+      "text": "Demo EasyTech — EClassOne, EN1, EPOSOne y Odoo en acción.\n\nAgenda 30 min sin costo: info@easytech.services"
+    },
+    {
+      "id": "tiktok_01_diagnostico",
+      "platform": "tiktok",
+      "status": "pending",
+      "scheduled_at": "2026-08-20T13:00:00-05:00",
+      "flyer": "flyers/11_diagnostico_gratuito.png",
+      "utm": "tiktok_post1",
+      "flyer_num": 11,
+      "text": "PYME en Panamá: ¿tu ERP y tu factura electrónica hablan entre sí? Diagnóstico gratis con EasyTech. #Panama #Odoo #PYME"
     }
   ]
 }

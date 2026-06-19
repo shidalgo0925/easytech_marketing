@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-19",
+  "strategy": "Estructura primero, APIs y permisos despues",
+  "queue_file": "Marketing/content_queue.json",
+  "connectors": [
+    {
+      "id": "linkedin",
+      "phase": "D.1",
+      "name": "LinkedIn",
+      "platform": "linkedin",
+      "implementation": "live",
+      "publisher": "linkedin_publisher.py",
+      "oauth": {
+        "url": "https://n8n.etsrv.site/linkedin/",
+        "service": "easytech-linkedin-oauth",
+        "port": 8091
+      },
+      "env_required": ["LINKEDIN_ACCESS_TOKEN", "LINKEDIN_AUTHOR_URN"],
+      "env_optional": ["LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET"],
+      "log_file": "Marketing/publish_log.json",
+      "cron": "linkedin_auto_publish.sh",
+      "enabled": true
+    },
+    {
+      "id": "facebook",
+      "phase": "D.2",
+      "name": "Facebook Page",
+      "platform": "facebook",
+      "implementation": "live",
+      "publisher": "meta_publisher.py",
+      "publisher_args": ["--platform=facebook"],
+      "oauth": {
+        "url": "https://n8n.etsrv.site/meta/",
+        "service": "easytech-meta-oauth",
+        "port": 8093
+      },
+      "env_required": ["META_PAGE_ACCESS_TOKEN", "META_PAGE_ID"],
+      "env_optional": ["META_APP_ID", "META_APP_SECRET"],
+      "log_file": "Marketing/meta_publish_log.json",
+      "cron": "meta_auto_publish.sh",
+      "enabled": true
+    },
+    {
+      "id": "instagram",
+      "phase": "D.3",
+      "name": "Instagram Business",
+      "platform": "instagram",
+      "implementation": "live",
+      "publisher": "meta_publisher.py",
+      "publisher_args": ["--platform=instagram"],
+      "oauth": {
+        "url": "https://n8n.etsrv.site/meta/",
+        "service": "easytech-meta-oauth",
+        "port": 8093
+      },
+      "env_required": ["META_PAGE_ACCESS_TOKEN", "META_IG_USER_ID"],
+      "env_optional": ["META_APP_ID", "META_APP_SECRET"],
+      "log_file": "Marketing/meta_publish_log.json",
+      "cron": "meta_auto_publish.sh",
+      "enabled": true
+    },
+    {
+      "id": "google_business",
+      "phase": "D.4",
+      "name": "Google Business Profile",
+      "platform": "google_business",
+      "implementation": "stub",
+      "publisher": "connectors/publishers/google_business.py",
+      "oauth": {
+        "url": null,
+        "service": null,
+        "port": null,
+        "note": "Google Cloud OAuth — pendiente Fase D.4b"
+      },
+      "env_required": ["GOOGLE_BUSINESS_ACCOUNT_ID", "GOOGLE_OAUTH_REFRESH_TOKEN"],
+      "env_optional": ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+      "log_file": "Marketing/publish_logs/google_business.json",
+      "cron": null,
+      "enabled": true,
+      "docs": "docs/conectores/GOOGLE_BUSINESS.md"
+    },
+    {
+      "id": "meta_ads",
+      "phase": "D.5",
+      "name": "Meta Ads",
+      "platform": "meta_ads",
+      "implementation": "stub",
+      "publisher": "connectors/publishers/meta_ads.py",
+      "oauth": {
+        "url": null,
+        "note": "Reutiliza app Meta tras D.2-D.3"
+      },
+      "env_required": ["META_AD_ACCOUNT_ID", "META_PAGE_ACCESS_TOKEN"],
+      "log_file": "Marketing/publish_logs/meta_ads.json",
+      "cron": null,
+      "enabled": true,
+      "docs": "docs/conectores/META_ADS.md"
+    },
+    {
+      "id": "google_ads",
+      "phase": "D.6",
+      "name": "Google Ads",
+      "platform": "google_ads",
+      "implementation": "stub",
+      "publisher": "connectors/publishers/google_ads.py",
+      "oauth": {
+        "url": null,
+        "note": "Google Ads API + OAuth — pendiente Fase D.6b"
+      },
+      "env_required": ["GOOGLE_ADS_CUSTOMER_ID", "GOOGLE_ADS_DEVELOPER_TOKEN"],
+      "log_file": "Marketing/publish_logs/google_ads.json",
+      "cron": null,
+      "enabled": true,
+      "docs": "docs/conectores/GOOGLE_ADS.md"
+    },
+    {
+      "id": "youtube",
+      "phase": "D.7",
+      "name": "YouTube",
+      "platform": "youtube",
+      "implementation": "stub",
+      "publisher": "connectors/publishers/youtube.py",
+      "oauth": {
+        "url": null,
+        "note": "YouTube Data API v3 — pendiente Fase D.7b"
+      },
+      "env_required": ["YOUTUBE_CHANNEL_ID", "GOOGLE_OAUTH_REFRESH_TOKEN"],
+      "log_file": "Marketing/publish_logs/youtube.json",
+      "cron": null,
+      "enabled": true,
+      "docs": "docs/conectores/YOUTUBE.md"
+    },
+    {
+      "id": "tiktok",
+      "phase": "D.8",
+      "name": "TikTok",
+      "platform": "tiktok",
+      "implementation": "stub",
+      "publisher": "connectors/publishers/tiktok.py",
+      "oauth": {
+        "url": null,
+        "note": "TikTok for Business API — pendiente Fase D.8b"
+      },
+      "env_required": ["TIKTOK_CLIENT_KEY", "TIKTOK_ACCESS_TOKEN"],
+      "log_file": "Marketing/publish_logs/tiktok.json",
+      "cron": null,
+      "enabled": true,
+      "docs": "docs/conectores/TIKTOK.md"
+    }
+  ]
+}

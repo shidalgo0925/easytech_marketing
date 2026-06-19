@@ -13,6 +13,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from Motor_Tecnico.accio_engine import executor, queue_store
+from Motor_Tecnico.connectors.registry import all_connector_views
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 PANAMA = ZoneInfo("America/Panama")
@@ -26,110 +27,7 @@ FLYERS_DIR = BASE_DIR / "Marketing" / "flyers"
 
 
 def load_connectors() -> list[dict[str, Any]]:
-    status = executor.get_status()
-    cq = status["content_queue"]
-
-    def linkedin_ok() -> bool:
-        return bool(os.getenv("LINKEDIN_ACCESS_TOKEN", "").strip())
-
-    def meta_fb_ok() -> bool:
-        return bool(os.getenv("META_PAGE_ACCESS_TOKEN", "").strip())
-
-    def meta_ig_ok() -> bool:
-        return meta_fb_ok() and bool(os.getenv("META_IG_USER_ID", "").strip())
-
-    meta_log = 0
-    if META_LOG_PATH.exists():
-        meta_log = len(json.loads(META_LOG_PATH.read_text(encoding="utf-8")))
-
-    return [
-        {
-            "id": "linkedin",
-            "name": "LinkedIn",
-            "phase": "D.1",
-            "configured": linkedin_ok(),
-            "auth_url": "https://n8n.etsrv.site/linkedin/",
-            "pending": cq.get("linkedin_pending", 0),
-            "published": cq.get("linkedin_published", 0),
-            "next": cq.get("next_pending"),
-            "status": "active" if linkedin_ok() else "needs_auth",
-        },
-        {
-            "id": "facebook",
-            "name": "Facebook Page",
-            "phase": "D.2",
-            "configured": meta_fb_ok(),
-            "auth_url": "https://n8n.etsrv.site/meta/",
-            "pending": cq.get("facebook_pending", 0),
-            "published": cq.get("facebook_published", 0),
-            "next": cq.get("facebook_next"),
-            "status": "active" if meta_fb_ok() else "needs_auth",
-        },
-        {
-            "id": "instagram",
-            "name": "Instagram Business",
-            "phase": "D.3",
-            "configured": meta_ig_ok(),
-            "auth_url": "https://n8n.etsrv.site/meta/",
-            "pending": cq.get("instagram_pending", 0),
-            "published": cq.get("instagram_published", 0),
-            "next": cq.get("instagram_next"),
-            "status": "active" if meta_ig_ok() else "needs_auth",
-            "meta_log_entries": meta_log,
-        },
-        {
-            "id": "google_business",
-            "name": "Google Business Profile",
-            "phase": "D.4",
-            "configured": False,
-            "auth_url": None,
-            "pending": 0,
-            "published": 0,
-            "status": "planned",
-            "note": "Requiere Google Cloud project + OAuth",
-        },
-        {
-            "id": "meta_ads",
-            "name": "Meta Ads",
-            "phase": "D.5",
-            "configured": False,
-            "auth_url": None,
-            "pending": 0,
-            "published": 0,
-            "status": "planned",
-            "note": "Tras conectar Meta organic",
-        },
-        {
-            "id": "google_ads",
-            "name": "Google Ads",
-            "phase": "D.6",
-            "configured": False,
-            "auth_url": None,
-            "pending": 0,
-            "published": 0,
-            "status": "planned",
-        },
-        {
-            "id": "youtube",
-            "name": "YouTube",
-            "phase": "D.7",
-            "configured": False,
-            "auth_url": None,
-            "pending": 0,
-            "published": 0,
-            "status": "planned",
-        },
-        {
-            "id": "tiktok",
-            "name": "TikTok",
-            "phase": "D.8",
-            "configured": False,
-            "auth_url": None,
-            "pending": 0,
-            "published": 0,
-            "status": "planned",
-        },
-    ]
+    return all_connector_views()
 
 
 def _odoo_client():

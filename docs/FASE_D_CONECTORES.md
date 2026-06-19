@@ -1,33 +1,39 @@
 # Fase D — Conectores multicanal
 
-| # | Canal | Estado | Archivo / URL |
-|---|-------|--------|---------------|
-| D.1 | LinkedIn | ✅ Activo | `linkedin_publisher.py`, `/linkedin/` |
-| D.2 | Facebook Page | 🔧 Listo (OAuth pendiente) | `meta_publisher.py`, `/meta/` |
-| D.3 | Instagram Business | 🔧 Listo (OAuth pendiente) | `meta_publisher.py`, `/meta/` |
-| D.4 | Google Business Profile | 📋 Planificado | — |
-| D.5 | Meta Ads | 📋 Planificado | Tras D.2–D.3 |
-| D.6 | Google Ads | 📋 Planificado | — |
-| D.7 | YouTube | 📋 Planificado | — |
-| D.8 | TikTok | 📋 Planificado | — |
+## Estrategia actual
 
-## Cola unificada
+**Estructura completa → APIs y permisos canal por canal.**
 
-Todos los canales usan `Marketing/content_queue.json` con campo `"platform"`:
+Ver `docs/ARQUITECTURA_CONECTORES.md`.
 
-- `linkedin`
-- `facebook`
-- `instagram`
+| # | Canal | Modo | Estado |
+|---|-------|------|--------|
+| D.1 | LinkedIn | live | ✅ Operativo |
+| D.2 | Facebook | live | Estructura + publisher; OAuth pendiente |
+| D.3 | Instagram | live | Estructura + publisher; OAuth pendiente |
+| D.4 | Google Business | stub | Cola + dry-run |
+| D.5 | Meta Ads | stub | Cola + dry-run |
+| D.6 | Google Ads | stub | Cola + dry-run |
+| D.7 | YouTube | stub | Cola + dry-run |
+| D.8 | TikTok | stub | Cola + dry-run |
 
-## Dashboard
+## Registro
 
-Pestaña **Conectores** → estado, cola y link OAuth.
+`Marketing/accio/connectors.json`
 
-## Próximo paso operativo
+## Router
 
-1. Crear app Meta + añadir `META_APP_ID` / `META_APP_SECRET` en `.env`
-2. Autorizar en https://n8n.etsrv.site/meta/
-3. Probar dry-run Facebook e Instagram
-4. Activar cron Meta (opcional)
+```bash
+python3 Motor_Tecnico/channel_publisher.py --connector=google_business --dry-run --force
+```
 
-Ver `docs/META_CONECTORES.md` para detalle.
+## Cuando toque conectar APIs
+
+| Fase | Doc |
+|------|-----|
+| D.2–D.3 | `docs/META_CONECTORES.md` |
+| D.4 | `docs/conectores/GOOGLE_BUSINESS.md` |
+| D.5 | `docs/conectores/META_ADS.md` |
+| D.6 | `docs/conectores/GOOGLE_ADS.md` |
+| D.7 | `docs/conectores/YOUTUBE.md` |
+| D.8 | `docs/conectores/TIKTOK.md` |

@@ -36,6 +36,15 @@ def run_pipeline() -> dict[str, Any]:
     return {"step": "odoo_sync", "scrape": scrape, **sync}
 
 
+def publish_channel(connector_id: str, force: bool = False, dry_run: bool = False) -> dict[str, Any]:
+    args = [f"--connector={connector_id}"]
+    if force:
+        args.append("--force")
+    if dry_run:
+        args.append("--dry-run")
+    return _run_script("channel_publisher.py", *args)
+
+
 def publish_linkedin(force: bool = False, dry_run: bool = False) -> dict[str, Any]:
     args = []
     if force:
@@ -122,42 +131,58 @@ def _platform_queue_stats(posts: list[dict[str, Any]], platform: str) -> dict[st
 
 
 def get_status() -> dict[str, Any]:
+    from Motor_Tecnico.connectors.registry import all_connector_views, load_registry  # noqa: PLC0415
+    from Motor_Tecnico.accio_engine.queue_store import list_orders, load_state  # noqa: PLC0415
+
     queue = load_content_queue()
     posts = queue.get("posts", [])
-    li = _platform_queue_stats(posts, "linkedin")
-    fb = _platform_queue_stats(posts, "facebook")
-    ig = _platform_queue_stats(posts, "instagram")
+    views = all_connector_views()
+
+    content_queue: dict[str, Any] = {}
+    for view in views:
+        pid = view["id"]
+        platform = view["platform"]
+        stats = _platform_queue_stats(posts, platform)
+        content_queue[f"{pid}_pending"] = stats["pending"]
+        content_queue[f"{pid}_published"] = stats["published"]
+        content_queue[f"{pid}_next"] = stats["next_pending"]
+        # aliases historicos LinkedIn / Meta
+        if platform == "linkedin":
+            content_queue["linkedin_pending"] = stats["pending"]
+            content_queue["linkedin_published"] = stats["published"]
+            content_queue["next_pending"] = stats["next_pending"]
+        if platform == "facebook":
+            content_queue["facebook_pending"] = stats["pending"]
+            content_queue["facebook_published"] = stats["published"]
+            content_queue["facebook_next"] = stats["next_pending"]
+        if platform == "instagram":
+            content_queue["instagram_pending"] = stats["pending"]
+            content_queue["instagram_published"] = stats["published"]
+            content_queue["instagram_next"] = stats["next_pending"]
 
     csv_path = BASE_DIR / "leads_prospeccion.csv"
     lead_rows = 0
     if csv_path.exists():
         lead_rows = max(0, sum(1 for _ in csv_path.open()) - 1)
 
-    from Motor_Tecnico.accio_engine.queue_store import list_orders, load_state  # noqa: PLC0415
-
+    registry = load_registry()
     return {
         "engine": "accio_marketing_engine",
-        "version": 1,
+        "version": 2,
+        "strategy": registry.get("strategy"),
         "time_panama": datetime.now(PANAMA).isoformat(),
-        "content_queue": {
-            "linkedin_pending": li["pending"],
-            "linkedin_published": li["published"],
-            "next_pending": li["next_pending"],
-            "facebook_pending": fb["pending"],
-            "facebook_published": fb["published"],
-            "facebook_next": fb["next_pending"],
-            "instagram_pending": ig["pending"],
-            "instagram_published": ig["published"],
-            "instagram_next": ig["next_pending"],
-        },
+        "content_queue": content_queue,
+        "connectors": views,
         "prospection_csv_rows": lead_rows,
         "orders_pending": len(list_orders(status="pending")),
         "state": load_state(),
         "paths": {
             "content_queue": str(QUEUE_PATH),
+            "connectors_registry": str(BASE_DIR / "Marketing" / "accio" / "connectors.json"),
             "flyers_manifest": str(BASE_DIR / "Marketing" / "flyers" / "manifest.json"),
             "calendar": str(CALENDAR_PATH),
             "meta_publish_log": str(BASE_DIR / "Marketing" / "meta_publish_log.json"),
+            "publish_logs_dir": str(BASE_DIR / "Marketing" / "publish_logs"),
         },
     }
 
@@ -175,6 +200,11 @@ ACTIONS = {
     ),
     "publish_meta": lambda p: publish_meta(
         platform=str(p.get("platform", "all")),
+        force=bool(p.get("force")),
+        dry_run=bool(p.get("dry_run")),
+    ),
+    "publish_channel": lambda p: publish_channel(
+        connector_id=str(p.get("connector") or p.get("platform", "")),
         force=bool(p.get("force")),
         dry_run=bool(p.get("dry_run")),
     ),

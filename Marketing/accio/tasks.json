@@ -63,9 +63,15 @@
       "phase": 3
     },
     {
+      "id": "connector_registry",
+      "title": "Registro conectores + stubs Fase D",
+      "status": "completed",
+      "phase": 2
+    },
+    {
       "id": "meta",
-      "title": "Facebook / Instagram API",
-      "status": "in_progress",
+      "title": "Facebook / Instagram API (OAuth)",
+      "status": "pending",
       "phase": 2
     },
     {

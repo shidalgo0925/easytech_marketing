@@ -25,13 +25,10 @@
 
 ## Fase D — Conectores
 
-1. LinkedIn ✅
-2. Facebook 🔧 (publisher + OAuth; falta autorizar app Meta)
-3. Instagram 🔧 (mismo OAuth Meta)
-4. Google Business Profile 📋
-5. Meta Ads 📋
-6. Google Ads 📋
-7. YouTube 📋
-8. TikTok 📋
+Estrategia: **estructura primero, APIs después** (`docs/ARQUITECTURA_CONECTORES.md`).
 
-Ver `docs/FASE_D_CONECTORES.md` y `docs/META_CONECTORES.md`.
+1. LinkedIn ✅ live
+2. Facebook / Instagram — live (OAuth pendiente)
+3. Google Business, Meta Ads, Google Ads, YouTube, TikTok — stub (cola + dry-run)
+
+Registro: `Marketing/accio/connectors.json`

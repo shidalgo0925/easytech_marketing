@@ -83,6 +83,20 @@ def dashboard_flyers():
     return jsonify({"ok": True, **dashboard_data.load_flyers_library()})
 
 
+@app.get("/accio/dashboard/api/connectors")
+@require_api_key
+def dashboard_connectors_api():
+    return jsonify({"ok": True, "connectors": dashboard_data.load_connectors()})
+
+
+@app.get("/accio/connectors")
+@require_api_key
+def connectors_registry():
+    from Motor_Tecnico.connectors.registry import load_registry
+
+    return jsonify({"ok": True, **load_registry(), "runtime": dashboard_data.load_connectors()})
+
+
 @app.get("/accio/assets/flyers/<path:filename>")
 def flyer_asset(filename: str):
     """Imagenes de marketing (publicas, solo PNG en Marketing/flyers/)."""
@@ -168,6 +182,8 @@ def openapi_spec():
             "/accio/run/pipeline": {"post": {"summary": "Scraper + Odoo sync"}},
             "/accio/run/publish-linkedin": {"post": {"summary": "Publicar siguiente post"}},
             "/accio/run/publish-meta": {"post": {"summary": "Publicar Facebook/Instagram"}},
+            "/accio/run/publish-channel": {"post": {"summary": "Publicar por conector (registry)"}},
+            "/accio/connectors": {"get": {"summary": "Registro de conectores Fase D"}},
         },
     }
     return jsonify(spec)
@@ -268,6 +284,23 @@ def publish_meta_now():
     elif platform == "instagram":
         action = "publish_instagram"
     order = queue_store.create_order(action, params, "api")
+    order = _run_order(order)
+    return jsonify({"ok": order["status"] == "completed", "order": order})
+
+
+@app.post("/accio/run/publish-channel")
+@require_api_key
+def publish_channel_now():
+    body = request.get_json(silent=True) or {}
+    connector = (body.get("connector") or body.get("platform") or "").strip()
+    if not connector:
+        return jsonify({"ok": False, "error": "Campo connector o platform requerido"}), 400
+    params = {
+        "connector": connector,
+        "force": bool(body.get("force")),
+        "dry_run": bool(body.get("dry_run")),
+    }
+    order = queue_store.create_order("publish_channel", params, "api")
     order = _run_order(order)
     return jsonify({"ok": order["status"] == "completed", "order": order})
 
