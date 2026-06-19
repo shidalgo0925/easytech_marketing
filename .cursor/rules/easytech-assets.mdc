@@ -1,0 +1,46 @@
+---
+description: Flyers, cola de marketing y rutas del proyecto EasyTech
+alwaysApply: true
+---
+
+# EasyTech Marketing — assets y rutas
+
+Proyecto: `/opt/easytech_marketing`
+
+## Flyers (NO olvidar)
+
+Los flyers oficiales están en **`Marketing/flyers/`** en el VPS. Catálogo completo: **`Marketing/flyers/manifest.json`**.
+
+| # | Archivo |
+|---|---------|
+| 1 | `01_desarrollo_software.png` |
+| 2 | `02_implementamos_odoo.png` |
+| 3 | `03_facturacion_electronica.png` |
+| 4 | `04_consultoria_ti.png` |
+| 5 | `05_en1_plataforma.png` |
+| 6 | `06_eclassone.png` |
+| 7 | `07_ethesistone.png` |
+| 8 | `08_eposone.png` |
+| 9 | `09_epayroll.png` |
+| 10 | *(falta IIUS)* |
+| 11 | `11_diagnostico_gratuito.png` |
+| 12 | `12_demo_plataformas.png` |
+
+**No usar** `/home/papichulo/.cursor/projects/opt/assets/` — es temporal del chat.
+
+Al publicar LinkedIn: leer `Marketing/content_queue.json` y usar `flyer` relativo a `Marketing/`. Script: `Motor_Tecnico/linkedin_publisher.py`.
+
+**Orquestador Accio:** `https://n8n.etsrv.site/accio/` — `docs/ACCIO_API.md` — servicio `easytech-accio-engine`.
+
+## Contacto y CTA
+
+- CTA: **DIAGNÓSTICO**
+- Guía: https://n8n.etsrv.site/guia/
+- WhatsApp: +507 6688-4938
+- Email: info@easytech.services
+
+## Nuevo flyer
+
+1. Guardar PNG en `Marketing/flyers/XX_nombre.png`
+2. Actualizar `Marketing/flyers/manifest.json`
+3. Referenciar en `Marketing/content_queue.json` si va a LinkedIn

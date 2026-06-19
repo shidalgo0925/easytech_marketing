@@ -1,0 +1,15 @@
+{
+  "last_tick": "2026-06-19T06:20:48.416956+00:00",
+  "last_actions": {
+    "publish_linkedin": {
+      "at": "2026-06-19T06:08:47.761040+00:00",
+      "order_id": "ord_6072880c738a",
+      "ok": true
+    },
+    "run_pipeline": {
+      "at": "2026-06-19T06:20:48.416956+00:00",
+      "order_id": "ord_d2f26f960a18",
+      "ok": true
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "posts": [
+    {
+      "id": "linkedin_01_fe_odoo",
+      "platform": "linkedin",
+      "status": "published",
+      "scheduled_at": "2026-06-19T13:00:00-05:00",
+      "flyer": "flyers/03_facturacion_electronica.png",
+      "utm": "linkedin_post1",
+      "text": "¿Por qué la Facturación Electrónica en Panamá sigue siendo un dolor de cabeza para muchas empresas? 🇵🇦\n\nEl problema no es el PAC.\nNo es la DGI.\nEl problema es que la factura vive en un sistema, el inventario en otro, y la contabilidad en un Excel.\n\nImplementar FE no debería ser \"un trámite más\".\nDebería ser el puente para automatizar tu operación.\n\nEn EasyTech Services ayudamos a empresas en Panamá a integrar:\n\n✅ Facturación electrónica autorizada (DGI)\n✅ Odoo como ERP central\n✅ Inventario, ventas y contabilidad en un solo flujo\n\nResultado: cumples la ley Y digitalizas tu negocio al mismo tiempo.\n\n🚀 ¿Tu empresa aún factura \"aparte\" del resto de la operación?\n\nEscríbeme DIAGNÓSTICO por mensaje directo o comenta abajo.\nTe reviso tu caso sin costo.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía gratis: https://n8n.etsrv.site/guia/\n\n#Panamá #FacturacionElectronica #Odoo #ERP #TransformacionDigital #EasyTech #PYME #Contabilidad",
+      "first_comment": "Si prefieres la guía técnica sobre Facturación Electrónica en Panamá 2026, déjanos tu email aquí 👇\nhttps://n8n.etsrv.site/guia/",
+      "published_at": "2026-06-19T00:34:49.038738-05:00",
+      "linkedin_post_id": "urn:li:share:7473608703850762240"
+    },
+    {
+      "id": "linkedin_02_diagnostico",
+      "platform": "linkedin",
+      "status": "published",
+      "scheduled_at": "2026-06-23T13:00:00-05:00",
+      "flyer": "flyers/11_diagnostico_gratuito.png",
+      "utm": "linkedin_post2",
+      "text": "¿Cuánto te cuesta NO saber qué tan preparada está tu empresa para digitalizarse? 💸\n\nMuchas PYMEs en Panamá invierten en software sin un mapa claro:\n→ Compran un ERP que nadie usa\n→ Tienen 5 sistemas que no se hablan\n→ Cumplen FE \"por obligación\" pero sin integrar la operación\n\nEl resultado: gasto duplicado, retrabajo y equipos frustrados.\n\nPor eso en EasyTech Services ofrecemos un Diagnóstico Tecnológico Gratuito:\n\n🔍 Revisamos tu stack actual (ERP, FE, inventario, ventas)\n📋 Identificamos cuellos de botella y riesgos de cumplimiento\n🗺️ Te entregamos un plan de acción claro — sin compromiso\n\nNo es una venta disfrazada. Es una sesión de 30 minutos para que sepas exactamente dónde estás y qué conviene hacer primero.\n\n🚀 ¿Quieres el tuyo?\n\nComenta DIAGNÓSTICO o escríbeme por DM.\nCupos limitados esta semana.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#Panamá #DiagnosticoTecnologico #TransformacionDigital #PYME #Odoo #ERP #EasyTech #ConsultoriaTI",
+      "first_comment": "También tenemos una guía gratuita sobre Facturación Electrónica en Panamá 2026 👇\nhttps://n8n.etsrv.site/guia/",
+      "published_at": "2026-06-19T00:36:54.385764-05:00",
+      "linkedin_post_id": "urn:li:share:7473609231162654720"
+    },
+    {
+      "id": "linkedin_03_implementamos_odoo",
+      "platform": "linkedin",
+      "status": "published",
+      "scheduled_at": "2026-06-26T13:00:00-05:00",
+      "flyer": "flyers/02_implementamos_odoo.png",
+      "utm": "linkedin_post3",
+      "text": "¿Tu empresa crece pero tu ERP no? 📈\n\nMuchas empresas en Panamá operan con Excel, sistemas viejos o software que no se habla entre areas.\n\nEn EasyTech Services implementamos Odoo como ERP central:\n\n✅ Ventas e inventario en tiempo real\n✅ Contabilidad integrada\n✅ Facturacion electronica (DGI)\n✅ CRM y seguimiento comercial\n\nNo es solo instalar software. Es disenar un flujo que tu equipo realmente use.\n\n🚀 ¿Quieres ver como funcionaria en tu empresa?\n\nComenta ODOO o escribeme DIAGNOSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#Odoo #ERP #Panama #EasyTech #TransformacionDigital #PYME",
+      "first_comment": "Guia gratis Facturacion Electronica Panama 2026 👇\nhttps://n8n.etsrv.site/guia/",
+      "published_at": "2026-06-19T00:41:28.269306-05:00",
+      "linkedin_post_id": "urn:li:share:7473610329587908609"
+    },
+    {
+      "id": "linkedin_04_demo_plataformas",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-06-30T13:00:00-05:00",
+      "flyer": "flyers/12_demo_plataformas.png",
+      "utm": "linkedin_post4",
+      "text": "¿Sabias que puedes probar nuestras plataformas SIN COSTO? 🎯\n\nEn EasyTech Services desarrollamos soluciones para distintos sectores:\n\n✅ EClassOne — gestion academica\n✅ EN1 / EasyNodeOne — plataformas de servicios\n✅ EPOSOne — punto de venta\n✅ Odoo + Facturacion Electronica\n\nAgenda una demo de 30 minutos y te mostramos el ecosistema en accion.\n\n🚀 Comenta DEMO o escribeme por DM.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EasyTech #Demo #Panama #Software #Odoo #EClassOne",
+      "first_comment": "https://n8n.etsrv.site/guia/"
+    }
+  ]
+}

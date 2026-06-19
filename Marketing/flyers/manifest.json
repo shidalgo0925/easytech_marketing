@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "updated": "2026-06-19",
+  "base_dir": "/opt/easytech_marketing/Marketing/flyers",
+  "relative_base": "Marketing/flyers",
+  "note": "Fuente canonica de flyers EasyTech. No usar /home/papichulo/.cursor/projects/opt/assets (temporal).",
+  "flyers": [
+    {"num": 1, "file": "01_desarrollo_software.png", "topic": "Desarrollo de software a la medida"},
+    {"num": 2, "file": "02_implementamos_odoo.png", "topic": "Implementacion Odoo ERP"},
+    {"num": 3, "file": "03_facturacion_electronica.png", "topic": "Facturacion electronica Panama DGI"},
+    {"num": 4, "file": "04_consultoria_ti.png", "topic": "Consultoria TI estrategica"},
+    {"num": 5, "file": "05_en1_plataforma.png", "topic": "EasyNodeOne EN1 plataforma todo en uno"},
+    {"num": 6, "file": "06_eclassone.png", "topic": "EClassOne gestion academica"},
+    {"num": 7, "file": "07_ethesistone.png", "topic": "EThesisOne tesis academicas"},
+    {"num": 8, "file": "08_eposone.png", "topic": "EPOSOne punto de venta"},
+    {"num": 9, "file": "09_epayroll.png", "topic": "EPayRoll planilla Panama"},
+    {"num": 10, "file": null, "topic": "IIUS International Institute", "status": "missing"},
+    {"num": 11, "file": "11_diagnostico_gratuito.png", "topic": "Diagnostico tecnologico gratuito"},
+    {"num": 12, "file": "12_demo_plataformas.png", "topic": "Demo plataformas sin costo"}
+  ],
+  "extras": [
+    {"file": "00_landing_ecosistema.png", "topic": "Landing hub 4 modulos ETS"},
+    {"file": "00_grid_productos.png", "topic": "Collage 12 productos (referencia)"}
+  ],
+  "queue": "/opt/easytech_marketing/Marketing/content_queue.json",
+  "publisher": "/opt/easytech_marketing/Motor_Tecnico/linkedin_publisher.py",
+  "contact": {
+    "email": "info@easytech.services",
+    "whatsapp": "+507 6688-4938",
+    "guia": "https://n8n.etsrv.site/guia/",
+    "cta_keyword": "DIAGNOSTICO"
+  }
+}

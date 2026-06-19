@@ -1,0 +1,30 @@
+{
+  "name": "EasyTech - Scraper + Odoo Semanal",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "weeks", "triggerAtDay": [0], "triggerAtHour": 6 }]
+        }
+      },
+      "name": "Cada domingo 6am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "command": "/opt/easytech_marketing/scripts/run_pipeline.sh"
+      },
+      "name": "Ejecutar pipeline",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [220, 0]
+    }
+  ],
+  "connections": {
+    "Cada domingo 6am": {
+      "main": [[{ "node": "Ejecutar pipeline", "type": "main", "index": 0 }]]
+    }
+  }
+}

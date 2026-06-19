@@ -1,0 +1,15 @@
+[Unit]
+Description=EasyMarketingOne Lead API (Odoo)
+After=network.target
+
+[Service]
+Type=simple
+User=papichulo
+WorkingDirectory=/opt/easytech_marketing
+Environment=PATH=/opt/easytech_marketing/venv/bin
+ExecStart=/opt/easytech_marketing/venv/bin/python3 Motor_Tecnico/lead_api.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

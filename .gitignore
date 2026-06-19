@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+*.log
+logs/
+*.sqlite
+*.db
+Marketing/accio/orders.json
+Marketing/accio/*.token
+leads_prospeccion.csv

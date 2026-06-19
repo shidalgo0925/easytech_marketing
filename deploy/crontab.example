@@ -1,0 +1,14 @@
+# EasyMarketingOne — crons en ArrozConPollo (usuario papichulo)
+# Instalar: crontab -e y pegar estas lineas
+
+# Domingo 6:00 — scraper + sync Odoo
+0 6 * * 0 /opt/easytech_marketing/scripts/run_pipeline.sh >> /opt/easytech_marketing/logs/cron.log 2>&1
+
+# Cada 15 min — procesar ordenes Accio Engine
+*/15 * * * * /opt/easytech_marketing/scripts/accio_tick.sh >> /opt/easytech_marketing/logs/accio_tick.log 2>&1
+
+# Mar/Jue 15:00 CEST (~8am Panama) — publicar LinkedIn si hay post listo
+0 15 * * 2,4 /opt/easytech_marketing/scripts/linkedin_auto_publish.sh
+
+# Vie 20:00 CEST (~1pm Panama)
+0 20 * * 5 /opt/easytech_marketing/scripts/linkedin_auto_publish.sh

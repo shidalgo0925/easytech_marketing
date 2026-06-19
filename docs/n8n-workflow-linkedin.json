@@ -1,0 +1,70 @@
+{
+  "name": "EasyTech - Publicacion LinkedIn Automatica",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 2,4"
+            }
+          ]
+        }
+      },
+      "name": "Mar y Jue 8am Panama",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "command": "/opt/easytech_marketing/venv/bin/python3 /opt/easytech_marketing/Motor_Tecnico/linkedin_publisher.py"
+      },
+      "name": "Publicar post pendiente",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.stdout }}",
+              "operation": "contains",
+              "value2": "Publicado"
+            }
+          ]
+        }
+      },
+      "name": "Se publico?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "command": "echo 'LinkedIn post publicado OK'"
+      },
+      "name": "Log exito",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [720, -80]
+    }
+  ],
+  "connections": {
+    "Mar y Jue 8am Panama": {
+      "main": [[{ "node": "Publicar post pendiente", "type": "main", "index": 0 }]]
+    },
+    "Publicar post pendiente": {
+      "main": [[{ "node": "Se publico?", "type": "main", "index": 0 }]]
+    },
+    "Se publico?": {
+      "main": [
+        [{ "node": "Log exito", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  }
+}
