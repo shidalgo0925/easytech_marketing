@@ -1,4 +1,35 @@
 {
-  "weeks": [],
-  "note": "Accio escribe aqui el calendario editorial via POST /accio/calendar"
+  "updated_at": "2026-06-19",
+  "timezone": "America/Panama",
+  "weeks": [
+    {
+      "week": "2026-W26",
+      "posts": [
+        {"id": "linkedin_04_demo_plataformas", "date": "2026-06-30", "flyer": 12, "topic": "Demo plataformas"}
+      ]
+    },
+    {
+      "week": "2026-W27",
+      "posts": [
+        {"id": "linkedin_05_en1", "date": "2026-07-03", "flyer": 5, "topic": "EN1 EasyNodeOne"},
+        {"id": "linkedin_06_eclassone", "date": "2026-07-08", "flyer": 6, "topic": "EClassOne"}
+      ]
+    },
+    {
+      "week": "2026-W28",
+      "posts": [
+        {"id": "linkedin_07_ethesistone", "date": "2026-07-10", "flyer": 7, "topic": "EThesisOne"},
+        {"id": "linkedin_08_eposone", "date": "2026-07-15", "flyer": 8, "topic": "EPOSOne"},
+        {"id": "linkedin_09_epayroll", "date": "2026-07-17", "flyer": 9, "topic": "EPayRoll"}
+      ]
+    },
+    {
+      "week": "2026-W30",
+      "posts": [
+        {"id": "linkedin_10_consultoria_ti", "date": "2026-07-22", "flyer": 4, "topic": "Consultoria TI"},
+        {"id": "linkedin_11_desarrollo_software", "date": "2026-07-24", "flyer": 1, "topic": "Software a medida"}
+      ]
+    }
+  ],
+  "note": "Flyer #10 IIUS pendiente. Flyer #12 = post linkedin_04. Flyers #2,#3,#11 ya publicados."
 }

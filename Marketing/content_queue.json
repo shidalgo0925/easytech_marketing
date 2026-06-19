@@ -43,7 +43,85 @@
       "scheduled_at": "2026-06-30T13:00:00-05:00",
       "flyer": "flyers/12_demo_plataformas.png",
       "utm": "linkedin_post4",
+      "flyer_num": 12,
       "text": "¿Sabias que puedes probar nuestras plataformas SIN COSTO? 🎯\n\nEn EasyTech Services desarrollamos soluciones para distintos sectores:\n\n✅ EClassOne — gestion academica\n✅ EN1 / EasyNodeOne — plataformas de servicios\n✅ EPOSOne — punto de venta\n✅ Odoo + Facturacion Electronica\n\nAgenda una demo de 30 minutos y te mostramos el ecosistema en accion.\n\n🚀 Comenta DEMO o escribeme por DM.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EasyTech #Demo #Panama #Software #Odoo #EClassOne",
+      "first_comment": "https://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "linkedin_05_en1",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-03T13:00:00-05:00",
+      "flyer": "flyers/05_en1_plataforma.png",
+      "utm": "linkedin_post5",
+      "flyer_num": 5,
+      "text": "¿Cuántos sistemas usas para vender, facturar, atender clientes y ver reportes? 📊\n\nVentas en un lado. Inventario en otro. CRM en Excel. Reportes \"cuando alguien los arma\".\n\nEasyNodeOne (EN1) integra todo en una sola plataforma en la nube:\n\n✅ CRM y ventas\n✅ Inventario y facturacion\n✅ Eventos, membresias y reportes\n✅ Acceso desde cualquier dispositivo\n\nMenos retrabajo. Mas control. Decisiones con datos reales.\n\n🚀 ¿Quieres ver EN1 en accion en tu negocio?\n\nComenta EN1 o escribeme DEMO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 https://n8n.etsrv.site/guia/\n\n#EasyTech #EN1 #EasyNodeOne #Panama #ERP #PYME #TransformacionDigital",
+      "first_comment": "Agenda demo gratis de EN1 👇\nhttps://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "linkedin_06_eclassone",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-08T13:00:00-05:00",
+      "flyer": "flyers/06_eclassone.png",
+      "utm": "linkedin_post6",
+      "flyer_num": 6,
+      "text": "¿Tu institucion educativa sigue llenando planillas a mano? 🎓\n\nMatriculas, notas, asistencia, pagos... en archivos sueltos.\n\nEClassOne centraliza la gestion academica:\n\n✅ Estudiantes, cursos y evaluaciones en linea\n✅ Calificaciones y certificados digitales\n✅ Portal para alumnos y docentes\n✅ Reportes en tiempo real\n\nMas tiempo para educar. Menos tiempo en papeleo.\n\n🚀 Comenta ECLASS o escribeme DEMO para ver la plataforma.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EClassOne #EdTech #Panama #Educacion #EasyTech #GestionAcademica",
+      "first_comment": "https://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "linkedin_07_ethesistone",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-10T13:00:00-05:00",
+      "flyer": "flyers/07_ethesistone.png",
+      "utm": "linkedin_post7",
+      "flyer_num": 7,
+      "text": "¿Gestionar tesis y proyectos academicos sigue siendo un caos de correos y carpetas? 📚\n\nAsesores, jurados, versiones de documentos, plazos...\n\nEThesisOne digitaliza el proceso completo:\n\n✅ Registro y seguimiento de temas\n✅ Asignacion de asesores y jurados\n✅ Control de documentos y observaciones\n✅ Reportes y estadisticas academicas\n\nUniversidades mas ordenadas. Estudiantes mas claros. Menos retrabajo administrativo.\n\n🚀 Comenta THESIS o escribeme DEMO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EThesisOne #EducacionSuperior #Panama #EasyTech #TransformacionDigital",
+      "first_comment": "https://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "linkedin_08_eposone",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-15T13:00:00-05:00",
+      "flyer": "flyers/08_eposone.png",
+      "utm": "linkedin_post8",
+      "flyer_num": 8,
+      "text": "¿Tu punto de venta y tu inventario no se hablan? 🛒\n\nVendes rapido... pero al final reconcilias a mano.\n\nEPOSOne es punto de venta pensado para PYMEs en Panama:\n\n✅ Ventas, devoluciones y cierres de caja\n✅ Inventario en tiempo real\n✅ Funciona offline cuando falla internet\n✅ App Android incluida\n\nSimple de usar. Potente donde importa.\n\n🚀 Comenta EPOS o escribeme DEMO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EPOSOne #Retail #Panama #PuntoDeVenta #EasyTech #PYME",
+      "first_comment": "https://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "linkedin_09_epayroll",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-17T13:00:00-05:00",
+      "flyer": "flyers/09_epayroll.png",
+      "utm": "linkedin_post9",
+      "flyer_num": 9,
+      "text": "¿Cuanto tiempo pierde tu equipo calculando planilla cada quincena? 💼\n\nExcel + formulas + riesgo de error + cumplimiento laboral en Panama.\n\nEPayRoll automatiza la gestion de planilla en la nube:\n\n✅ Colaboradores, contratos y vacaciones\n✅ Calculos segun normativa panamena\n✅ Reportes listos para contabilidad\n✅ Portal del empleado\n\nMenos errores. Mas control. Menos estrés en RRHH.\n\n🚀 Comenta PLANILLA o escribeme DEMO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EPayRoll #RRHH #Panama #Planilla #EasyTech #PYME",
+      "first_comment": "https://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "linkedin_10_consultoria_ti",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-22T13:00:00-05:00",
+      "flyer": "flyers/04_consultoria_ti.png",
+      "utm": "linkedin_post10",
+      "flyer_num": 4,
+      "text": "¿Compras software sin un mapa claro de hacia donde va tu empresa? 🗺️\n\nMuchas PYMEs invierten en tecnologia reactiva: \"esto urge\", \"esto recomendo alguien\", sin alinear con el negocio.\n\nEn EasyTech Services ofrecemos Consultoria TI estrategica:\n\n✅ Transformacion digital con criterio\n✅ Arquitectura y roadmap tecnologico\n✅ Gobierno TI y reduccion de riesgos\n✅ Integracion Odoo, EN1 y sistemas existentes\n\nDecisiones inteligentes antes de gastar.\n\n🚀 Comenta CONSULTORIA o escribeme DIAGNOSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#ConsultoriaTI #TransformacionDigital #Panama #EasyTech #Odoo #PYME",
+      "first_comment": "Diagnostico tecnologico gratuito 👇\nhttps://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "linkedin_11_desarrollo_software",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-24T13:00:00-05:00",
+      "flyer": "flyers/01_desarrollo_software.png",
+      "utm": "linkedin_post11",
+      "flyer_num": 1,
+      "text": "¿Tu empresa necesita un sistema que no existe en una caja lista? 💡\n\nNo todo se resuelve con un ERP generico. A veces necesitas:\n\n✅ Aplicaciones web a medida\n✅ Integraciones entre sistemas\n✅ Automatizacion de procesos criticos\n✅ Conexion con Odoo, EN1 o APIs propias\n\nEn EasyTech Services desarrollamos software conectado a nuestro ecosistema — no islas de codigo sueltas.\n\n🚀 Tienes una idea? Comenta SOFTWARE o escribeme DIAGNOSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#DesarrolloSoftware #Panama #EasyTech #Odoo #PYME #TransformacionDigital",
       "first_comment": "https://n8n.etsrv.site/guia/"
     }
   ]

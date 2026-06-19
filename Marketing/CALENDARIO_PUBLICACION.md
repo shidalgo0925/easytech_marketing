@@ -1,35 +1,26 @@
-# Calendario de publicación — Operación ArrozConPollo
+# Calendario LinkedIn — EasyMarketingOne
 
-## Modo automatico (LinkedIn)
+Cola: `Marketing/content_queue.json` · Publicacion automatica: cron Mar/Jue/Vie 13:00 Panamá
 
-Cola: `Marketing/content_queue.json`  
-Script: `Motor_Tecnico/linkedin_publisher.py`  
-n8n: `docs/n8n-workflow-linkedin.json` (Mar/Jue 8:00 AM Panama)
+## Publicados
 
-| Post | Fecha programada | Estado |
-|------|------------------|--------|
-| #1 FE + Odoo | 2026-06-19 13:00 | pending |
-| #2 Diagnóstico | 2026-06-23 13:00 | pending |
+| ID | Flyer | Tema |
+|----|-------|------|
+| linkedin_01_fe_odoo | #3 | FE + Odoo |
+| linkedin_02_diagnostico | #11 | Diagnostico |
+| linkedin_03_implementamos_odoo | #2 | Odoo ERP |
 
-Setup: ver `docs/LINKEDIN_AUTOMATIZACION.md`
+## Pendientes (automatico)
 
-## Manual (Instagram / Facebook — pendiente API Meta)
+| Fecha | ID | Flyer | Tema |
+|-------|-----|-------|------|
+| 2026-06-30 | linkedin_04_demo_plataformas | #12 | Demo |
+| 2026-07-03 | linkedin_05_en1 | #5 | EN1 |
+| 2026-07-08 | linkedin_06_eclassone | #6 | EClassOne |
+| 2026-07-10 | linkedin_07_ethesistone | #7 | EThesisOne |
+| 2026-07-15 | linkedin_08_eposone | #8 | EPOSOne |
+| 2026-07-17 | linkedin_09_epayroll | #9 | EPayRoll |
+| 2026-07-22 | linkedin_10_consultoria_ti | #4 | Consultoria TI |
+| 2026-07-24 | linkedin_11_desarrollo_software | #1 | Software |
 
-| Día | Red | Contenido | Archivo |
-|-----|-----|-----------|---------|
-| Mar tarde | Instagram | Mismo mensaje, flyer #3 | `Instagram/post_01_facturacion_electronica.md` |
-| Mié | Facebook | Post #1 adaptado | `Facebook/post_01_facturacion_electronica.md` |
-| Vie | Instagram Stories | 3 frames diagnóstico | `Instagram/post_01_facturacion_electronica.md` (Stories) |
-
-## Checklist
-
-- [ ] Token LinkedIn en `.env` (una sola vez)
-- [ ] Flyers PNG en `Marketing/flyers/`
-- [ ] Workflow n8n importado y activo
-- [ ] Responder comentarios/DMs en < 24 h
-- [ ] Lead "DIAGNÓSTICO" → Odoo CRM, etapa Nuevo - Marketing
-
-## Próximos (semana 2)
-
-- LinkedIn Post #3: "Implementamos Odoo" (flyer #2)
-- LinkedIn Post #4: Demo plataformas sin costo (flyer #12)
+Flyer #10 IIUS: pendiente asset.
