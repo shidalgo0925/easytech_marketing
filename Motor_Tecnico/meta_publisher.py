@@ -14,6 +14,10 @@ import requests
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+from Motor_Tecnico.flyer_utils import flyer_public_url, resolve_flyer_path
 QUEUE_PATH = BASE_DIR / "Marketing" / "content_queue.json"
 LOG_PATH = BASE_DIR / "Marketing" / "meta_publish_log.json"
 PANAMA = ZoneInfo("America/Panama")
@@ -69,18 +73,7 @@ def pick_next_post(queue: dict, platform: str, force: bool = False) -> dict | No
     return candidates[0][1]
 
 
-def flyer_public_url(post: dict) -> str | None:
-    flyer = (post.get("flyer") or "").strip()
-    if not flyer:
-        return None
-    name = Path(flyer).name
-    local = BASE_DIR / "Marketing" / "flyers" / name
-    if not local.is_file():
-        local = BASE_DIR / "Marketing" / flyer
-    if not local.is_file():
-        print(f"  Flyer no encontrado ({flyer}); se publica solo texto.")
-        return None
-    return f"{PUBLIC_BASE}/accio/assets/flyers/{name}"
+from Motor_Tecnico.flyer_utils import flyer_public_url, resolve_flyer_path
 
 
 def publish_facebook(page_id: str, token: str, text: str, image_url: str | None) -> str:
@@ -132,14 +125,19 @@ def publish_platform(platform: str, force: bool = False, dry_run: bool = False) 
         return False
 
     print(f"Post seleccionado ({platform}): {post['id']} (programado: {post['scheduled_at']})")
+    flyer_path = resolve_flyer_path(post)
     if dry_run:
         print("DRY RUN — no se publicó nada.")
+        print(f"  Flyer: {flyer_path or 'NO ENCONTRADO'}")
         print(post["text"][:200] + "...")
         return True
 
+    if post.get("flyer") and not flyer_path:
+        raise SystemExit(f"Flyer requerido pero no encontrado: {post.get('flyer')}")
+
     page_id = require_env("META_PAGE_ID")
     token = require_env("META_PAGE_ACCESS_TOKEN")
-    image_url = flyer_public_url(post)
+    image_url = flyer_public_url(post, PUBLIC_BASE)
 
     if platform == "facebook":
         remote_id = publish_facebook(page_id, token, post["text"], image_url)

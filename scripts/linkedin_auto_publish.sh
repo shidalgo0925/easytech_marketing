@@ -3,6 +3,7 @@
 set -euo pipefail
 cd /opt/easytech_marketing
 source venv/bin/activate
+python3 Motor_Tecnico/validate_flyers.py
 LOG_DIR="/opt/easytech_marketing/logs"
 mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/linkedin_publish-$(date +%Y%m%d-%H%M).log"

@@ -73,8 +73,24 @@ source venv/bin/activate
 # Ver que post saldria (sin publicar)
 python3 Motor_Tecnico/linkedin_publisher.py --dry-run
 
+# Validar flyers antes de publicar
+python3 Motor_Tecnico/validate_flyers.py
+
 # Publicar ahora ignorando la fecha (cuando .env este listo)
 python3 Motor_Tecnico/linkedin_publisher.py --force
+```
+
+## Imagenes (flyers)
+
+Los posts **#1–#3** salieron solo texto porque los PNG se subieron al servidor **después** de publicar (~7 h tarde). El publisher antes caía en modo silencioso “solo texto” si no encontraba el archivo.
+
+**Desde jun 2026:** si falta el flyer, **no publica** (aborta). El cron valida flyers antes de publicar.
+
+Posts **#4+** tienen flyer en disco — el proximo deberia salir **con imagen** (#12 demo plataformas).
+
+```bash
+python3 Motor_Tecnico/linkedin_publisher.py --force --dry-run
+# debe mostrar: Flyer: .../12_demo_plataformas.png
 ```
 
 ## Agregar mas posts
@@ -86,7 +102,7 @@ Edita `Marketing/content_queue.json` — copia un bloque, cambia `id`, `schedule
 | Que es automatico | Que NO lo es |
 |-----------------|--------------|
 | Publicar en fecha/hora | Crear app LinkedIn (1 vez) |
-| Adjuntar flyer si existe | Subir flyers PNG al servidor |
+| Adjuntar flyer (obligatorio si esta en cola) | Subir flyers PNG **antes** de la fecha de publicacion |
 | Primer comentario 2 min despues | Responder DMs/comentarios de clientes |
 | Actualizar cola a `published` | Renovar token si expira (~60 dias) |
 
