@@ -5,8 +5,7 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -43,8 +42,16 @@ def publish_linkedin(force: bool = False, dry_run: bool = False) -> dict[str, An
         args.append("--force")
     if dry_run:
         args.append("--dry-run")
-    result = _run_script("linkedin_publisher.py", *args)
-    return result
+    return _run_script("linkedin_publisher.py", *args)
+
+
+def publish_meta(platform: str = "all", force: bool = False, dry_run: bool = False) -> dict[str, Any]:
+    args = [f"--platform={platform}"]
+    if force:
+        args.append("--force")
+    if dry_run:
+        args.append("--dry-run")
+    return _run_script("meta_publisher.py", *args)
 
 
 def load_content_queue() -> dict[str, Any]:
@@ -103,11 +110,23 @@ def set_calendar(calendar: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def _platform_queue_stats(posts: list[dict[str, Any]], platform: str) -> dict[str, Any]:
+    pending = [p for p in posts if p.get("platform") == platform and p.get("status") == "pending"]
+    published = [p for p in posts if p.get("platform") == platform and p.get("status") == "published"]
+    pending.sort(key=lambda p: p.get("scheduled_at") or "")
+    return {
+        "pending": len(pending),
+        "published": len(published),
+        "next_pending": pending[0]["id"] if pending else None,
+    }
+
+
 def get_status() -> dict[str, Any]:
     queue = load_content_queue()
     posts = queue.get("posts", [])
-    pending_li = [p for p in posts if p.get("platform") == "linkedin" and p.get("status") == "pending"]
-    published_li = [p for p in posts if p.get("platform") == "linkedin" and p.get("status") == "published"]
+    li = _platform_queue_stats(posts, "linkedin")
+    fb = _platform_queue_stats(posts, "facebook")
+    ig = _platform_queue_stats(posts, "instagram")
 
     csv_path = BASE_DIR / "leads_prospeccion.csv"
     lead_rows = 0
@@ -121,9 +140,15 @@ def get_status() -> dict[str, Any]:
         "version": 1,
         "time_panama": datetime.now(PANAMA).isoformat(),
         "content_queue": {
-            "linkedin_pending": len(pending_li),
-            "linkedin_published": len(published_li),
-            "next_pending": pending_li[0]["id"] if pending_li else None,
+            "linkedin_pending": li["pending"],
+            "linkedin_published": li["published"],
+            "next_pending": li["next_pending"],
+            "facebook_pending": fb["pending"],
+            "facebook_published": fb["published"],
+            "facebook_next": fb["next_pending"],
+            "instagram_pending": ig["pending"],
+            "instagram_published": ig["published"],
+            "instagram_next": ig["next_pending"],
         },
         "prospection_csv_rows": lead_rows,
         "orders_pending": len(list_orders(status="pending")),
@@ -132,6 +157,7 @@ def get_status() -> dict[str, Any]:
             "content_queue": str(QUEUE_PATH),
             "flyers_manifest": str(BASE_DIR / "Marketing" / "flyers" / "manifest.json"),
             "calendar": str(CALENDAR_PATH),
+            "meta_publish_log": str(BASE_DIR / "Marketing" / "meta_publish_log.json"),
         },
     }
 
@@ -140,6 +166,17 @@ ACTIONS = {
     "run_pipeline": lambda p: run_pipeline(),
     "publish_linkedin": lambda p: publish_linkedin(
         force=bool(p.get("force")), dry_run=bool(p.get("dry_run"))
+    ),
+    "publish_facebook": lambda p: publish_meta(
+        platform="facebook", force=bool(p.get("force")), dry_run=bool(p.get("dry_run"))
+    ),
+    "publish_instagram": lambda p: publish_meta(
+        platform="instagram", force=bool(p.get("force")), dry_run=bool(p.get("dry_run"))
+    ),
+    "publish_meta": lambda p: publish_meta(
+        platform=str(p.get("platform", "all")),
+        force=bool(p.get("force")),
+        dry_run=bool(p.get("dry_run")),
     ),
     "enqueue_post": lambda p: {"post": enqueue_post(p["post"])},
     "enqueue_posts": lambda p: enqueue_posts(p.get("posts", [])),

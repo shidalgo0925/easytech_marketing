@@ -123,6 +123,46 @@
       "flyer_num": 1,
       "text": "¿Tu empresa necesita un sistema que no existe en una caja lista? 💡\n\nNo todo se resuelve con un ERP generico. A veces necesitas:\n\n✅ Aplicaciones web a medida\n✅ Integraciones entre sistemas\n✅ Automatizacion de procesos criticos\n✅ Conexion con Odoo, EN1 o APIs propias\n\nEn EasyTech Services desarrollamos software conectado a nuestro ecosistema — no islas de codigo sueltas.\n\n🚀 Tienes una idea? Comenta SOFTWARE o escribeme DIAGNOSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#DesarrolloSoftware #Panama #EasyTech #Odoo #PYME #TransformacionDigital",
       "first_comment": "https://n8n.etsrv.site/guia/"
+    },
+    {
+      "id": "facebook_01_fe_odoo",
+      "platform": "facebook",
+      "status": "pending",
+      "scheduled_at": "2026-07-02T13:00:00-05:00",
+      "flyer": "flyers/03_facturacion_electronica.png",
+      "utm": "facebook_post1",
+      "flyer_num": 3,
+      "text": "🇵🇦 Empresarios de Panamá: ¿su facturación electrónica está conectada con el resto de su operación?\n\nMuchas empresas cumplen con la DGI, pero siguen con inventario en Excel, ventas en otro sistema y contabilidad desconectada.\n\nEn EasyTech Services integramos Odoo + Facturación Electrónica autorizada en un solo flujo.\n\n✅ Cumples la ley\n✅ Automatizas tu operación\n\nComenta DIAGNÓSTICO o escríbenos:\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía gratis: https://n8n.etsrv.site/guia/\n\n#Panamá #FacturacionElectronica #Odoo #PYME #EasyTech"
+    },
+    {
+      "id": "facebook_02_diagnostico",
+      "platform": "facebook",
+      "status": "pending",
+      "scheduled_at": "2026-07-09T13:00:00-05:00",
+      "flyer": "flyers/11_diagnostico_gratuito.png",
+      "utm": "facebook_post2",
+      "flyer_num": 11,
+      "text": "¿Cuánto le cuesta a su empresa NO saber qué tan preparada está para digitalizarse?\n\nEn EasyTech ofrecemos un Diagnóstico Tecnológico Gratuito: revisamos ERP, FE, inventario y ventas — sin compromiso.\n\nComenta DIAGNÓSTICO o escríbenos por mensaje.\n📱 WhatsApp: +507 6688-4938\n📄 https://n8n.etsrv.site/guia/\n\n#Panamá #DiagnosticoTecnologico #EasyTech #Odoo #PYME"
+    },
+    {
+      "id": "instagram_01_fe_odoo",
+      "platform": "instagram",
+      "status": "pending",
+      "scheduled_at": "2026-07-04T13:00:00-05:00",
+      "flyer": "flyers/03_facturacion_electronica.png",
+      "utm": "instagram_post1",
+      "flyer_num": 3,
+      "text": "¿Facturas en un sistema y llevas el inventario en otro? 📊\n\nEn Panamá, la Facturación Electrónica no debería ser solo cumplir con la DGI. Debería conectar toda tu operación.\n\nEn EasyTech integramos FE autorizada + Odoo ERP.\n\n👉 Escribe DIAGNÓSTICO en comentarios o DM\n📱 WhatsApp: +507 6688-4938\n🔗 Guía gratis en bio\n\n#Panama #FacturacionElectronica #Odoo #ERP #PYME #EasyTech #DGI"
+    },
+    {
+      "id": "instagram_02_diagnostico",
+      "platform": "instagram",
+      "status": "pending",
+      "scheduled_at": "2026-07-11T13:00:00-05:00",
+      "flyer": "flyers/11_diagnostico_gratuito.png",
+      "utm": "instagram_post2",
+      "flyer_num": 11,
+      "text": "Diagnóstico tecnológico GRATIS esta semana 🔍\n\nRevisamos tu stack (ERP, FE, inventario) y te damos un plan claro — sin venta disfrazada.\n\nDM DIAGNÓSTICO o WhatsApp +507 6688-4938\n\n#Panama #EasyTech #Odoo #TransformacionDigital #PYME #ConsultoriaTI"
     }
   ]
 }

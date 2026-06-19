@@ -20,6 +20,10 @@ Guardar **fuera del repositorio** (gestor de contraseñas, vault, backup cifrado
 | `LINKEDIN_CLIENT_SECRET` | App LinkedIn |
 | `LINKEDIN_ACCESS_TOKEN` | Token OAuth |
 | `LINKEDIN_AUTHOR_URN` | urn:li:person:... |
+| `META_APP_ID` | App Meta Developers |
+| `META_APP_SECRET` | App Meta |
+| `META_PAGE_ACCESS_TOKEN` | Token pagina FB |
+| `META_IG_USER_ID` | Instagram Business ID |
 
 ## Backup recomendado
 

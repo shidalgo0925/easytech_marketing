@@ -12,3 +12,6 @@
 
 # Vie 20:00 CEST (~1pm Panama)
 0 20 * * 5 /opt/easytech_marketing/scripts/linkedin_auto_publish.sh
+
+# Mie/Vie 21:00 CEST — Meta FB + IG si hay post listo (tras LinkedIn)
+0 21 * * 3,5 /opt/easytech_marketing/scripts/meta_auto_publish.sh

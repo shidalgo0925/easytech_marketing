@@ -86,6 +86,10 @@
     .bar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
     .bar-val { min-width: 2rem; text-align: right; }
     .metric-note { padding: .75rem 1rem; font-size: .75rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .conn-ok { color: var(--green); }
+    .conn-warn { color: var(--amber); }
+    .conn-plan { color: var(--muted); }
+    .platform-tag { font-size: .65rem; padding: .1rem .35rem; border-radius: 4px; background: #1e3a5f; color: #93c5fd; text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -108,8 +112,9 @@
         <span class="badge">Operador autónomo</span>
         <button class="btn btn-secondary" onclick="loadData()">↻ Actualizar</button>
         <button class="btn btn-primary" id="btnPipeline" onclick="runPipeline()">▶ Pipeline</button>
-        <button class="btn btn-primary" id="btnPublish" onclick="runPublish(false)">📣 Publicar</button>
-        <button class="btn btn-danger" id="btnForce" onclick="runPublish(true)">⚡ Forzar post</button>
+        <button class="btn btn-primary" id="btnPublish" onclick="runPublish(false)">📣 LinkedIn</button>
+        <button class="btn btn-primary" id="btnMeta" onclick="runMetaPublish(false)">📱 Meta</button>
+        <button class="btn btn-danger" id="btnForce" onclick="runPublish(true)">⚡ Forzar LI</button>
       </div>
     </header>
 
@@ -120,6 +125,7 @@
         <button class="tab" data-tab="calendario">Calendario</button>
         <button class="tab" data-tab="metricas">Métricas</button>
         <button class="tab" data-tab="flyers">Flyers</button>
+        <button class="tab" data-tab="conectores">Conectores</button>
       </nav>
 
       <div id="panel-resumen" class="tab-panel active">
@@ -178,6 +184,14 @@
           <div class="card-head">Biblioteca de flyers</div>
           <div class="flyer-grid" id="flyerGrid"></div>
         </section>
+      </div>
+
+      <div id="panel-conectores" class="tab-panel">
+        <section class="card">
+          <div class="card-head">Fase D — Conectores de publicación</div>
+          <div class="card-body" id="connectorsTable"></div>
+        </section>
+        <p class="metric-note" style="margin-top:1rem;border:none">Meta (FB+IG): <a href="https://n8n.etsrv.site/meta/" target="_blank">Autorizar OAuth</a> · Docs: <code>docs/META_CONECTORES.md</code></p>
       </div>
 
       <div class="links" id="quickLinks"></div>
@@ -241,6 +255,7 @@
       const s = data.stats;
       document.getElementById('stats').innerHTML = `
         <div class="stat"><div class="label">Posts pendientes</div><div class="value">${s.linkedin_pending}</div></div>
+        <div class="stat"><div class="label">FB / IG pend.</div><div class="value">${s.facebook_pending||0} / ${s.instagram_pending||0}</div></div>
         <div class="stat"><div class="label">Publicados</div><div class="value">${s.linkedin_published}</div></div>
         <div class="stat"><div class="label">Prospectos CSV</div><div class="value">${s.prospection_csv}</div></div>
         <div class="stat"><div class="label">Leads Odoo</div><div class="value">${data.odoo.ok ? data.odoo.total : '—'}</div></div>
@@ -249,8 +264,14 @@
 
       const posts = data.pending_posts;
       document.getElementById('postsTable').innerHTML = posts.length ? `
-        <table><thead><tr><th>ID</th><th>Programado</th><th>Flyer</th><th>Vista previa</th></tr></thead>
-        <tbody>${posts.map(p => `<tr><td><code>${p.id}</code></td><td>${(p.scheduled_at||'').slice(0,16)}</td><td>${p.flyer}</td><td>${p.preview}</td></tr>`).join('')}</tbody></table>
+        <table><thead><tr><th>Plataforma</th><th>ID</th><th>Programado</th><th>Flyer</th><th>Vista previa</th></tr></thead>
+        <tbody>${posts.map(p => `<tr>
+          <td><span class="platform-tag">${p.platform||'?'}</span></td>
+          <td><code>${p.id}</code></td>
+          <td>${(p.scheduled_at||'').slice(0,16)}</td>
+          <td>${p.flyer}</td>
+          <td>${p.preview}</td>
+        </tr>`).join('')}</tbody></table>
       ` : '<div class="empty">No hay posts pendientes</div>';
 
       const odoo = data.odoo;
@@ -337,6 +358,26 @@
         <div class="metric-note">Pendientes en cola: ${li.pending ?? 0}</div>`;
     }
 
+    function renderConnectors(data) {
+      const items = data.connectors || [];
+      const statusLabel = c => {
+        if (c.status === 'active') return '<span class="conn-ok">Activo</span>';
+        if (c.status === 'needs_auth') return '<span class="conn-warn">Falta OAuth</span>';
+        return '<span class="conn-plan">Planificado</span>';
+      };
+      document.getElementById('connectorsTable').innerHTML = `
+        <table><thead><tr><th>Fase</th><th>Canal</th><th>Estado</th><th>Cola</th><th>Publicados</th><th>Siguiente</th><th>Acción</th></tr></thead>
+        <tbody>${items.map(c => `<tr>
+          <td>${c.phase}</td>
+          <td>${c.name}</td>
+          <td>${statusLabel(c)}</td>
+          <td>${c.pending ?? '—'}</td>
+          <td>${c.published ?? '—'}</td>
+          <td><code>${c.next || '—'}</code></td>
+          <td>${c.auth_url ? `<a href="${c.auth_url}" target="_blank">Conectar</a>` : (c.note || '—')}</td>
+        </tr>`).join('')}</tbody></table>`;
+    }
+
     function renderFlyers(data) {
       const lib = data.flyers || {};
       document.getElementById('flyerStats').innerHTML = `
@@ -368,6 +409,7 @@
         renderCalendario(data);
         renderMetricas(data);
         renderFlyers(data);
+        renderConnectors(data);
         document.getElementById('quickLinks').innerHTML = Object.entries(data.links).map(([k,v]) =>
           `<a href="${v}" target="_blank">${k}</a>`).join(' · ');
       } catch (e) { toast('Error: ' + e.message, true); }
@@ -381,6 +423,25 @@
         const r = await fetch('/accio/run/pipeline', { method: 'POST', headers: authHeaders() });
         const data = await r.json();
         toast(data.ok ? 'Pipeline completado' : 'Pipeline falló: ' + (data.order?.error || ''), !data.ok);
+        loadData();
+      } catch (e) { toast(e.message, true); }
+      btn.disabled = false;
+    }
+
+    async function runMetaPublish(force) {
+      const btn = document.getElementById('btnMeta');
+      if (force && !confirm('¿Publicar siguiente post Meta (FB+IG) ahora?')) return;
+      btn.disabled = true;
+      try {
+        toast('Publicando Meta (Facebook + Instagram)…');
+        const r = await fetch('/accio/run/publish-meta', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ force, platform: 'all' }),
+        });
+        const data = await r.json();
+        const ok = data.ok && data.order?.status === 'completed';
+        toast(ok ? 'Meta OK' : (data.order?.error || data.order?.result?.stdout || 'Sin post listo'), !ok);
         loadData();
       } catch (e) { toast(e.message, true); }
       btn.disabled = false;

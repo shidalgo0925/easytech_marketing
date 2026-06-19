@@ -21,7 +21,115 @@ CAMPAIGNS_PATH = BASE_DIR / "Marketing" / "accio" / "campaigns.json"
 CALENDAR_PATH = BASE_DIR / "Marketing" / "accio" / "calendar.json"
 MANIFEST_PATH = BASE_DIR / "Marketing" / "flyers" / "manifest.json"
 PUBLISH_LOG_PATH = BASE_DIR / "Marketing" / "publish_log.json"
+META_LOG_PATH = BASE_DIR / "Marketing" / "meta_publish_log.json"
 FLYERS_DIR = BASE_DIR / "Marketing" / "flyers"
+
+
+def load_connectors() -> list[dict[str, Any]]:
+    status = executor.get_status()
+    cq = status["content_queue"]
+
+    def linkedin_ok() -> bool:
+        return bool(os.getenv("LINKEDIN_ACCESS_TOKEN", "").strip())
+
+    def meta_fb_ok() -> bool:
+        return bool(os.getenv("META_PAGE_ACCESS_TOKEN", "").strip())
+
+    def meta_ig_ok() -> bool:
+        return meta_fb_ok() and bool(os.getenv("META_IG_USER_ID", "").strip())
+
+    meta_log = 0
+    if META_LOG_PATH.exists():
+        meta_log = len(json.loads(META_LOG_PATH.read_text(encoding="utf-8")))
+
+    return [
+        {
+            "id": "linkedin",
+            "name": "LinkedIn",
+            "phase": "D.1",
+            "configured": linkedin_ok(),
+            "auth_url": "https://n8n.etsrv.site/linkedin/",
+            "pending": cq.get("linkedin_pending", 0),
+            "published": cq.get("linkedin_published", 0),
+            "next": cq.get("next_pending"),
+            "status": "active" if linkedin_ok() else "needs_auth",
+        },
+        {
+            "id": "facebook",
+            "name": "Facebook Page",
+            "phase": "D.2",
+            "configured": meta_fb_ok(),
+            "auth_url": "https://n8n.etsrv.site/meta/",
+            "pending": cq.get("facebook_pending", 0),
+            "published": cq.get("facebook_published", 0),
+            "next": cq.get("facebook_next"),
+            "status": "active" if meta_fb_ok() else "needs_auth",
+        },
+        {
+            "id": "instagram",
+            "name": "Instagram Business",
+            "phase": "D.3",
+            "configured": meta_ig_ok(),
+            "auth_url": "https://n8n.etsrv.site/meta/",
+            "pending": cq.get("instagram_pending", 0),
+            "published": cq.get("instagram_published", 0),
+            "next": cq.get("instagram_next"),
+            "status": "active" if meta_ig_ok() else "needs_auth",
+            "meta_log_entries": meta_log,
+        },
+        {
+            "id": "google_business",
+            "name": "Google Business Profile",
+            "phase": "D.4",
+            "configured": False,
+            "auth_url": None,
+            "pending": 0,
+            "published": 0,
+            "status": "planned",
+            "note": "Requiere Google Cloud project + OAuth",
+        },
+        {
+            "id": "meta_ads",
+            "name": "Meta Ads",
+            "phase": "D.5",
+            "configured": False,
+            "auth_url": None,
+            "pending": 0,
+            "published": 0,
+            "status": "planned",
+            "note": "Tras conectar Meta organic",
+        },
+        {
+            "id": "google_ads",
+            "name": "Google Ads",
+            "phase": "D.6",
+            "configured": False,
+            "auth_url": None,
+            "pending": 0,
+            "published": 0,
+            "status": "planned",
+        },
+        {
+            "id": "youtube",
+            "name": "YouTube",
+            "phase": "D.7",
+            "configured": False,
+            "auth_url": None,
+            "pending": 0,
+            "published": 0,
+            "status": "planned",
+        },
+        {
+            "id": "tiktok",
+            "name": "TikTok",
+            "phase": "D.8",
+            "configured": False,
+            "auth_url": None,
+            "pending": 0,
+            "published": 0,
+            "status": "planned",
+        },
+    ]
 
 
 def _odoo_client():
@@ -347,6 +455,8 @@ def get_summary() -> dict[str, Any]:
         "stats": {
             "linkedin_pending": status["content_queue"]["linkedin_pending"],
             "linkedin_published": status["content_queue"]["linkedin_published"],
+            "facebook_pending": status["content_queue"].get("facebook_pending", 0),
+            "instagram_pending": status["content_queue"].get("instagram_pending", 0),
             "prospection_csv": status["prospection_csv_rows"],
             "orders_pending": status["orders_pending"],
         },
@@ -356,11 +466,13 @@ def get_summary() -> dict[str, Any]:
         "calendar": load_calendar_view(),
         "metrics": load_metrics(),
         "flyers": load_flyers_library(),
+        "connectors": load_connectors(),
         "orders": orders,
         "odoo": fetch_odoo_leads(),
         "links": {
             "n8n": "https://n8n.etsrv.site",
             "guia": "https://n8n.etsrv.site/guia/",
             "linkedin_oauth": "https://n8n.etsrv.site/linkedin/",
+            "meta_oauth": "https://n8n.etsrv.site/meta/",
         },
     }

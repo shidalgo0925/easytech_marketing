@@ -167,6 +167,7 @@ def openapi_spec():
             },
             "/accio/run/pipeline": {"post": {"summary": "Scraper + Odoo sync"}},
             "/accio/run/publish-linkedin": {"post": {"summary": "Publicar siguiente post"}},
+            "/accio/run/publish-meta": {"post": {"summary": "Publicar Facebook/Instagram"}},
         },
     }
     return jsonify(spec)
@@ -247,6 +248,26 @@ def publish_linkedin_now():
     body = request.get_json(silent=True) or {}
     params = {"force": bool(body.get("force")), "dry_run": bool(body.get("dry_run"))}
     order = queue_store.create_order("publish_linkedin", params, "api")
+    order = _run_order(order)
+    return jsonify({"ok": order["status"] == "completed", "order": order})
+
+
+@app.post("/accio/run/publish-meta")
+@require_api_key
+def publish_meta_now():
+    body = request.get_json(silent=True) or {}
+    platform = (body.get("platform") or "all").strip().lower()
+    params = {
+        "platform": platform,
+        "force": bool(body.get("force")),
+        "dry_run": bool(body.get("dry_run")),
+    }
+    action = "publish_meta"
+    if platform == "facebook":
+        action = "publish_facebook"
+    elif platform == "instagram":
+        action = "publish_instagram"
+    order = queue_store.create_order(action, params, "api")
     order = _run_order(order)
     return jsonify({"ok": order["status"] == "completed", "order": order})
 

@@ -38,7 +38,7 @@ openssl rand -hex 24
 ```bash
 sudo cp deploy/systemd/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now easytech-lead-api easytech-linkedin-oauth easytech-accio-engine
+sudo systemctl enable --now easytech-lead-api easytech-linkedin-oauth easytech-meta-oauth easytech-accio-engine
 ```
 
 ## 4. Docker n8n
@@ -56,6 +56,7 @@ Proxy en `n8n.etsrv.site`:
 - `/guia/` → `/var/www/guia/`
 - `/guia/api/` → lead API `:8080`
 - `/linkedin/` → oauth `:8091`
+- `/meta/` → Meta OAuth `:8093` (Facebook + Instagram)
 
 ## 6. Cron
 

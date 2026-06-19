@@ -26,12 +26,12 @@
 ## Fase D — Conectores
 
 1. LinkedIn ✅
-2. Facebook
-3. Instagram
-4. Google Business Profile
-5. Meta Ads
-6. Google Ads
-7. YouTube
-8. TikTok
+2. Facebook 🔧 (publisher + OAuth; falta autorizar app Meta)
+3. Instagram 🔧 (mismo OAuth Meta)
+4. Google Business Profile 📋
+5. Meta Ads 📋
+6. Google Ads 📋
+7. YouTube 📋
+8. TikTok 📋
 
-**Regla:** no añadir conectores D.2+ hasta Fase A en GitHub completa.
+Ver `docs/FASE_D_CONECTORES.md` y `docs/META_CONECTORES.md`.
