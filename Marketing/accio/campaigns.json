@@ -1,0 +1,93 @@
+{
+  "updated_at": "2026-06-19",
+  "campaigns": [
+    {
+      "id": "camp_fe_odoo",
+      "post_id": "linkedin_01_fe_odoo",
+      "product": "Facturacion Electronica + Odoo",
+      "flyer_num": 3,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_diagnostico",
+      "post_id": "linkedin_02_diagnostico",
+      "product": "Diagnostico tecnologico gratuito",
+      "flyer_num": 11,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_odoo",
+      "post_id": "linkedin_03_implementamos_odoo",
+      "product": "Implementacion Odoo ERP",
+      "flyer_num": 2,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "ODOO"
+    },
+    {
+      "id": "camp_demo",
+      "post_id": "linkedin_04_demo_plataformas",
+      "product": "Demo plataformas sin costo",
+      "flyer_num": 12,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DEMO"
+    },
+    {
+      "id": "camp_en1",
+      "post_id": "linkedin_05_en1",
+      "product": "EN1 / EasyNodeOne",
+      "flyer_num": 5,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_eclassone",
+      "post_id": "linkedin_06_eclassone",
+      "product": "EClassOne gestion academica",
+      "flyer_num": 6,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DEMO"
+    },
+    {
+      "id": "camp_ethesistone",
+      "post_id": "linkedin_07_ethesistone",
+      "product": "EThesisOne tesis academicas",
+      "flyer_num": 7,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DEMO"
+    },
+    {
+      "id": "camp_eposone",
+      "post_id": "linkedin_08_eposone",
+      "product": "EPOSOne punto de venta",
+      "flyer_num": 8,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DEMO"
+    },
+    {
+      "id": "camp_epayroll",
+      "post_id": "linkedin_09_epayroll",
+      "product": "EPayRoll planilla Panama",
+      "flyer_num": 9,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_consultoria",
+      "post_id": "linkedin_10_consultoria_ti",
+      "product": "Consultoria TI estrategica",
+      "flyer_num": 4,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_software",
+      "post_id": "linkedin_11_desarrollo_software",
+      "product": "Desarrollo software a medida",
+      "flyer_num": 1,
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    }
+  ]
+}

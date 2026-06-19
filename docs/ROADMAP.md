@@ -11,17 +11,17 @@
 
 ## Fase B — Operación
 
-- [ ] Posts LinkedIn #5–#12 en cola
+- [x] Posts LinkedIn #5–#12 en cola
 - [ ] Validar leads Odoo (origen guía vs scraper)
 - [ ] Confirmar cron LinkedIn en logs
 - [ ] Rotar secretos expuestos
 
 ## Fase C — Plataforma
 
-- [ ] Módulo campañas
-- [ ] Calendario editorial UI
-- [ ] Panel métricas (clicks, conversiones)
-- [ ] Biblioteca flyers en dashboard
+- [x] Módulo campañas
+- [x] Calendario editorial UI
+- [x] Panel métricas (clicks, conversiones)
+- [x] Biblioteca flyers en dashboard
 
 ## Fase D — Conectores
 

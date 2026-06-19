@@ -59,6 +59,43 @@ def dashboard_summary():
     return jsonify(dashboard_data.get_summary())
 
 
+@app.get("/accio/dashboard/api/campaigns")
+@require_api_key
+def dashboard_campaigns():
+    return jsonify({"ok": True, "campaigns": dashboard_data.load_campaigns()})
+
+
+@app.get("/accio/dashboard/api/calendar")
+@require_api_key
+def dashboard_calendar():
+    return jsonify({"ok": True, **dashboard_data.load_calendar_view()})
+
+
+@app.get("/accio/dashboard/api/metrics")
+@require_api_key
+def dashboard_metrics():
+    return jsonify({"ok": True, **dashboard_data.load_metrics()})
+
+
+@app.get("/accio/dashboard/api/flyers")
+@require_api_key
+def dashboard_flyers():
+    return jsonify({"ok": True, **dashboard_data.load_flyers_library()})
+
+
+@app.get("/accio/assets/flyers/<path:filename>")
+def flyer_asset(filename: str):
+    """Imagenes de marketing (publicas, solo PNG en Marketing/flyers/)."""
+    safe = Path(filename).name
+    if safe != filename or not safe.lower().endswith(".png"):
+        return jsonify({"ok": False, "error": "Archivo no permitido"}), 400
+    folder = BASE_DIR / "Marketing" / "flyers"
+    path = folder / safe
+    if not path.is_file() or not path.resolve().is_relative_to(folder.resolve()):
+        return jsonify({"ok": False, "error": "No encontrado"}), 404
+    return send_from_directory(folder, safe, mimetype="image/png")
+
+
 @app.get("/accio/tasks")
 @require_api_key
 def tasks_get():
