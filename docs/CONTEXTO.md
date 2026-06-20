@@ -106,13 +106,22 @@ Archivo: `Motor_Tecnico/accio_engine/static/accio-design.css`
 
 ## Estrategia editorial de contenido
 
-**Regla:** **3 posts de valor + 1 de venta/consejo** por cada bloque de 4.  
+### Regla actual (Fase B — interina)
+
+**3 posts de valor + 1 de venta/consejo** por cada bloque de 4 (**75% / 25%**).  
 **Todos los posts llevan imagen** (flyer PNG en `Marketing/flyers/`).
 
 | Tipo | Qué publicamos |
 |------|----------------|
 | `valor` | Educativo: errores comunes, checklists, insights de sector — sin pitch duro |
 | `venta` | Demo, producto, CTA claro (DEMO / EN1 / DIAGNÓSTICO) |
+
+### Regla objetivo (Fase E — vNext)
+
+**95% valor / 5% venta** con matriz por tipo: educación 50% · consejos 20% · casos 15% · tendencias 10% · venta 5%.  
+Calendario inteligente por día (L consejo · Mi caso · Vi tendencia · Do venta).
+
+Ver **`docs/ROADMAP.md` → Fase E** para el plan completo del motor de conocimiento.
 
 Archivos:
 
@@ -243,11 +252,13 @@ O desde dashboard → **Publicar siguiente** / **Publicar Meta**.
 | Fase | Estado |
 |------|--------|
 | A — Git, deploy, docs | ✅ En producción |
-| B — Cola editorial, leads | 🔄 Cola reestructurada 3:1 |
+| B — Cola editorial, leads | 🔄 Cola 3:1 (75/25 interina) |
 | C — Campañas, calendario UI, métricas | ✅ |
-| D — Conectores multicanal | 🔄 FB live; Google/TikTok OAuth; IG pendiente |
+| **E — Motor conocimiento y valor** | ⏳ **Prioridad antes de escalar canales** |
+| D — Conectores multicanal | 🔄 LinkedIn + FB live; resto pendiente |
+| F — EN1 + recomendaciones | 📋 Tras E |
 
-Detalle: `docs/ROADMAP.md`
+Detalle completo: **`docs/ROADMAP.md`**
 
 ---
 

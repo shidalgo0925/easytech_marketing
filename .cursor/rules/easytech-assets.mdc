@@ -9,8 +9,8 @@ Proyecto: `/opt/easytech_marketing` · Dashboard: **EM+Acción** · Contexto: `d
 
 ## Editorial
 
-Regla **3 valor + 1 venta** por bloque de 4 posts. Campo `content_type` en `Marketing/content_queue.json`.  
-Calendario: `Marketing/CALENDARIO_PUBLICACION.md` · Campañas: `Marketing/accio/campaigns.json`.
+Regla **3 valor + 1 venta** (interina 75/25). Objetivo Fase E: matriz 95/5.  
+Calendario: `Marketing/CALENDARIO_PUBLICACION.md` · Roadmap: `docs/ROADMAP.md` (Fase E).
 
 ## Flyers (NO olvidar)
 
