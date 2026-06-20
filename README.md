@@ -2,27 +2,36 @@
 
 Motor de marketing autónomo de **EasyTech Services** — planifica, publica, captura leads y opera desde el VPS (ArrozConPollo).
 
+Dashboard UI: **EM+Acción** · Repo: `github.com/shidalgo0925/easytech_marketing`
+
 > Accio Work Desktop quedó sin créditos. **Este motor propio sigue vivo.**
 
-## Estado actual (Fase A)
+## Contexto completo
+
+Ver **[docs/CONTEXTO.md](docs/CONTEXTO.md)** — arquitectura, URLs, conectores, estrategia editorial 3:1, Meta, operación diaria.
+
+## Estado actual (jun 2026)
 
 | Componente | Estado |
 |------------|--------|
-| Accio Engine API | ✅ `Motor_Tecnico/accio_engine/` |
-| Dashboard web | ✅ `/accio/dashboard/` |
-| LinkedIn auto | ✅ publisher + cron |
-| Odoo CRM | ✅ lead API + sync |
-| Scraper Panamá | ✅ cron domingo |
-| Flyers | ✅ `Marketing/flyers/` |
+| Accio Engine + EM+Acción dashboard | ✅ |
+| LinkedIn auto | ✅ 3 posts publicados |
+| Facebook Page (Meta OAuth) | ✅ conectado |
+| Instagram / Google / TikTok | ⏳ OAuth o publisher pendiente |
+| Cola editorial 3 valor + 1 venta | ✅ reestructurada |
+| Odoo CRM + lead API | ✅ |
+| Flyers | ✅ 11/12 (#10 IIUS falta) |
 
-**Servidor producción:** `95.111.244.137` → `/opt/easytech_marketing`
+**Servidor:** `95.111.244.137` → `/opt/easytech_marketing`
 
 ## URLs
 
 | Servicio | URL |
 |----------|-----|
-| Dashboard | https://n8n.etsrv.site/accio/dashboard/ |
+| Dashboard EM+Acción | https://n8n.etsrv.site/accio/dashboard/ |
 | API | https://n8n.etsrv.site/accio/ |
+| Meta OAuth | https://n8n.etsrv.site/meta/ |
+| Privacidad | https://n8n.etsrv.site/accio/privacidad/ |
 | Landing guía | https://n8n.etsrv.site/guia/ |
 | Odoo CRM | https://easydb.etsrv.site |
 
@@ -34,30 +43,24 @@ Ver [docs/INSTALACION.md](docs/INSTALACION.md)
 
 | Doc | Contenido |
 |-----|-----------|
-| [ACCIO_MARKETING_ENGINE.md](docs/ACCIO_MARKETING_ENGINE.md) | Plan maestro 4 fases |
+| [CONTEXTO.md](docs/CONTEXTO.md) | **Contexto completo del sistema** |
+| [ROADMAP.md](docs/ROADMAP.md) | Fases A–D |
+| [CONECTAR_REDES.md](docs/CONECTAR_REDES.md) | OAuth por canal |
 | [ACCIO_API.md](docs/ACCIO_API.md) | API REST |
 | [OPERAR_SIN_CURSOR.md](docs/OPERAR_SIN_CURSOR.md) | Operación diaria |
-| [INVENTARIO_DESPLIEGUE.md](docs/INVENTARIO_DESPLIEGUE.md) | Auditoría VPS |
+| [CALENDARIO_PUBLICACION.md](Marketing/CALENDARIO_PUBLICACION.md) | Cola editorial |
 | [deploy/SECRETS.md](deploy/SECRETS.md) | Secretos (no Git) |
 
 ## Estructura
 
 ```
-EasyMarketingOne/
-├── Motor_Tecnico/       # scraper, Odoo, LinkedIn, accio_engine
-├── Marketing/           # cola, flyers, accio/
-├── docs/
-├── deploy/              # systemd, cron, secretos
-├── scripts/
-└── docker-compose.yml   # n8n
+easytech_marketing/
+├── Motor_Tecnico/       # accio_engine, OAuth, publishers, conectores
+├── Marketing/           # content_queue, flyers, accio/
+├── docs/                # CONTEXTO.md, ROADMAP, conectores…
+├── deploy/              # systemd, cron
+└── scripts/             # auto_publish
 ```
-
-## Roadmap
-
-- **Fase A** — Git + backup + docs ✅ (en curso)
-- **Fase B** — Posts #5–#12, validar leads
-- **Fase C** — Campañas, calendario, métricas
-- **Fase D** — Facebook, Instagram, Google, Meta Ads…
 
 ## Licencia
 

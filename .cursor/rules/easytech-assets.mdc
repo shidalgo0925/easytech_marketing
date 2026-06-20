@@ -5,7 +5,12 @@ alwaysApply: true
 
 # EasyTech Marketing — assets y rutas
 
-Proyecto: `/opt/easytech_marketing`
+Proyecto: `/opt/easytech_marketing` · Dashboard: **EM+Acción** · Contexto: `docs/CONTEXTO.md`
+
+## Editorial
+
+Regla **3 valor + 1 venta** por bloque de 4 posts. Campo `content_type` en `Marketing/content_queue.json`.  
+Calendario: `Marketing/CALENDARIO_PUBLICACION.md` · Campañas: `Marketing/accio/campaigns.json`.
 
 ## Flyers (NO olvidar)
 

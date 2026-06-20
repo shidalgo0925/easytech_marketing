@@ -6,7 +6,7 @@
 - [x] Git init + .gitignore
 - [x] deploy/systemd + crontab.example
 - [x] docs/INSTALACION.md
-- [ ] Push a GitHub `EasyMarketingOne`
+- [x] Push a GitHub `shidalgo0925/easytech_marketing`
 - [ ] Backup .env offline cifrado
 
 ## Fase B — Operación
