@@ -15,3 +15,6 @@
 
 # Mie/Vie 21:00 CEST — Meta FB + IG si hay post listo (tras LinkedIn)
 0 21 * * 3,5 /opt/easytech_marketing/scripts/meta_auto_publish.sh
+
+# Sab 22:00 CEST — Google Business Profile
+0 22 * * 6 /opt/easytech_marketing/scripts/google_auto_publish.sh

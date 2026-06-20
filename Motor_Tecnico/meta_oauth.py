@@ -32,7 +32,7 @@ REDIRECT_URI = os.getenv("META_REDIRECT_URI", "https://n8n.etsrv.site/meta/callb
 SCOPES = os.getenv(
     "META_SCOPES",
     "pages_manage_posts,pages_read_engagement,pages_show_list,"
-    "instagram_basic,instagram_content_publish,business_management",
+    "business_management,public_profile",
 )
 _used_codes: set[str] = set()
 

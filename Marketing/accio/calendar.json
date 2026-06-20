@@ -1,35 +1,49 @@
 {
-  "updated_at": "2026-06-19",
+  "updated_at": "2026-06-20",
   "timezone": "America/Panama",
+  "editorial_rule": "3 valor + 1 venta/consejo por cada bloque de 4 posts",
   "weeks": [
     {
       "week": "2026-W26",
       "posts": [
-        {"id": "linkedin_04_demo_plataformas", "date": "2026-06-30", "flyer": 12, "topic": "Demo plataformas"}
+        {"id": "linkedin_04_fe_errores", "date": "2026-06-30", "flyer": 3, "topic": "Valor: 3 errores FE", "content_type": "valor"}
       ]
     },
     {
       "week": "2026-W27",
       "posts": [
-        {"id": "linkedin_05_en1", "date": "2026-07-03", "flyer": 5, "topic": "EN1 EasyNodeOne"},
-        {"id": "linkedin_06_eclassone", "date": "2026-07-08", "flyer": 6, "topic": "EClassOne"}
+        {"id": "linkedin_05_mapa_tecnologico", "date": "2026-07-03", "flyer": 4, "topic": "Valor: mapa tecnológico", "content_type": "valor"},
+        {"id": "linkedin_06_planilla_consejo", "date": "2026-07-08", "flyer": 9, "topic": "Valor: consejo planilla", "content_type": "valor"},
+        {"id": "linkedin_07_demo_plataformas", "date": "2026-07-10", "flyer": 12, "topic": "Venta: demo 30 min", "content_type": "venta"},
+        {"id": "facebook_01_fe_errores", "date": "2026-07-02", "flyer": 3, "topic": "FB valor FE", "content_type": "valor"}
       ]
     },
     {
       "week": "2026-W28",
       "posts": [
-        {"id": "linkedin_07_ethesistone", "date": "2026-07-10", "flyer": 7, "topic": "EThesisOne"},
-        {"id": "linkedin_08_eposone", "date": "2026-07-15", "flyer": 8, "topic": "EPOSOne"},
-        {"id": "linkedin_09_epayroll", "date": "2026-07-17", "flyer": 9, "topic": "EPayRoll"}
+        {"id": "linkedin_08_retail_inventario", "date": "2026-07-15", "flyer": 8, "topic": "Valor: retail inventario", "content_type": "valor"},
+        {"id": "linkedin_09_educacion_matricula", "date": "2026-07-17", "flyer": 6, "topic": "Valor: educación matrícula", "content_type": "valor"},
+        {"id": "facebook_02_planilla_tip", "date": "2026-07-09", "flyer": 9, "topic": "FB valor planilla", "content_type": "valor"},
+        {"id": "facebook_03_demo", "date": "2026-07-11", "flyer": 12, "topic": "FB venta demo", "content_type": "venta"},
+        {"id": "instagram_01_fe_errores", "date": "2026-07-04", "flyer": 3, "topic": "IG valor FE", "content_type": "valor"}
       ]
     },
     {
       "week": "2026-W30",
       "posts": [
-        {"id": "linkedin_10_consultoria_ti", "date": "2026-07-22", "flyer": 4, "topic": "Consultoria TI"},
-        {"id": "linkedin_11_desarrollo_software", "date": "2026-07-24", "flyer": 1, "topic": "Software a medida"}
+        {"id": "linkedin_10_tesis_caos", "date": "2026-07-22", "flyer": 7, "topic": "Valor: caos tesis", "content_type": "valor"},
+        {"id": "linkedin_11_en1_demo", "date": "2026-07-24", "flyer": 5, "topic": "Venta: EN1 demo", "content_type": "venta"},
+        {"id": "instagram_02_retail_tip", "date": "2026-07-12", "flyer": 8, "topic": "IG valor retail", "content_type": "valor"},
+        {"id": "instagram_03_demo", "date": "2026-07-18", "flyer": 12, "topic": "IG venta demo", "content_type": "venta"}
+      ]
+    },
+    {
+      "week": "2026-W31",
+      "posts": [
+        {"id": "facebook_04_en1", "date": "2026-07-25", "flyer": 5, "topic": "FB venta EN1", "content_type": "venta"},
+        {"id": "instagram_04_educacion", "date": "2026-07-26", "flyer": 6, "topic": "IG valor educación", "content_type": "valor"}
       ]
     }
   ],
-  "note": "Flyer #10 IIUS pendiente. Flyer #12 = post linkedin_04. Flyers #2,#3,#11 ya publicados."
+  "note": "Publicados: linkedin_01-03. Ritmo 3:1 en LinkedIn (bloques 4-7 y 8-11). Todos los posts llevan flyer PNG."
 }

@@ -28,7 +28,12 @@
 Estrategia: **estructura primero, APIs después** (`docs/ARQUITECTURA_CONECTORES.md`).
 
 1. LinkedIn ✅ live
-2. Facebook / Instagram — live (OAuth pendiente)
-3. Google Business, Meta Ads, Google Ads, YouTube, TikTok — stub (cola + dry-run)
+2. Facebook / Instagram — live (OAuth: https://n8n.etsrv.site/meta/)
+3. Google Business — live (OAuth: https://n8n.etsrv.site/google/)
+4. YouTube — OAuth compartido Google; publisher video pendiente
+5. TikTok — OAuth: https://n8n.etsrv.site/tiktok/; publisher pendiente
+6. Meta Ads, Google Ads — stub
+
+Guía: `docs/CONECTAR_REDES.md`
 
 Registro: `Marketing/accio/connectors.json`

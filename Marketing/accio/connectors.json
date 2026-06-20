@@ -65,15 +65,14 @@
       "phase": "D.4",
       "name": "Google Business Profile",
       "platform": "google_business",
-      "implementation": "stub",
+      "implementation": "live",
       "publisher": "connectors/publishers/google_business.py",
       "oauth": {
-        "url": null,
-        "service": null,
-        "port": null,
-        "note": "Google Cloud OAuth — pendiente Fase D.4b"
+        "url": "https://n8n.etsrv.site/google/",
+        "service": "easytech-google-oauth",
+        "port": 8094
       },
-      "env_required": ["GOOGLE_BUSINESS_ACCOUNT_ID", "GOOGLE_OAUTH_REFRESH_TOKEN"],
+      "env_required": ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_OAUTH_REFRESH_TOKEN", "GOOGLE_BUSINESS_LOCATION_ID"],
       "env_optional": ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
       "log_file": "Marketing/publish_logs/google_business.json",
       "cron": null,
@@ -122,10 +121,12 @@
       "implementation": "stub",
       "publisher": "connectors/publishers/youtube.py",
       "oauth": {
-        "url": null,
-        "note": "YouTube Data API v3 — pendiente Fase D.7b"
+        "url": "https://n8n.etsrv.site/google/",
+        "service": "easytech-google-oauth",
+        "port": 8094,
+        "note": "Mismo OAuth que Google Business"
       },
-      "env_required": ["YOUTUBE_CHANNEL_ID", "GOOGLE_OAUTH_REFRESH_TOKEN"],
+      "env_required": ["GOOGLE_OAUTH_REFRESH_TOKEN", "YOUTUBE_CHANNEL_ID"],
       "log_file": "Marketing/publish_logs/youtube.json",
       "cron": null,
       "enabled": true,
@@ -139,8 +140,9 @@
       "implementation": "stub",
       "publisher": "connectors/publishers/tiktok.py",
       "oauth": {
-        "url": null,
-        "note": "TikTok for Business API — pendiente Fase D.8b"
+        "url": "https://n8n.etsrv.site/tiktok/",
+        "service": "easytech-tiktok-oauth",
+        "port": 8095
       },
       "env_required": ["TIKTOK_CLIENT_KEY", "TIKTOK_ACCESS_TOKEN"],
       "log_file": "Marketing/publish_logs/tiktok.json",

@@ -53,6 +53,32 @@ def dashboard_page():
     return send_from_directory(app.static_folder, "dashboard.html")
 
 
+@app.get("/accio/privacidad")
+def privacy_redirect():
+    return redirect("/accio/privacidad/", code=302)
+
+
+@app.get("/accio/privacidad/")
+def privacy_page():
+    return send_from_directory(app.static_folder, "privacidad.html", mimetype="text/html")
+
+
+@app.get("/accio/dashboard/<path:asset>")
+def dashboard_assets(asset: str):
+    allowed = {"accio-design.css", "accio-logomark.svg", "em-logomark.svg", "em-accion-app-icon.svg", "em-accion-app-icon-1024.png", "accio-wordmark.svg", "accio-logo-horizontal.svg", "accio-og.svg", "palette-preview.html"}
+    if asset not in allowed:
+        return jsonify({"ok": False, "error": "Asset no permitido"}), 404
+    if asset.endswith(".svg"):
+        mimetype = "image/svg+xml"
+    elif asset.endswith(".png"):
+        mimetype = "image/png"
+    elif asset.endswith(".html"):
+        mimetype = "text/html"
+    else:
+        mimetype = "text/css"
+    return send_from_directory(app.static_folder, asset, mimetype=mimetype)
+
+
 @app.get("/accio/dashboard/api/summary")
 @require_api_key
 def dashboard_summary():

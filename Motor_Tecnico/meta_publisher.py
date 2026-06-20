@@ -73,9 +73,6 @@ def pick_next_post(queue: dict, platform: str, force: bool = False) -> dict | No
     return candidates[0][1]
 
 
-from Motor_Tecnico.flyer_utils import flyer_public_url, resolve_flyer_path
-
-
 def publish_facebook(page_id: str, token: str, text: str, image_url: str | None) -> str:
     if image_url:
         resp = requests.post(

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+  <g stroke="#C8843C" fill="none">
+    <circle cx="28" cy="28" r="22" stroke-width="1.75" stroke-dasharray="3 2.4"/>
+    <circle cx="28" cy="28" r="17.5" stroke-width="1.15" opacity="0.45"/>
+    <path stroke-width="1.4" stroke-linecap="round" d="M28 4v4M28 48v4M4 28h4M48 28h4M10.6 10.6l2.8 2.8M42.4 42.4l2.8 2.8M10.6 45.4l2.8-2.8M42.4 13.6l2.8-2.8"/>
+  </g>
+  <text x="28" y="29" text-anchor="middle" font-family="Georgia, 'Fraunces', serif" font-size="14" font-weight="600" fill="#C8843C">EM</text>
+</svg>

@@ -3,204 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Accio Marketing Engine — EasyTech</title>
-  <style>
-    :root {
-      --bg: #0f172a; --card: #1e293b; --border: #334155;
-      --text: #e2e8f0; --muted: #94a3b8;
-      --accent: #2563eb; --accent-hover: #1d4ed8;
-      --green: #22c55e; --amber: #f59e0b; --red: #ef4444;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
-    .login-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.95); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .login-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: min(400px, 92vw); }
-    .login-box h2 { margin-bottom: .5rem; font-size: 1.25rem; }
-    .login-box p { color: var(--muted); font-size: .875rem; margin-bottom: 1rem; }
-    .login-box input { width: 100%; padding: .75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 1rem; }
-    .hidden { display: none !important; }
-    header { border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
-    header h1 { font-size: 1.125rem; font-weight: 600; }
-    header h1 span { color: var(--muted); font-weight: 400; }
-    .badge { display: inline-block; padding: .2rem .6rem; border-radius: 999px; font-size: .75rem; background: #14532d; color: #86efac; }
-    .actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-    button, .btn { cursor: pointer; border: none; border-radius: 8px; padding: .5rem 1rem; font-size: .875rem; font-weight: 500; transition: background .15s; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: #334155; }
-    .btn-danger { background: #7f1d1d; color: #fecaca; border: 1px solid #991b1b; }
-    .btn:disabled, button:disabled { opacity: .5; cursor: not-allowed; }
-    main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-    .tabs { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: .75rem; }
-    .tab { background: transparent; color: var(--muted); border: 1px solid transparent; padding: .45rem .9rem; border-radius: 8px; }
-    .tab.active { background: var(--card); color: var(--text); border-color: var(--border); }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
-    .stat .label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-    .stat .value { font-size: 1.75rem; font-weight: 700; margin-top: .25rem; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .card-head { padding: .875rem 1rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: .9375rem; display: flex; justify-content: space-between; align-items: center; }
-    .card-body { padding: 0; max-height: 480px; overflow-y: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: .8125rem; }
-    th, td { padding: .625rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-    th { color: var(--muted); font-weight: 500; position: sticky; top: 0; background: var(--card); }
-    tr:last-child td { border-bottom: none; }
-    .status-ok { color: var(--green); }
-    .status-fail { color: var(--red); }
-    .status-pending { color: var(--amber); }
-    .status-run { color: #60a5fa; }
-    .status-published { color: var(--green); }
-    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--card); border: 1px solid var(--border); padding: .875rem 1.25rem; border-radius: 10px; max-width: 360px; box-shadow: 0 8px 32px rgba(0,0,0,.4); z-index: 50; animation: slide .2s ease; }
-    @keyframes slide { from { transform: translateY(12px); opacity: 0; } }
-    .links { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: .75rem; }
-    .links a { color: #93c5fd; font-size: .875rem; text-decoration: none; }
-    .links a:hover { text-decoration: underline; }
-    #clock { color: var(--muted); font-size: .8125rem; }
-    .empty { padding: 2rem; text-align: center; color: var(--muted); }
-    .cal-week { padding: 1rem; border-bottom: 1px solid var(--border); }
-    .cal-week:last-child { border-bottom: none; }
-    .cal-week h4 { font-size: .8125rem; color: var(--muted); margin-bottom: .75rem; }
-    .cal-items { display: flex; flex-direction: column; gap: .5rem; }
-    .cal-item { display: flex; align-items: center; gap: .75rem; padding: .5rem .75rem; background: var(--bg); border-radius: 8px; font-size: .8125rem; }
-    .cal-date { min-width: 5.5rem; color: var(--muted); }
-    .cal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .cal-dot.published { background: var(--green); }
-    .cal-dot.pending { background: var(--amber); }
-    .flyer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; padding: 1rem; }
-    .flyer-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .flyer-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #0b1220; }
-    .flyer-card.missing img { display: none; }
-    .flyer-card.missing .flyer-placeholder { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .75rem; background: #0b1220; }
-    .flyer-meta { padding: .625rem; font-size: .75rem; }
-    .flyer-meta .num { color: var(--muted); }
-    .flyer-meta .topic { margin-top: .2rem; }
-    .flyer-tag { display: inline-block; margin-top: .35rem; padding: .1rem .4rem; border-radius: 4px; font-size: .65rem; background: #1e3a5f; color: #93c5fd; }
-    .bar-row { display: flex; align-items: center; gap: .75rem; padding: .5rem 1rem; font-size: .8125rem; }
-    .bar-label { min-width: 120px; color: var(--muted); }
-    .bar-track { flex: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
-    .bar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
-    .bar-val { min-width: 2rem; text-align: right; }
-    .metric-note { padding: .75rem 1rem; font-size: .75rem; color: var(--muted); border-top: 1px solid var(--border); }
-    .conn-ok { color: var(--green); }
-    .conn-warn { color: var(--amber); }
-    .conn-plan { color: var(--muted); }
-    .platform-tag { font-size: .65rem; padding: .1rem .35rem; border-radius: 4px; background: #1e3a5f; color: #93c5fd; text-transform: uppercase; }
-  </style>
+  <title>EM+Acción — Command Center</title>
+  <link rel="icon" href="/accio/dashboard/em-logomark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/accio/dashboard/accio-design.css">
 </head>
 <body>
   <div id="login" class="login-overlay">
     <div class="login-box">
-      <h2>Accio Dashboard</h2>
-      <p>Ingresa tu <strong>ACCIO_API_KEY</strong> (está en el servidor <code>.env</code>).</p>
+      <div class="login-brand em-logo">
+        <span class="em-logo-lockup">
+          <span class="em-logo-icon" aria-hidden="true">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g class="em-gear-ring" stroke="currentColor" fill="none">
+                <circle cx="18" cy="18" r="14" stroke-width="1.5" stroke-dasharray="2.4 1.9"/>
+                <circle cx="18" cy="18" r="11.5" stroke-width="1" opacity="0.45"/>
+                <path stroke-width="1.25" stroke-linecap="round" d="M18 2.5v3M18 30.5v3M2.5 18h3M30.5 18h3M6.8 6.8l2.1 2.1M27.1 27.1l2.1 2.1M6.8 29.2l2.1-2.1M27.1 8.9l2.1-2.1"/>
+              </g>
+            </svg>
+            <span class="em-monogram">EM</span>
+          </span>
+          <span class="em-plus">+</span>
+        </span>
+        <span class="em-wordmark">Acción</span>
+      </div>
+      <p>Command center de marketing autónomo. Ingresa tu <strong>ACCIO_API_KEY</strong>.</p>
       <input type="password" id="apiKeyInput" placeholder="ACCIO_API_KEY" autocomplete="off">
-      <button class="btn btn-primary" style="width:100%" onclick="saveKey()">Entrar</button>
+      <button class="accio-btn-primary" style="width:100%" onclick="saveKey()">Entrar al terminal</button>
     </div>
   </div>
 
   <div id="app" class="hidden">
-    <header>
-      <div>
-        <h1>Accio Marketing Engine <span>— EasyTech Services</span></h1>
-        <div id="clock"></div>
+    <header class="accio-header">
+      <div class="accio-header-left">
+        <a class="accio-brand em-logo" href="/accio/dashboard/" aria-label="EM+Acción">
+          <span class="em-logo-lockup">
+            <span class="em-logo-icon" aria-hidden="true">
+              <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g class="em-gear-ring" stroke="currentColor" fill="none">
+                  <circle cx="18" cy="18" r="14" stroke-width="1.5" stroke-dasharray="2.4 1.9"/>
+                  <circle cx="18" cy="18" r="11.5" stroke-width="1" opacity="0.45"/>
+                  <path stroke-width="1.25" stroke-linecap="round" d="M18 2.5v3M18 30.5v3M2.5 18h3M30.5 18h3M6.8 6.8l2.1 2.1M27.1 27.1l2.1 2.1M6.8 29.2l2.1-2.1M27.1 8.9l2.1-2.1"/>
+                </g>
+              </svg>
+              <span class="em-monogram">EM</span>
+            </span>
+            <span class="em-plus">+</span>
+          </span>
+          <span class="em-wordmark">Acción</span>
+        </a>
+        <div class="accio-client" title="Cliente activo">
+          <span class="accio-kpi-label" style="margin:0">Cliente</span>
+          <span class="accio-client-name" id="clientName">EasyTech Services</span>
+        </div>
+        <div class="accio-clock" id="clock"></div>
       </div>
-      <div class="actions">
-        <span class="badge">Operador autónomo</span>
-        <button class="btn btn-secondary" onclick="loadData()">↻ Actualizar</button>
-        <button class="btn btn-primary" id="btnPipeline" onclick="runPipeline()">▶ Pipeline</button>
-        <button class="btn btn-primary" id="btnPublish" onclick="runPublish(false)">📣 LinkedIn</button>
-        <button class="btn btn-primary" id="btnMeta" onclick="runMetaPublish(false)">📱 Meta</button>
-        <button class="btn btn-danger" id="btnForce" onclick="runPublish(true)">⚡ Forzar LI</button>
+      <div class="accio-header-right">
+        <span class="accio-status-live">Operador autónomo</span>
+        <button class="accio-btn-secondary" onclick="loadData()">Actualizar</button>
+        <button class="accio-btn-primary" id="btnPrimary" onclick="runPrimaryAction()">Publicar siguiente</button>
+        <div class="accio-menu">
+          <button class="accio-btn-icon" id="menuToggle" aria-label="Más acciones" onclick="toggleMenu(event)">···</button>
+          <div class="accio-menu-panel" id="actionMenu">
+            <button class="accio-menu-item" onclick="runPipeline(); closeMenu()">Ejecutar pipeline</button>
+            <button class="accio-menu-item" onclick="runPublish(false); closeMenu()">Publicar LinkedIn</button>
+            <button class="accio-menu-item" onclick="runMetaPublish(false); closeMenu()">Publicar Meta</button>
+            <button class="accio-menu-item danger" onclick="runPublish(true); closeMenu()">Forzar LinkedIn</button>
+          </div>
+        </div>
       </div>
     </header>
 
-    <main>
-      <nav class="tabs" id="tabs">
-        <button class="tab active" data-tab="resumen">Resumen</button>
-        <button class="tab" data-tab="campanas">Campañas</button>
-        <button class="tab" data-tab="calendario">Calendario</button>
-        <button class="tab" data-tab="metricas">Métricas</button>
-        <button class="tab" data-tab="flyers">Flyers</button>
-        <button class="tab" data-tab="conectores">Conectores</button>
+    <main class="accio-main">
+      <nav class="accio-tabs" id="tabs">
+        <button class="accio-tab active" data-tab="resumen">Resumen</button>
+        <button class="accio-tab" data-tab="campanas">Campañas</button>
+        <button class="accio-tab" data-tab="calendario">Calendario</button>
+        <button class="accio-tab" data-tab="metricas">Métricas</button>
+        <button class="accio-tab" data-tab="flyers">Flyers</button>
+        <button class="accio-tab" data-tab="conectores">Conectores</button>
       </nav>
 
       <div id="panel-resumen" class="tab-panel active">
-        <div class="stats" id="stats"></div>
-        <div class="grid">
-          <section class="card">
-            <div class="card-head">Cola de posts pendientes</div>
-            <div class="card-body" id="postsTable"></div>
+        <div class="accio-kpi-grid" id="stats"></div>
+        <div class="accio-grid">
+          <section class="accio-card">
+            <div class="accio-card-head">Cola de publicaciones</div>
+            <div class="accio-card-body accio-table-wrap" id="postsTable"></div>
           </section>
-          <section class="card">
-            <div class="card-head">
-              Leads Odoo CRM
-              <a id="odooLink" href="#" target="_blank" style="font-size:.75rem;color:#93c5fd">Abrir Odoo →</a>
+          <section class="accio-card">
+            <div class="accio-card-head">
+              Leads CRM
+              <a id="odooLink" href="#" target="_blank">Abrir Odoo →</a>
             </div>
-            <div class="card-body" id="leadsTable"></div>
+            <div class="accio-card-body accio-table-wrap" id="leadsTable"></div>
           </section>
-          <section class="card" style="grid-column: 1 / -1">
-            <div class="card-head">Últimas órdenes Accio</div>
-            <div class="card-body" id="ordersTable"></div>
+          <section class="accio-card" style="grid-column: 1 / -1">
+            <div class="accio-card-head">Órdenes del motor</div>
+            <div class="accio-card-body accio-table-wrap" id="ordersTable"></div>
           </section>
         </div>
       </div>
 
       <div id="panel-campanas" class="tab-panel">
-        <div class="stats" id="campStats"></div>
-        <section class="card">
-          <div class="card-head">Campañas por producto (LinkedIn)</div>
-          <div class="card-body" id="campaignsTable"></div>
+        <div class="accio-kpi-grid" id="campStats"></div>
+        <section class="accio-card">
+          <div class="accio-card-head">Campañas por producto</div>
+          <div class="accio-card-body accio-table-wrap" id="campaignsTable"></div>
         </section>
       </div>
 
       <div id="panel-calendario" class="tab-panel">
-        <section class="card">
-          <div class="card-head">Calendario editorial · Panamá</div>
-          <div class="card-body" id="calendarView" style="max-height:none"></div>
+        <section class="accio-card">
+          <div class="accio-card-head">Calendario editorial · Panamá</div>
+          <div class="accio-card-body" id="calendarView" style="max-height:none"></div>
         </section>
       </div>
 
       <div id="panel-metricas" class="tab-panel">
-        <div class="stats" id="metricStats"></div>
-        <div class="grid">
-          <section class="card">
-            <div class="card-head">Leads por origen (Odoo)</div>
-            <div class="card-body" id="sourceBars"></div>
+        <div class="accio-kpi-grid" id="metricStats"></div>
+        <div class="accio-grid">
+          <section class="accio-card">
+            <div class="accio-card-head">Leads por origen</div>
+            <div class="accio-card-body" id="sourceBars"></div>
           </section>
-          <section class="card">
-            <div class="card-head">Publicaciones LinkedIn</div>
-            <div class="card-body" id="publishMetrics"></div>
+          <section class="accio-card">
+            <div class="accio-card-head">Publicaciones LinkedIn</div>
+            <div class="accio-card-body accio-table-wrap" id="publishMetrics"></div>
           </section>
         </div>
       </div>
 
       <div id="panel-flyers" class="tab-panel">
-        <div class="stats" id="flyerStats"></div>
-        <section class="card">
-          <div class="card-head">Biblioteca de flyers</div>
+        <div class="accio-kpi-grid" id="flyerStats"></div>
+        <section class="accio-card">
+          <div class="accio-card-head">Biblioteca de assets</div>
           <div class="flyer-grid" id="flyerGrid"></div>
         </section>
       </div>
 
       <div id="panel-conectores" class="tab-panel">
-        <section class="card">
-          <div class="card-head">Fase D — Conectores de publicación</div>
-          <div class="card-body" id="connectorsTable"></div>
+        <section class="accio-card">
+          <div class="accio-card-head">Conectores multicanal</div>
+          <div class="accio-card-body accio-table-wrap" id="connectorsTable"></div>
         </section>
-        <p class="metric-note" style="margin-top:1rem;border:none">Meta (FB+IG): <a href="https://n8n.etsrv.site/meta/" target="_blank">Autorizar OAuth</a> · Docs: <code>docs/META_CONECTORES.md</code></p>
       </div>
 
-      <div class="links" id="quickLinks"></div>
+      <div class="accio-links" id="quickLinks"></div>
     </main>
   </div>
 
   <script>
     const KEY_STORAGE = 'accio_dashboard_key';
     let lastData = null;
+    let activeTab = 'resumen';
 
     function getKey() { return sessionStorage.getItem(KEY_STORAGE) || ''; }
 
@@ -219,19 +174,40 @@
 
     function toast(msg, isError) {
       const el = document.createElement('div');
-      el.className = 'toast';
-      el.style.borderColor = isError ? '#991b1b' : '#334155';
+      el.className = 'toast' + (isError ? ' is-error' : '');
       el.textContent = msg;
       document.body.appendChild(el);
       setTimeout(() => el.remove(), 5000);
     }
 
     async function api(path, opts = {}) {
-      const res = await fetch('/accio/dashboard/api' + path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } });
+      const res = await fetch('/accio/dashboard/api' + path, {
+        ...opts,
+        headers: { ...authHeaders(), ...(opts.headers || {}) },
+      });
       const data = await res.json().catch(() => ({}));
-      if (res.status === 401) { sessionStorage.removeItem(KEY_STORAGE); location.reload(); throw new Error('Sesión expirada'); }
+      if (res.status === 401) {
+        sessionStorage.removeItem(KEY_STORAGE);
+        location.reload();
+        throw new Error('Sesión expirada');
+      }
       if (!res.ok) throw new Error(data.error || res.statusText);
       return data;
+    }
+
+    function kpi(label, value, accent) {
+      return `<div class="accio-kpi-card">
+        <div class="accio-kpi-label">${label}</div>
+        <div class="accio-kpi-value${accent ? ' is-accent' : ''}">${value}</div>
+      </div>`;
+    }
+
+    function platformBadge(platform) {
+      const p = (platform || '').toLowerCase();
+      let cls = 'default';
+      if (p === 'linkedin') cls = 'linkedin';
+      else if (['facebook', 'instagram', 'meta_ads'].includes(p)) cls = 'meta';
+      return `<span class="accio-badge accio-badge--${cls}">${platform || '?'}</span>`;
     }
 
     function statusClass(s) {
@@ -241,77 +217,125 @@
       return 'status-pending';
     }
 
+    function tableWrap(html) {
+      return html.includes('<table') ? html : html;
+    }
+
+    function toggleMenu(e) {
+      e.stopPropagation();
+      document.getElementById('actionMenu').classList.toggle('open');
+    }
+    function closeMenu() {
+      document.getElementById('actionMenu').classList.remove('open');
+    }
+    document.addEventListener('click', () => closeMenu());
+
     function switchTab(name) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      activeTab = name;
+      document.querySelectorAll('.accio-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+      updatePrimaryLabel();
+    }
+
+    function updatePrimaryLabel() {
+      const btn = document.getElementById('btnPrimary');
+      const labels = {
+        resumen: 'Publicar siguiente',
+        campanas: 'Ver cola',
+        calendario: 'Publicar siguiente',
+        metricas: 'Actualizar métricas',
+        flyers: 'Actualizar assets',
+        conectores: 'Validar conectores',
+      };
+      btn.textContent = labels[activeTab] || 'Operar';
+    }
+
+    function runPrimaryAction() {
+      if (activeTab === 'metricas' || activeTab === 'flyers') return loadData();
+      if (activeTab === 'campanas' || activeTab === 'calendario' || activeTab === 'conectores') return switchTab('resumen');
+      return runPublish(false);
     }
 
     document.getElementById('tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.tab');
+      const tab = e.target.closest('.accio-tab');
       if (tab) switchTab(tab.dataset.tab);
     });
 
     function renderResumen(data) {
       const s = data.stats;
-      document.getElementById('stats').innerHTML = `
-        <div class="stat"><div class="label">Posts pendientes</div><div class="value">${s.linkedin_pending}</div></div>
-        <div class="stat"><div class="label">FB / IG pend.</div><div class="value">${s.facebook_pending||0} / ${s.instagram_pending||0}</div></div>
-        <div class="stat"><div class="label">Publicados</div><div class="value">${s.linkedin_published}</div></div>
-        <div class="stat"><div class="label">Prospectos CSV</div><div class="value">${s.prospection_csv}</div></div>
-        <div class="stat"><div class="label">Leads Odoo</div><div class="value">${data.odoo.ok ? data.odoo.total : '—'}</div></div>
-        <div class="stat"><div class="label">Etapa Marketing</div><div class="value">${data.odoo.ok ? data.odoo.marketing_stage : '—'}</div></div>
-        <div class="stat"><div class="label">Órdenes pendientes</div><div class="value">${s.orders_pending}</div></div>`;
+      document.getElementById('stats').innerHTML = [
+        kpi('Posts pendientes', s.linkedin_pending),
+        kpi('FB / IG pend.', `${s.facebook_pending||0} / ${s.instagram_pending||0}`),
+        kpi('Publicados', s.linkedin_published, true),
+        kpi('Prospectos CSV', s.prospection_csv),
+        kpi('Leads Odoo', data.odoo.ok ? data.odoo.total : '—'),
+        kpi('Etapa marketing', data.odoo.ok ? data.odoo.marketing_stage : '—'),
+        kpi('Órdenes pend.', s.orders_pending),
+      ].join('');
 
       const posts = data.pending_posts;
       document.getElementById('postsTable').innerHTML = posts.length ? `
-        <table><thead><tr><th>Plataforma</th><th>ID</th><th>Programado</th><th>Flyer</th><th>Vista previa</th></tr></thead>
-        <tbody>${posts.map(p => `<tr>
-          <td><span class="platform-tag">${p.platform||'?'}</span></td>
-          <td><code>${p.id}</code></td>
-          <td>${(p.scheduled_at||'').slice(0,16)}</td>
+        <table class="accio-table"><thead><tr>
+          <th>Canal</th><th>ID</th><th>Programado</th><th>Flyer</th><th>Vista previa</th>
+        </tr></thead><tbody>${posts.map(p => `<tr>
+          <td>${platformBadge(p.platform)}</td>
+          <td class="is-mono">${p.id}</td>
+          <td class="is-mono">${(p.scheduled_at||'').slice(0,16)}</td>
           <td>${p.flyer}</td>
           <td>${p.preview}</td>
         </tr>`).join('')}</tbody></table>
       ` : '<div class="empty">No hay posts pendientes</div>';
 
       const odoo = data.odoo;
-      if (odoo.ok && odoo.odoo_url) document.getElementById('odooLink').href = odoo.odoo_url + '/web#action=crm.crm_lead_action_pipeline';
+      if (odoo.ok && odoo.odoo_url) {
+        document.getElementById('odooLink').href = odoo.odoo_url + '/web#action=crm.crm_lead_action_pipeline';
+      }
       document.getElementById('leadsTable').innerHTML = odoo.ok && odoo.recent.length ? `
-        <table><thead><tr><th>Lead</th><th>Email</th><th>Etapa</th><th>Origen</th></tr></thead>
-        <tbody>${odoo.recent.map(l => `<tr><td>${l.name}</td><td>${l.email}</td><td>${l.stage}</td><td>${l.source}</td></tr>`).join('')}</tbody></table>
+        <table class="accio-table"><thead><tr><th>Lead</th><th>Email</th><th>Etapa</th><th>Origen</th></tr></thead>
+        <tbody>${odoo.recent.map(l => `<tr>
+          <td>${l.name}</td>
+          <td>${l.email}</td>
+          <td>${l.stage}</td>
+          <td>${l.source}</td>
+        </tr>`).join('')}</tbody></table>
       ` : `<div class="empty">${odoo.error || 'Sin leads recientes'}</div>`;
 
       const orders = data.orders;
       document.getElementById('ordersTable').innerHTML = orders.length ? `
-        <table><thead><tr><th>ID</th><th>Acción</th><th>Estado</th><th>Creada</th><th>Detalle</th></tr></thead>
-        <tbody>${orders.map(o => `<tr><td><code>${o.id}</code></td><td>${o.action}</td><td class="${statusClass(o.status)}">${o.status}</td><td>${(o.created_at||'').slice(0,19)}</td><td>${o.error || (o.result && o.result.stdout ? o.result.stdout.slice(0,80) : '—')}</td></tr>`).join('')}</tbody></table>
+        <table class="accio-table"><thead><tr><th>ID</th><th>Acción</th><th>Estado</th><th>Creada</th><th>Detalle</th></tr></thead>
+        <tbody>${orders.map(o => `<tr>
+          <td class="is-mono">${o.id}</td>
+          <td>${o.action}</td>
+          <td class="${statusClass(o.status)}">${o.status}</td>
+          <td class="is-mono">${(o.created_at||'').slice(0,19)}</td>
+          <td>${o.error || (o.result?.stdout?.slice(0,80)) || '—'}</td>
+        </tr>`).join('')}</tbody></table>
       ` : '<div class="empty">Sin órdenes aún</div>';
     }
 
     function renderCampanas(data) {
       const camps = data.campaigns || [];
-      const pub = camps.filter(c => c.status === 'published').length;
-      const pend = camps.filter(c => c.status === 'pending').length;
-      document.getElementById('campStats').innerHTML = `
-        <div class="stat"><div class="label">Total campañas</div><div class="value">${camps.length}</div></div>
-        <div class="stat"><div class="label">Publicadas</div><div class="value">${pub}</div></div>
-        <div class="stat"><div class="label">Programadas</div><div class="value">${pend}</div></div>`;
+      document.getElementById('campStats').innerHTML = [
+        kpi('Total campañas', camps.length),
+        kpi('Publicadas', camps.filter(c => c.status === 'published').length),
+        kpi('Programadas', camps.filter(c => c.status === 'pending').length, true),
+      ].join('');
       document.getElementById('campaignsTable').innerHTML = camps.length ? `
-        <table><thead><tr><th>Producto</th><th>Flyer</th><th>Estado</th><th>Fecha</th><th>UTM</th><th>CTA</th></tr></thead>
-        <tbody>${camps.map(c => `<tr>
+        <table class="accio-table"><thead><tr>
+          <th>Producto</th><th>Flyer</th><th>Estado</th><th>Fecha</th><th>UTM</th><th>CTA</th>
+        </tr></thead><tbody>${camps.map(c => `<tr>
           <td>${c.product}</td>
           <td>#${c.flyer_num || '—'}</td>
           <td class="${statusClass(c.status)}">${c.status}</td>
-          <td>${(c.status==='published' ? c.published_at : c.scheduled_at || '').slice(0,16) || '—'}</td>
-          <td><code>${c.utm || '—'}</code></td>
+          <td class="is-mono">${(c.status==='published' ? c.published_at : c.scheduled_at || '').slice(0,16) || '—'}</td>
+          <td class="is-mono">${c.utm || '—'}</td>
           <td>${c.cta}</td>
         </tr>`).join('')}</tbody></table>
       ` : '<div class="empty">Sin campañas</div>';
     }
 
     function renderCalendario(data) {
-      const cal = data.calendar || {};
-      const weeks = cal.weeks || [];
+      const weeks = data.calendar?.weeks || [];
       if (!weeks.length) {
         document.getElementById('calendarView').innerHTML = '<div class="empty">Calendario vacío</div>';
         return;
@@ -326,20 +350,21 @@
               <span>Flyer #${p.flyer} · ${p.topic}</span>
               <span class="${statusClass(p.status)}" style="margin-left:auto">${p.status}</span>
             </div>`).join('')}</div>
-        </div>`).join('') + (cal.note ? `<div class="metric-note">${cal.note}</div>` : '');
+        </div>`).join('') + (data.calendar.note ? `<div class="metric-note">${data.calendar.note}</div>` : '');
     }
 
     function renderMetricas(data) {
       const m = data.metrics || {};
       const od = m.odoo || {};
       const li = m.linkedin || {};
-      document.getElementById('metricStats').innerHTML = `
-        <div class="stat"><div class="label">Leads Odoo</div><div class="value">${od.total_leads ?? '—'}</div></div>
-        <div class="stat"><div class="label">Guía FE</div><div class="value">${od.guia_leads ?? 0}</div></div>
-        <div class="stat"><div class="label">Scraper</div><div class="value">${od.scraper_leads ?? 0}</div></div>
-        <div class="stat"><div class="label">Posts publicados</div><div class="value">${li.published ?? 0}</div></div>
-        <div class="stat"><div class="label">Prospectos CSV</div><div class="value">${m.prospection?.csv_rows ?? 0}</div></div>
-        <div class="stat"><div class="label">Conv. guía/post</div><div class="value">${m.conversion?.guia_per_post ?? 0}%</div></div>`;
+      document.getElementById('metricStats').innerHTML = [
+        kpi('Leads Odoo', od.total_leads ?? '—'),
+        kpi('Guía FE', od.guia_leads ?? 0, true),
+        kpi('Scraper', od.scraper_leads ?? 0),
+        kpi('Posts publicados', li.published ?? 0),
+        kpi('Prospectos CSV', m.prospection?.csv_rows ?? 0),
+        kpi('Conv. guía/post', `${m.conversion?.guia_per_post ?? 0}%`),
+      ].join('');
 
       const sources = od.by_source || [];
       const max = Math.max(...sources.map(s => s.count), 1);
@@ -353,9 +378,27 @@
 
       const recent = li.recent_published || [];
       document.getElementById('publishMetrics').innerHTML = `
-        <table><thead><tr><th>Post</th><th>Publicado</th><th>UTM</th></tr></thead>
-        <tbody>${recent.map(p => `<tr><td><code>${p.id}</code></td><td>${(p.published_at||'').slice(0,16)}</td><td><code>${p.utm||'—'}</code></td></tr>`).join('')}</tbody></table>
+        <table class="accio-table"><thead><tr><th>Post</th><th>Publicado</th><th>UTM</th></tr></thead>
+        <tbody>${recent.map(p => `<tr>
+          <td class="is-mono">${p.id}</td>
+          <td class="is-mono">${(p.published_at||'').slice(0,16)}</td>
+          <td class="is-mono">${p.utm||'—'}</td>
+        </tr>`).join('')}</tbody></table>
         <div class="metric-note">Pendientes en cola: ${li.pending ?? 0}</div>`;
+    }
+
+    function authLink(c) {
+      if (!c.auth_url) return '—';
+      if (c.status === 'active') {
+        return `<a href="${c.auth_url}" target="_blank" class="is-mono" style="font-size:var(--accio-text-xs);color:var(--accio-text-tertiary)">OAuth</a>`;
+      }
+      if (c.status === 'needs_auth') {
+        return `<a href="${c.auth_url}" target="_blank">Conectar</a>`;
+      }
+      if (c.status === 'stub') {
+        return `<a href="${c.auth_url}" target="_blank" style="color:var(--accio-text-tertiary)">Configurar</a>`;
+      }
+      return '—';
     }
 
     function renderConnectors(data) {
@@ -363,31 +406,36 @@
       const statusLabel = c => {
         if (c.status === 'active') return '<span class="conn-ok">Activo</span>';
         if (c.status === 'needs_auth') return '<span class="conn-warn">Falta OAuth</span>';
-        if (c.status === 'stub') return '<span class="conn-plan">Estructura (sin API)</span>';
+        if (c.status === 'stub') return '<span class="conn-plan">Estructura</span>';
         return '<span class="conn-plan">Planificado</span>';
       };
+      const meta = items.find(c => c.id === 'facebook' || c.platform === 'facebook');
+      const metaNote = meta && meta.status !== 'active'
+        ? `<p class="metric-note" style="margin-top:1rem;border:none">Meta: <a href="https://n8n.etsrv.site/meta/" target="_blank">Conectar Facebook + Instagram</a></p>`
+        : '';
       document.getElementById('connectorsTable').innerHTML = `
-        <table><thead><tr><th>Fase</th><th>Canal</th><th>Modo</th><th>Estado</th><th>Cola</th><th>Publicados</th><th>Siguiente</th><th>Acción</th></tr></thead>
-        <tbody>${items.map(c => `<tr>
-          <td>${c.phase}</td>
+        <table class="accio-table"><thead><tr>
+          <th>Fase</th><th>Canal</th><th>Modo</th><th>Estado</th><th>Cola</th><th>Pub.</th><th>Siguiente</th><th></th>
+        </tr></thead><tbody>${items.map(c => `<tr>
+          <td class="is-mono">${c.phase}</td>
           <td>${c.name}</td>
-          <td><code>${c.implementation||'—'}</code></td>
+          <td class="is-mono">${c.implementation||'—'}</td>
           <td>${statusLabel(c)}</td>
           <td>${c.pending ?? '—'}</td>
           <td>${c.published ?? '—'}</td>
-          <td><code>${c.next || '—'}</code></td>
-          <td>${c.auth_url ? `<a href="${c.auth_url}" target="_blank">Conectar</a>` : (c.docs ? `<span class="conn-plan">${c.docs}</span>` : '—')}</td>
-        </tr>`).join('')}</tbody></table>`;
+          <td class="is-mono">${c.next || '—'}</td>
+          <td>${authLink(c)}</td>
+        </tr>`).join('')}</tbody></table>${metaNote}`;
     }
 
     function renderFlyers(data) {
       const lib = data.flyers || {};
-      document.getElementById('flyerStats').innerHTML = `
-        <div class="stat"><div class="label">Total</div><div class="value">${lib.total ?? 0}</div></div>
-        <div class="stat"><div class="label">Disponibles</div><div class="value">${lib.available ?? 0}</div></div>
-        <div class="stat"><div class="label">Faltantes</div><div class="value">${lib.missing ?? 0}</div></div>`;
-      const items = lib.flyers || [];
-      document.getElementById('flyerGrid').innerHTML = items.map(f => `
+      document.getElementById('flyerStats').innerHTML = [
+        kpi('Total', lib.total ?? 0),
+        kpi('Disponibles', lib.available ?? 0, true),
+        kpi('Faltantes', lib.missing ?? 0),
+      ].join('');
+      document.getElementById('flyerGrid').innerHTML = (lib.flyers || []).map(f => `
         <div class="flyer-card ${f.missing ? 'missing' : ''}">
           ${f.missing
             ? '<div class="flyer-placeholder">Sin asset</div>'
@@ -396,7 +444,7 @@
             <div class="num">#${f.num}</div>
             <div class="topic">${f.topic}</div>
             ${f.in_queue ? '<span class="flyer-tag">En cola</span>' : ''}
-            ${f.missing ? '<span class="flyer-tag" style="background:#7f1d1d;color:#fecaca">Faltante</span>' : ''}
+            ${f.missing ? '<span class="flyer-tag missing-tag">Faltante</span>' : ''}
           </div>
         </div>`).join('');
     }
@@ -405,72 +453,68 @@
       try {
         const data = await api('/summary');
         lastData = data;
-        document.getElementById('clock').textContent = 'Panamá · ' + data.time_panama;
+        document.getElementById('clock').textContent = data.time_panama;
         renderResumen(data);
         renderCampanas(data);
         renderCalendario(data);
         renderMetricas(data);
         renderFlyers(data);
         renderConnectors(data);
-        document.getElementById('quickLinks').innerHTML = Object.entries(data.links).map(([k,v]) =>
-          `<a href="${v}" target="_blank">${k}</a>`).join(' · ');
+        document.getElementById('quickLinks').innerHTML = Object.entries(data.links)
+          .map(([k, v]) => `<a href="${v}" target="_blank">${k}</a>`).join(' · ');
       } catch (e) { toast('Error: ' + e.message, true); }
     }
 
     async function runPipeline() {
-      const btn = document.getElementById('btnPipeline');
-      btn.disabled = true;
       try {
-        toast('Ejecutando scraper + Odoo sync…');
+        toast('Ejecutando pipeline…');
         const r = await fetch('/accio/run/pipeline', { method: 'POST', headers: authHeaders() });
         const data = await r.json();
-        toast(data.ok ? 'Pipeline completado' : 'Pipeline falló: ' + (data.order?.error || ''), !data.ok);
+        toast(data.ok ? 'Pipeline completado' : 'Pipeline falló', !data.ok);
         loadData();
       } catch (e) { toast(e.message, true); }
-      btn.disabled = false;
     }
 
     async function runMetaPublish(force) {
-      const btn = document.getElementById('btnMeta');
-      if (force && !confirm('¿Publicar siguiente post Meta (FB+IG) ahora?')) return;
-      btn.disabled = true;
+      if (force && !confirm('¿Publicar Meta ahora?')) return;
       try {
-        toast('Publicando Meta (Facebook + Instagram)…');
+        toast('Publicando Meta…');
         const r = await fetch('/accio/run/publish-meta', {
-          method: 'POST',
-          headers: authHeaders(),
+          method: 'POST', headers: authHeaders(),
           body: JSON.stringify({ force, platform: 'all' }),
         });
         const data = await r.json();
         const ok = data.ok && data.order?.status === 'completed';
-        toast(ok ? 'Meta OK' : (data.order?.error || data.order?.result?.stdout || 'Sin post listo'), !ok);
+        toast(ok ? 'Meta OK' : (data.order?.error || 'Sin post listo'), !ok);
         loadData();
       } catch (e) { toast(e.message, true); }
-      btn.disabled = false;
     }
 
     async function runPublish(force) {
-      const btn = force ? document.getElementById('btnForce') : document.getElementById('btnPublish');
-      if (force && !confirm('¿Publicar el siguiente post ahora (ignorar fecha)?')) return;
-      btn.disabled = true;
+      if (force && !confirm('¿Forzar publicación LinkedIn?')) return;
       try {
-        toast(force ? 'Publicando (forzado)…' : 'Publicando siguiente post…');
-        const r = await fetch('/accio/run/publish-linkedin', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ force }) });
+        toast(force ? 'Publicando (forzado)…' : 'Publicando…');
+        const r = await fetch('/accio/run/publish-linkedin', {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ force }),
+        });
         const data = await r.json();
         const ok = data.ok && data.order?.status === 'completed';
-        toast(ok ? 'Publicación OK' : (data.order?.error || data.order?.result?.stdout || 'Sin post listo'), !ok);
+        toast(ok ? 'Publicación OK' : (data.order?.error || 'Sin post listo'), !ok);
         loadData();
       } catch (e) { toast(e.message, true); }
-      btn.disabled = false;
     }
 
     if (getKey()) {
       document.getElementById('login').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden');
+      updatePrimaryLabel();
       loadData();
       setInterval(loadData, 60000);
     } else {
-      document.getElementById('apiKeyInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveKey(); });
+      document.getElementById('apiKeyInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') saveKey();
+      });
     }
   </script>
 </body>

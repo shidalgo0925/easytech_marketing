@@ -1,0 +1,16 @@
+[Unit]
+Description=EasyTech TikTok OAuth
+After=network.target
+
+[Service]
+Type=simple
+User=papichulo
+WorkingDirectory=/opt/easytech_marketing
+Environment=PATH=/opt/easytech_marketing/venv/bin
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/easytech_marketing/venv/bin/python3 /opt/easytech_marketing/Motor_Tecnico/tiktok_oauth.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

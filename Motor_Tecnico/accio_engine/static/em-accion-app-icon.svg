@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <rect width="1024" height="1024" fill="#10211A"/>
+  <g transform="translate(512 512)" stroke="#C8843C" fill="none">
+    <g stroke-width="28" stroke-linecap="round">
+      <circle r="340" stroke-dasharray="56 44"/>
+      <circle r="278" stroke-width="18" opacity="0.45"/>
+      <path stroke-width="22" d="M0 -392v72M0 320v72M-392 0h72M320 0h72M-277 -277l51 51M226 226l51 51M-277 277l51-51M226 -226l51-51"/>
+    </g>
+  </g>
+  <text x="512" y="548" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="220" font-weight="700" fill="#C8843C" letter-spacing="-0.06em">EM</text>
+</svg>

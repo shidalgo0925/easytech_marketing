@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accio — Paletas de color</title>
+  <link rel="stylesheet" href="accio-design.css">
+  <style>
+    .palette-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .palette-page h1 {
+      font-family: var(--accio-font-display);
+      font-size: var(--accio-text-2xl);
+      margin-bottom: 0.5rem;
+    }
+    .palette-page > p { color: var(--accio-text-secondary); margin-bottom: 2rem; }
+    .palette-grid { display: grid; gap: 2rem; }
+    .palette-card {
+      background: var(--accio-bg-surface);
+      border: 1px solid var(--accio-border);
+      border-radius: var(--accio-radius-lg);
+      overflow: hidden;
+    }
+    .palette-card.is-rec { border-color: var(--accio-accent); }
+    .palette-head {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--accio-border);
+      display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .palette-head h2 {
+      font-family: var(--accio-font-display);
+      font-size: var(--accio-text-lg);
+    }
+    .palette-head span { font-size: var(--accio-text-sm); color: var(--accio-text-tertiary); }
+    .palette-body { padding: 1.25rem; display: grid; gap: 1.25rem; }
+    .swatches { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .swatch { width: 72px; }
+    .swatch-box {
+      height: 44px; border-radius: var(--accio-radius-sm);
+      border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0.35rem;
+    }
+    .swatch label {
+      display: block;
+      font-size: var(--accio-text-xs);
+      color: var(--accio-text-tertiary);
+    }
+    .swatch code {
+      font-family: var(--accio-font-mono);
+      font-size: 0.65rem;
+      color: var(--accio-text-secondary);
+    }
+    .mini {
+      border-radius: var(--accio-radius-md);
+      overflow: hidden;
+      border: 1px solid var(--accio-border);
+      font-size: 11px;
+    }
+    .mini-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; border-bottom: 1px solid var(--accio-border);
+    }
+    .mini-brand { display: flex; align-items: center; gap: 8px; font-family: var(--accio-font-display); font-weight: 600; }
+    .mini-mark { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--p-accent); }
+    .mini-actions { display: flex; gap: 6px; align-items: center; }
+    .mini-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 99px; font-size: 9px;
+      background: var(--p-accent-muted); color: var(--p-accent-text);
+    }
+    .mini-pill i { width: 5px; height: 5px; border-radius: 50%; background: var(--p-accent); display: block; }
+    .mini-btn {
+      padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 10px;
+      background: var(--p-accent); color: #1A1310; border: none;
+    }
+    .mini-body { padding: 12px; background: var(--p-base); }
+    .mini-kpis { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .mini-kpi {
+      flex: 1 1 80px; padding: 10px; border-radius: 8px;
+      background: var(--p-surface); border: 1px solid var(--p-border);
+    }
+    .mini-kpi .lbl { font-size: 8px; letter-spacing: 0.08em; color: var(--p-text-3); margin-bottom: 4px; }
+    .mini-kpi .val { font-family: var(--accio-font-display); font-size: 20px; font-weight: 600; color: var(--p-text); }
+    .mini-kpi .val.accent { color: var(--p-accent-text); }
+    .mini-table { border-radius: 6px; overflow: hidden; background: var(--p-inset); border: 1px solid var(--p-border); }
+    .mini-table .th {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 6px 10px;
+      font-size: 8px; letter-spacing: 0.06em; color: var(--p-text-3);
+      border-bottom: 1px solid var(--p-border);
+    }
+    .mini-table .tr {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 7px 10px;
+      font-size: 10px; color: var(--p-text-2); align-items: center;
+    }
+    .badge-li {
+      display: inline-block; padding: 1px 5px; border-radius: 4px; font-size: 8px;
+      color: #4A7394; background: rgba(74,115,148,0.12);
+    }
+    .compare { margin-top: 3rem; }
+    .compare h2 { font-family: var(--accio-font-display); margin-bottom: 1rem; }
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    .compare-item h3 { font-size: var(--accio-text-sm); margin-bottom: 0.5rem; color: var(--accio-text-secondary); }
+    .tag {
+      font-size: var(--accio-text-xs);
+      padding: 2px 8px;
+      border-radius: var(--accio-radius-sm);
+      background: var(--accio-accent-muted);
+      color: var(--accio-accent-text);
+    }
+    .tag.neutral { background: var(--accio-bg-inset); color: var(--accio-text-tertiary); }
+  </style>
+</head>
+<body>
+  <div class="palette-page">
+    <h1>Accio — Paletas de color</h1>
+    <p>Preview de cada combinación con header, KPIs, tabla y acento cobre. Elige una y dímelo (A, B, C, D o Actual).</p>
+
+    <div class="palette-grid" id="palettes"></div>
+
+    <section class="compare">
+      <h2>Comparación rápida</h2>
+      <div class="compare-grid" id="compare"></div>
+    </section>
+  </div>
+
+  <script>
+    const PALETTES = [
+      {
+        id: 'actual', name: 'Actual — Linen', tagline: 'Crema cálido (activo hoy)', tag: 'neutral',
+        accent: '#B8722E', accentText: '#9A5E1F', accentMuted: '#C8843C22',
+        base: '#E6E0D6', surface: '#EFEBE3', surface2: '#F7F4EF', inset: '#DDD6CB',
+        border: '#C9C0B4', text: '#1F1B17', text2: '#5C554C', text3: '#8A8074',
+      },
+      {
+        id: 'stone', name: 'A — Stone Command', tagline: 'Piedra clara, más contraste', tag: 'accent', rec: true,
+        accent: '#B8722E', accentText: '#9A5E1F', accentMuted: '#B8722E20',
+        base: '#D8D2C8', surface: '#E8E4DC', surface2: '#F2EFE9', inset: '#CBC4B8',
+        border: '#B8B0A4', text: '#2A2622', text2: '#5E5850', text3: '#857C72',
+      },
+      {
+        id: 'sand', name: 'B — Sand Editorial', tagline: 'Arena suave, revista premium', tag: 'neutral',
+        accent: '#C07830', accentText: '#8F5520', accentMuted: '#C0783022',
+        base: '#E9E0D2', surface: '#F4EDE3', surface2: '#FAF6F0', inset: '#DDD3C4',
+        border: '#C9BFB0', text: '#3D3428', text2: '#6B6256', text3: '#948A7C',
+      },
+      {
+        id: 'slate', name: 'C — Slate Mist', tagline: 'Gris azulado tech', tag: 'neutral',
+        accent: '#C8843C', accentText: '#A06220', accentMuted: '#C8843C22',
+        base: '#DDE1E6', surface: '#EAEEF2', surface2: '#F4F6F9', inset: '#CDD3DA',
+        border: '#B5BEC8', text: '#1E2430', text2: '#4A5362', text3: '#6E7888',
+      },
+      {
+        id: 'twilight', name: 'D — Twilight Panel', tagline: 'Medio-oscuro, atardecer', tag: 'neutral',
+        accent: '#DD9750', accentText: '#E6A766', accentMuted: '#DD975028',
+        base: '#3D3832', surface: '#4A443D', surface2: '#565048', inset: '#35302B',
+        border: '#5E5850', text: '#F0EBE3', text2: '#B8B0A4', text3: '#8A8074',
+      },
+    ];
+
+    function miniPreview(p) {
+      const s = `--p-base:${p.base};--p-surface:${p.surface};--p-inset:${p.inset};--p-border:${p.border};--p-text:${p.text};--p-text-2:${p.text2};--p-text-3:${p.text3};--p-accent:${p.accent};--p-accent-text:${p.accentText};--p-accent-muted:${p.accentMuted};`;
+      return `<div class="mini" style="${s}">
+        <div class="mini-header" style="background:var(--p-surface);border-color:var(--p-border)">
+          <div class="mini-brand" style="color:var(--p-text)"><span class="mini-mark"></span>Accio</div>
+          <div class="mini-actions">
+            <span class="mini-pill"><i></i>Operador</span>
+            <button class="mini-btn">Publicar</button>
+          </div>
+        </div>
+        <div class="mini-body">
+          <div class="mini-kpis">
+            <div class="mini-kpi"><div class="lbl">LEADS</div><div class="val">68</div></div>
+            <div class="mini-kpi"><div class="lbl">PENDIENTES</div><div class="val">12</div></div>
+            <div class="mini-kpi"><div class="lbl">PUBLICADOS</div><div class="val accent">6</div></div>
+          </div>
+          <div class="mini-table">
+            <div class="th"><span>CANAL</span><span>ID</span><span>ESTADO</span></div>
+            <div class="tr">
+              <span class="badge-li">LINKEDIN</span>
+              <span style="font-family:monospace;font-size:9px;color:var(--p-text-3)">linkedin_04</span>
+              <span style="color:var(--p-accent-text)">pending</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function swatches(p) {
+      const items = [
+        ['Base', p.base], ['Surface', p.surface], ['Elevado', p.surface2], ['Inset', p.inset],
+        ['Borde', p.border], ['Texto', p.text], ['Acento', p.accent],
+      ];
+      return items.map(([l, h]) => `
+        <div class="swatch">
+          <div class="swatch-box" style="background:${h}"></div>
+          <label>${l}</label>
+          <code>${h}</code>
+        </div>`).join('');
+    }
+
+    document.getElementById('palettes').innerHTML = PALETTES.map(p => `
+      <article class="palette-card${p.rec ? ' is-rec' : ''}">
+        <div class="palette-head">
+          <div>
+            <h2>${p.name}</h2>
+            <span>${p.tagline}</span>
+          </div>
+          ${p.rec ? '<span class="tag">Recomendada</span>' : p.id === 'actual' ? '<span class="tag neutral">Actual</span>' : ''}
+        </div>
+        <div class="palette-body">
+          ${miniPreview(p)}
+          <div class="swatches">${swatches(p)}</div>
+        </div>
+      </article>`).join('');
+
+    document.getElementById('compare').innerHTML = PALETTES.map(p => `
+      <div class="compare-item">
+        <h3>${p.name}</h3>
+        ${miniPreview(p)}
+      </div>`).join('');
+  </script>
+</body>
+</html>
