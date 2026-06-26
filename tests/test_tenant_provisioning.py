@@ -115,5 +115,16 @@ class TenantProvisioningTests(unittest.TestCase):
                 tenant_provisioning.get_company("no_existe")
 
 
+    def test_subdomain_unique(self):
+        with self._patch_paths():
+            tenant_provisioning.create_company(
+                {"tenant_id": "sub_a", "display_name": "A", "subdomain": "fisico"}
+            )
+            with self.assertRaises(ValueError):
+                tenant_provisioning.create_company(
+                    {"tenant_id": "sub_b", "display_name": "B", "subdomain": "fisico"}
+                )
+
+
 if __name__ == "__main__":
     unittest.main()

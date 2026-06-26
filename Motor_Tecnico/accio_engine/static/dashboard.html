@@ -169,7 +169,7 @@
         <div class="accio-kpi-grid" id="settingsStats"></div>
         <div class="config-layout">
           <nav class="config-subnav" id="configSubnav">
-            <button type="button" class="config-nav active" data-config="empresa">Información general</button>
+            <button type="button" class="config-nav active" data-config="tenant">Organización (tenant)</button>
             <button type="button" class="config-nav" data-config="usuarios">Usuarios</button>
             <button type="button" class="config-nav" data-config="productos">Productos</button>
             <button type="button" class="config-nav" data-config="crm">CRM</button>
@@ -183,7 +183,7 @@
             <button type="button" class="config-nav" data-config="seguridad">Seguridad</button>
           </nav>
           <div class="config-content">
-            <section class="config-section active config-section--claro" id="config-empresa"></section>
+            <section class="config-section active config-section--claro" id="config-tenant"></section>
             <section class="config-section" id="config-usuarios"></section>
             <section class="config-section" id="config-productos"></section>
             <section class="config-section" id="config-conectores"></section>
@@ -928,6 +928,18 @@
       return opts.map(([v, l]) => `<option value="${v}" ${v === (selected || 'odoo') ? 'selected' : ''}>${l}</option>`).join('');
     }
 
+    function registrationOptions(selected) {
+      const val = selected || 'open';
+      return [
+        ['open', 'Abierto'],
+        ['closed', 'Cerrado'],
+      ].map(([v, l]) => `<option value="${v}" ${v === val ? 'selected' : ''}>${l}</option>`).join('');
+    }
+
+    function tenantOrgBlock(data) {
+      return data.tenant_organization || data.empresa || {};
+    }
+
     function empresaFormFieldsHtml(company, ctx, branding) {
       const isNew = empresaFormMode === 'create';
       const contact = (ctx && typeof ctx.contacto === 'object' && ctx.contacto) ? ctx.contacto : {};
@@ -935,10 +947,12 @@
       const b = branding || company.branding || {};
       const showCode = isNew && isPlatformAdmin();
       return `
-        ${showCode ? '<label>Código interno (solo plataforma)<input id="empTenantId" placeholder="mi_empresa" autocomplete="off"></label>' : `<input type="hidden" id="empTenantId" value="${esc(empresaEditId)}">`}
-        <label>Nombre de la empresa<input id="empDisplayName" value="${esc(company.display_name || ctx.empresa || '')}"></label>
+        ${showCode ? '<label>ID tenant (slug)<input id="empTenantId" placeholder="modecosa" autocomplete="off"></label>' : `<input type="hidden" id="empTenantId" value="${esc(empresaEditId)}">`}
+        <label>Nombre de la organización<input id="empDisplayName" value="${esc(company.display_name || ctx.empresa || '')}"></label>
+        <label>Subdominio (opcional)<input id="empSubdomain" value="${esc(company.subdomain || '')}" placeholder="fisico"></label>
+        <label>Registro<select id="empRegistration">${registrationOptions(company.registration)}</select></label>
         ${isNew ? '' : `<label>Estado<select id="empStatus"><option value="active" ${status==='active'?'selected':''}>Activa</option><option value="disabled" ${status==='disabled'?'selected':''}>Suspendida</option></select></label>`}
-        <label>CRM de la empresa<select id="empCrm">${crmOptions(company.crm_target)}</select></label>
+        <label>CRM del tenant<select id="empCrm">${crmOptions(company.crm_target)}</select></label>
         <label>Zona horaria<input id="empTimezone" value="${esc(company.timezone || 'America/Panama')}"></label>
         <label>Idioma / locale<input id="empLocale" value="${esc(company.default_locale || 'es-PA')}"></label>
         <label>Dominios web (separados por coma)<input id="empDomains" value="${esc((company.domains || []).join(', '))}"></label>
@@ -964,11 +978,12 @@
     }
 
     function renderEmpresaSection(data) {
-      const companies = data.empresa?.companies || [];
+      const torg = tenantOrgBlock(data);
+      const companies = torg.companies || [];
       if (empresaFormMode !== 'create') {
-        empresaEditId = isPlatformAdmin() ? (data.empresa?.selected_tenant_id || TENANT_ID) : TENANT_ID;
+        empresaEditId = isPlatformAdmin() ? (torg.selected_tenant_id || TENANT_ID) : TENANT_ID;
       }
-      const ctx = data.empresa?.context || {};
+      const ctx = torg.context || {};
       const branding = data.tenant?.branding || {};
       const company = companies.find(c => c.tenant_id === empresaEditId) || {
         tenant_id: empresaEditId,
@@ -976,35 +991,39 @@
         crm_target: data.crm_target,
         timezone: data.tenant?.timezone,
         domains: data.tenant?.domains || [],
+        subdomain: data.tenant?.subdomain,
+        registration: data.tenant?.registration || 'open',
         status: 'active',
         branding,
       };
       const platform = isPlatformAdmin();
+      const regLabel = v => v === 'closed' ? 'Cerrado' : 'Abierto';
       const listHtml = platform ? `
             <div class="config-table-wrap">
-              <table class="accio-table" id="empresasTable">
-                <thead><tr><th>Nombre</th><th>Industria</th><th>País</th><th>CRM</th><th>Estado</th><th></th></tr></thead>
+              <table class="accio-table" id="tenantsTable">
+                <thead><tr><th>ID</th><th>Nombre</th><th>Subdominio</th><th>Registro</th><th>CRM</th><th>Estado</th><th></th></tr></thead>
                 <tbody>${companies.length ? companies.map(c => `
                   <tr class="${c.tenant_id === empresaEditId && empresaFormMode !== 'create' ? 'is-selected' : ''}" data-id="${esc(c.tenant_id)}">
+                    <td class="is-mono">${esc(c.tenant_id)}</td>
                     <td>${esc(c.display_name)}</td>
-                    <td>${esc(c.industria || '—')}</td>
-                    <td>${esc(c.pais || '—')}</td>
+                    <td class="is-mono">${esc(c.subdomain || '—')}</td>
+                    <td>${regLabel(c.registration)}</td>
                     <td>${esc(c.crm_target || '—')}</td>
                     <td><span class="field-status status-${c.status === 'active' ? 'active' : 'pending'}">${c.status === 'active' ? 'Activa' : 'Suspendida'}</span></td>
                     <td class="col-actions"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="selectEmpresaCompany('${esc(c.tenant_id)}')">Editar</button></td>
-                  </tr>`).join('') : '<tr><td colspan="6">Sin empresas</td></tr>'}
+                  </tr>`).join('') : '<tr><td colspan="7">Sin tenants</td></tr>'}
                 </tbody>
               </table>
             </div>` : '';
-      document.getElementById('config-empresa').innerHTML = `
+      document.getElementById('config-tenant').innerHTML = `
         <section class="accio-card config-card">
           <div class="accio-card-head">
-            <span class="config-card-title">${platform ? 'Empresas de la plataforma' : 'Información de la empresa'}</span>
-            ${platform ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="newEmpresaForm()">+ Crear empresa</button>' : ''}
+            <span class="config-card-title">${platform ? 'Organizaciones (tenants)' : 'Mi organización (tenant)'}</span>
+            ${platform ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="newEmpresaForm()">+ Nuevo tenant</button>' : ''}
           </div>
           <div class="accio-card-body accio-form">
             ${listHtml}
-            <h4 id="empresaFormTitle">${empresaFormMode === 'create' ? 'Nueva empresa' : (platform ? 'Editar empresa' : company.display_name || 'Mi empresa')}</h4>
+            <h4 id="empresaFormTitle">${empresaFormMode === 'create' ? 'Nuevo tenant' : (platform ? 'Editar tenant' : company.display_name || 'Mi tenant')}</h4>
             <div id="empresaFormFields" class="config-form-empresa config-form-2col">${empresaFormFieldsHtml(company, ctx, branding)}</div>
             <div class="config-crud-bar">
               ${can('admin') ? '<button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveEmpresaCompany()">Guardar</button>' : ''}
@@ -1013,7 +1032,7 @@
               ${platform && empresaFormMode === 'edit' && empresaEditId && company.status === 'disabled' ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="enableEmpresaCompany()">Reactivar</button>' : ''}
               ${platform && empresaFormMode === 'edit' && empresaEditId && empresaEditId !== 'easytech' && company.status !== 'disabled' ? '<button type="button" class="accio-btn-secondary accio-btn-sm cfg-btn-del" onclick="disableEmpresaCompany()">Suspender</button>' : ''}
             </div>
-            <p class="metric-note">${platform ? 'Como administrador de plataforma puede crear empresas. Cada una opera de forma aislada con sus usuarios, conectores y campañas.' : 'Configure los datos de su organización. Los cambios aplican solo a esta empresa.'}</p>
+            <p class="metric-note">${platform ? 'Cada tenant es una organización SaaS aislada: usuarios, apps, conectores, cola y campañas propias. EN1 u otros CRM son destinos externos — no son tenants.' : 'Datos de su tenant. Las apps de marketing se gestionan con el selector App del header.'}</p>
           </div>
         </section>`;
     }
@@ -1048,6 +1067,8 @@
         timezone: document.getElementById('empTimezone')?.value,
         default_locale: document.getElementById('empLocale')?.value,
         domains: (document.getElementById('empDomains')?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+        subdomain: document.getElementById('empSubdomain')?.value.trim() || null,
+        registration: document.getElementById('empRegistration')?.value || 'open',
         context: collectEmpresaContext(),
         branding: {
           primary_color: document.getElementById('empPrimary')?.value,
@@ -1082,9 +1103,9 @@
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Error al cargar empresa');
         const c = data.company || {};
-        document.getElementById('empresaFormTitle').textContent = 'Editar empresa';
+        document.getElementById('empresaFormTitle').textContent = 'Editar tenant';
         document.getElementById('empresaFormFields').innerHTML = empresaFormFieldsHtml(c, c.context || {}, c.branding || {});
-        document.querySelectorAll('#empresasTable tr').forEach(tr => tr.classList.toggle('is-selected', tr.dataset.id === id));
+        document.querySelectorAll('#tenantsTable tr').forEach(tr => tr.classList.toggle('is-selected', tr.dataset.id === id));
       } catch (e) { toast(e.message, true); }
     }
 
@@ -1092,9 +1113,9 @@
       if (!can('admin')) return toast('Solo administradores', true);
       empresaFormMode = 'create';
       empresaEditId = '';
-      document.getElementById('empresaFormTitle').textContent = 'Nueva empresa';
+      document.getElementById('empresaFormTitle').textContent = 'Nuevo tenant';
       document.getElementById('empresaFormFields').innerHTML = empresaFormFieldsHtml({}, {}, {});
-      document.querySelectorAll('#empresasTable tr').forEach(tr => tr.classList.remove('is-selected'));
+      document.querySelectorAll('#tenantsTable tr').forEach(tr => tr.classList.remove('is-selected'));
     }
 
     async function saveEmpresaCompany() {
@@ -1114,7 +1135,7 @@
         });
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Error al guardar');
-        toast(empresaFormMode === 'create' ? 'Empresa creada' : 'Empresa actualizada');
+        toast(empresaFormMode === 'create' ? 'Tenant creado' : 'Tenant actualizado');
         empresaFormMode = 'edit';
         empresaEditId = data.company?.tenant_id || empresaEditId;
         await refreshTenantsList();
@@ -1144,14 +1165,14 @@
     async function disableEmpresaCompany() {
       if (!can('admin')) return toast('Solo administradores', true);
       if (!empresaEditId || empresaEditId === 'easytech') return;
-      if (!confirm(`¿Desactivar la empresa «${empresaEditId}»?`)) return;
+      if (!confirm(`¿Suspender el tenant «${empresaEditId}»?`)) return;
       try {
         const r = await fetch(tenantApi('/settings/empresas/' + empresaEditId + '/disable'), {
           method: 'POST', headers: authHeaders(), credentials: 'include',
         });
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Error al desactivar');
-        toast('Empresa desactivada');
+        toast('Tenant suspendido');
         await refreshTenantsList();
         await loadSettings();
       } catch (e) { toast(e.message, true); }
@@ -1161,7 +1182,7 @@
       lastSettings = data;
       const conn = data.conectores || {};
       const allConn = [...(conn.linkedin||[]), ...(conn.meta||[]), ...(conn.google||[]), ...(conn.tiktok||[])];
-      const ctx = data.empresa?.context || {};
+      const ctx = tenantOrgBlock(data).context || {};
       const b = data.tenant?.branding || {};
       const products = data.productos?.products || [];
       const pub = data.publicacion || {};
@@ -1173,7 +1194,7 @@
       const roles = data.usuarios?.roles || [];
 
       document.getElementById('settingsStats').innerHTML = [
-        kpi('Empresa', data.tenant?.display_name || TENANT_ID, 'c-tenant-claro'),
+        kpi('Tenant', data.tenant?.display_name || TENANT_ID, 'c-tenant-claro'),
         kpi('CRM', data.crm_target || '—'),
         kpi('Conectores OK', allConn.filter(f => f.validation_status === 'active').length, true),
         kpi('Productos', products.filter(p => p.enabled).length),
@@ -1688,7 +1709,7 @@
 
     const ROLE_LABELS = {
       super_admin: 'Super administrador de plataforma',
-      tenant_admin: 'Administrador de empresa',
+      tenant_admin: 'Administrador del tenant',
       marketing_operator: 'Operador de marketing',
       viewer: 'Solo lectura',
       admin: 'Administrador de empresa',

@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Seleccionar empresa — EMAccion</title>
+  <title>Seleccionar tenant — EMAccion</title>
   <link rel="icon" href="/accio/static/em-logomark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/accio/static/accio-design.css">
 </head>
 <body class="login-page">
   <main class="login-shell">
-    <section class="login-card empresas-card" aria-labelledby="empresasTitle">
+    <section class="login-card empresas-card" aria-labelledby="tenantsTitle">
       <header class="login-card-head">
         <div class="login-brand em-logo">
           <span class="em-logo-icon" aria-hidden="true">
@@ -22,47 +22,47 @@
           <span class="em-wordmark">EMAccion</span>
         </div>
       </header>
-      <h1 class="login-title" id="empresasTitle">Seleccione empresa</h1>
-      <p class="login-subtitle" id="empresasSubtitle">Elija la organización con la que desea trabajar.</p>
-      <ul class="empresa-picker-list" id="empresaList"></ul>
+      <h1 class="login-title" id="tenantsTitle">Seleccione tenant</h1>
+      <p class="login-subtitle" id="tenantsSubtitle">Elija la organización (tenant) con la que desea trabajar.</p>
+      <ul class="empresa-picker-list" id="tenantList"></ul>
       <footer class="login-foot">
         <button type="button" class="btn-ghost" id="logoutBtn">Cerrar sesión</button>
       </footer>
     </section>
   </main>
   <script>
-    async function loadCompanies() {
+    async function loadTenants() {
       const r = await fetch('/accio/auth/empresas', { credentials: 'include' });
       const data = await r.json();
       if (!data.authenticated) {
         location.href = '/accio/login/';
         return;
       }
-      const list = document.getElementById('empresaList');
+      const list = document.getElementById('tenantList');
       const companies = data.companies || [];
       if (!companies.length) {
-        list.innerHTML = '<li class="empresa-picker-empty">No tiene empresas asignadas.</li>';
+        list.innerHTML = '<li class="empresa-picker-empty">No tiene tenants asignados.</li>';
         return;
       }
       if (companies.length === 1) {
-        enterEmpresa(companies[0].id);
+        enterTenant(companies[0].id);
         return;
       }
-      document.getElementById('empresasSubtitle').textContent =
-        `${data.name || 'Usuario'} — ${companies.length} empresas disponibles`;
+      document.getElementById('tenantsSubtitle').textContent =
+        `${data.name || 'Usuario'} — ${companies.length} tenants disponibles`;
       list.innerHTML = companies.map(c => `
         <li>
           <button type="button" class="empresa-picker-item" data-id="${c.id}">
             <span class="empresa-picker-name">${c.name}</span>
-            <span class="empresa-picker-meta">${c.crm_label || ''}</span>
+            <span class="empresa-picker-meta">${c.subdomain ? c.subdomain + ' · ' : ''}${c.crm_label || ''}</span>
           </button>
         </li>`).join('');
       list.querySelectorAll('.empresa-picker-item').forEach(btn => {
-        btn.addEventListener('click', () => enterEmpresa(btn.dataset.id));
+        btn.addEventListener('click', () => enterTenant(btn.dataset.id));
       });
     }
 
-    async function enterEmpresa(id) {
+    async function enterTenant(id) {
       const r = await fetch('/accio/auth/empresas/' + encodeURIComponent(id) + '/entrar', {
         method: 'POST',
         credentials: 'include',
@@ -80,7 +80,7 @@
       location.href = '/accio/login/';
     });
 
-    loadCompanies();
+    loadTenants();
   </script>
 </body>
 </html>

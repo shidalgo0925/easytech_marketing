@@ -19,7 +19,9 @@ from Motor_Tecnico.accio_engine.tenant import (
 )
 
 _TENANT_ID_RE = re.compile(r"^[a-z][a-z0-9_-]{1,48}$")
+_SUBDOMAIN_RE = re.compile(r"^[a-z][a-z0-9-]{0,62}$")
 _PROTECTED_TENANTS = frozenset({DEFAULT_TENANT})
+_REGISTRATION_VALUES = frozenset({"open", "closed"})
 
 _DEFAULT_USERS = {
     "users": [
@@ -64,6 +66,36 @@ def validate_tenant_id(tenant_id: str) -> str:
     return tid
 
 
+def validate_subdomain(subdomain: str | None) -> str | None:
+    if subdomain is None:
+        return None
+    value = str(subdomain).strip().lower()
+    if not value or value in {"-", "none"}:
+        return None
+    if not _SUBDOMAIN_RE.match(value):
+        raise ValueError("Subdominio inválido: minúsculas, números y guiones (empieza con letra)")
+    return value
+
+
+def validate_registration(registration: str | None) -> str:
+    value = (registration or "open").strip().lower()
+    if value not in _REGISTRATION_VALUES:
+        raise ValueError("Registro inválido: use open o closed")
+    return value
+
+
+def _ensure_subdomain_unique(
+    reg: dict[str, Any], subdomain: str | None, *, exclude_tenant_id: str | None = None
+) -> None:
+    if not subdomain:
+        return
+    for row in reg.get("tenants", []):
+        if exclude_tenant_id and row.get("tenant_id") == exclude_tenant_id:
+            continue
+        if row.get("subdomain") == subdomain:
+            raise ValueError(f"El subdominio «{subdomain}» ya está en uso")
+
+
 def list_companies(*, include_disabled: bool = False) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for raw in tenant_mod.load_registry().get("tenants", []):
@@ -87,9 +119,9 @@ def list_companies(*, include_disabled: bool = False) -> list[dict[str, Any]]:
                 "timezone": raw.get("timezone", "America/Panama"),
                 "default_locale": raw.get("default_locale", "es-PA"),
                 "domains": list(raw.get("domains") or []),
+                "subdomain": raw.get("subdomain"),
+                "registration": raw.get("registration", "open"),
                 "created_at": raw.get("created_at"),
-                "en1_organization_id": raw.get("en1_organization_id"),
-                "en1_subdomain": raw.get("en1_subdomain"),
                 "empresa": ctx.get("empresa") or raw.get("display_name", tid),
                 "industria": ctx.get("industria", ""),
                 "pais": ctx.get("pais", ""),
@@ -114,6 +146,8 @@ def get_company(tenant_id: str) -> dict[str, Any]:
         "timezone": record.get("timezone", profile.get("timezone", "America/Panama")),
         "default_locale": record.get("default_locale", "es-PA"),
         "domains": list(record.get("domains") or profile.get("domains") or []),
+        "subdomain": record.get("subdomain"),
+        "registration": record.get("registration", "open"),
         "created_at": record.get("created_at") or profile.get("created_at"),
         "branding": profile.get("branding") or {},
         "context": context,
@@ -137,6 +171,8 @@ def _bootstrap_files(tenant_id: str, record: dict[str, Any], context: dict[str, 
         "domains": list(record.get("domains") or []),
         "timezone": record.get("timezone", "America/Panama"),
         "created_at": record.get("created_at", now),
+        "subdomain": record.get("subdomain"),
+        "registration": record.get("registration", "open"),
         "branding": dict(tenant_profile.DEFAULT_BRANDING),
     }
     _write_json(root / "tenant.json", profile)
@@ -215,6 +251,9 @@ def create_company(payload: dict[str, Any]) -> dict[str, Any]:
     domains = payload.get("domains") or []
     if isinstance(domains, str):
         domains = [d.strip() for d in domains.split(",") if d.strip()]
+    subdomain = validate_subdomain(payload.get("subdomain"))
+    registration = validate_registration(payload.get("registration"))
+    _ensure_subdomain_unique(reg, subdomain)
 
     record = {
         "tenant_id": tid,
@@ -224,6 +263,8 @@ def create_company(payload: dict[str, Any]) -> dict[str, Any]:
         "timezone": payload.get("timezone") or "America/Panama",
         "crm_target": (payload.get("crm_target") or "odoo").strip().lower(),
         "domains": domains,
+        "subdomain": subdomain,
+        "registration": registration,
         "created_at": _utc_now(),
     }
     context = payload.get("context") if isinstance(payload.get("context"), dict) else payload
@@ -253,13 +294,19 @@ def update_company(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         if isinstance(domains, str):
             domains = [d.strip() for d in domains.split(",") if d.strip()]
         record["domains"] = list(domains)
+    if "subdomain" in payload:
+        subdomain = validate_subdomain(payload.get("subdomain"))
+        _ensure_subdomain_unique(reg, subdomain, exclude_tenant_id=tid)
+        record["subdomain"] = subdomain
+    if "registration" in payload and payload["registration"] is not None:
+        record["registration"] = validate_registration(payload.get("registration"))
 
     _save_registry(reg)
 
     profile_payload: dict[str, Any] = {}
     if record.get("display_name"):
         profile_payload["display_name"] = record["display_name"]
-    for key in ("timezone", "domains", "default_locale"):
+    for key in ("timezone", "domains", "default_locale", "subdomain", "registration"):
         if key in record:
             profile_payload[key] = record[key]
     if profile_payload:

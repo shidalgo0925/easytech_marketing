@@ -9,6 +9,7 @@
       "default_locale": "es-PA",
       "timezone": "America/Panama",
       "crm_target": "odoo",
+      "registration": "open",
       "domains": [
         "easytech.services",
         "emaccion.etsrv.site",
@@ -23,6 +24,7 @@
       "default_locale": "es-PA",
       "timezone": "America/Panama",
       "crm_target": "en1",
+      "registration": "open",
       "domains": [
         "relatic.com"
       ],

@@ -1,6 +1,6 @@
 # Aclaración de arquitectura — Tenant vs Apps en EMAcción
 
-**Estado:** Fase 3 implementada (2026-06-27) · **Pendiente:** leads EN1, UI mapping dashboard
+**Estado:** Tenant SaaS nativo en EMAcción (2026-06-27) · EN1 = referencia de producto, no integración de tenants
 **Fecha:** 2026-06-26  
 **Complementa:** `docs/CONTEXTO.md`, `docs/EMACCION_PHASE_M_MULTI_TENANT.md`
 
@@ -259,16 +259,16 @@ ETS será simplemente el primer Tenant de producción, pero la arquitectura debe
 
 ---
 
-## Relación con EN1 (referencia externa)
+## Relación con EN1 (referencia externa — no es el tenant de EMAcción)
 
-EN1 (`/admin/organizations`) es otro producto SaaS con su propio CRUD de organizaciones. **No duplicar** ese CRUD en EMAcción.
+EN1 (`/admin/organizations`) es **otro producto SaaS**. Sus organizaciones son análogas conceptuales a un tenant, pero **EMAcción tiene su propio CRUD de tenants** en Configuración → Organización (tenant).
 
-| EN1 | EMAcción |
-|-----|----------|
-| `saas_organization` | Equivalente conceptual a **Tenant** (cuando exista sync) |
-| — | **App** — capa exclusiva de EMAcción |
+| EN1 (referencia) | EMAcción (implementación real) |
+|------------------|--------------------------------|
+| `saas_organization` | **Tenant** — `tenant_id` + `Marketing/tenants/{id}/` |
+| Módulos / productos EN1 | **App** — capa de marketing dentro del tenant |
 
-Las capturas de EN1 Dev son referencia de producto; la integración API EN1 ↔ EMAcción sigue pendiente.
+**No duplicar** el CRUD de EN1 ni sincronizar organizations como fuente de tenants. EN1 puede ser destino CRM (`crm_target: en1`), no el registro de tenants.
 
 ---
 
@@ -283,15 +283,14 @@ Las capturas de EN1 Dev son referencia de producto; la integración API EN1 ↔ 
 | Relatic como tenant | `relatic` en registry | OK si escenario 2; conflict si era App de ETS |
 | Flyers / IIUS | Globales en `Marketing/flyers/` | Sin `tenant_id` / `app_id` |
 
-**Próximo paso técnico (requiere GO):** leads EN1 → CRM (write) + UI mapping en dashboard.
+**Próximo paso:** apps por tenant en Configuración (UI) · leads CRM externos (GO aparte).
 
-### Fase 3 implementada (2026-06-27)
+### Tenant nativo (2026-06-27)
 
-- `Motor_Tecnico/accio_engine/en1_organizations.py` — sync **read-only** EN1 ↔ `tenant_id`
-- API: `GET /accio/en1/organizations`, `GET /accio/en1/sync`, `POST /accio/{tenant}/settings/en1-mapping`
-- Campo `en1_organization_id` en `registry.json` (solo lado EMAcción)
-- Referencia EN1 Dev cuando API no configurada; cache local tras fetch live
-- Test CRM EN1 valida lectura de organizaciones cuando hay credenciales
+- Campos tenant: `subdomain`, `registration` (open/closed), `status`, `crm_target`
+- UI: **Organización (tenant)** — tabla ID / Nombre / Subdominio / Registro / CRM / Estado
+- Rutas alias: `/accio/tenants/` (picker), vocabulario corregido (no “empresa” como tenant)
+- Bootstrap completo al crear tenant (apps default, cola, usuarios, etc.)
 
 ### Fase 2 implementada (2026-06-27)
 

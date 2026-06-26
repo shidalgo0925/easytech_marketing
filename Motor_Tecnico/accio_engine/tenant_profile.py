@@ -36,6 +36,8 @@ def load_profile(tenant_id: str) -> dict[str, Any]:
         "crm_target": tenant.crm_target,
         "default_locale": tenant.default_locale,
         "domains": list(tenant.domains),
+        "subdomain": tenant.subdomain,
+        "registration": tenant.registration,
         "timezone": "America/Panama",
         "created_at": None,
         "branding": dict(DEFAULT_BRANDING),
@@ -52,7 +54,7 @@ def load_profile(tenant_id: str) -> dict[str, Any]:
 def save_profile(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     resolve_tenant(tenant_id)
     current = load_profile(tenant_id)
-    allowed_top = {"display_name", "timezone", "domains", "default_locale"}
+    allowed_top = {"display_name", "timezone", "domains", "default_locale", "subdomain", "registration"}
     for key in allowed_top:
         if key in payload:
             current[key] = payload[key]

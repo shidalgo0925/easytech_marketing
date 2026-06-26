@@ -185,7 +185,7 @@ def save_ai_config(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
 
 
 DEFAULT_ROLES: list[dict[str, Any]] = [
-    {"id": "tenant_admin", "label": "Administrador de empresa", "permissions": ["*"]},
+    {"id": "tenant_admin", "label": "Administrador del tenant", "permissions": ["*"]},
     {"id": "marketing_operator", "label": "Operador de marketing", "permissions": ["read", "publish"]},
     {"id": "viewer", "label": "Solo lectura", "permissions": ["read"]},
 ]
@@ -419,6 +419,7 @@ def get_center_view(tenant_id: str, *, allowed_company_ids: set[str] | None = No
             "backups",
             "seguridad",
         ],
+        "tenant_organization": load_empresa(tenant_id, allowed_company_ids=allowed_company_ids),
         "empresa": load_empresa(tenant_id, allowed_company_ids=allowed_company_ids),
         "tenant": tenant_profile.load_profile(tenant_id),
         "usuarios": rbac.sanitize_users_for_api(load_users(tenant_id)),

@@ -35,6 +35,8 @@ class Tenant:
     default_locale: str = "es-PA"
     timezone: str = "America/Panama"
     domains: tuple[str, ...] = ()
+    subdomain: str | None = None
+    registration: str = "open"
     created_at: str | None = None
 
     @property
@@ -140,6 +142,8 @@ def _tenant_from_record(raw: dict[str, Any]) -> Tenant:
         default_locale=raw.get("default_locale", "es-PA"),
         timezone=raw.get("timezone", "America/Panama"),
         domains=tuple(raw.get("domains") or ()),
+        subdomain=raw.get("subdomain"),
+        registration=raw.get("registration", "open"),
         created_at=raw.get("created_at"),
     )
 
