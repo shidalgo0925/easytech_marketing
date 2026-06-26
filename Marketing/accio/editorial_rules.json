@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-20",
+  "interim_rule": {
+    "name": "3_valor_1_venta",
+    "description": "Regla interina Fase B: 3 posts valor + 1 venta por bloque de 4",
+    "ratio": { "valor": 0.75, "venta": 0.25 }
+  },
+  "target_matrix": {
+    "name": "matriz_95_5",
+    "description": "Objetivo Fase E: 95% valor, 5% venta directa",
+    "types": {
+      "educacion": 0.50,
+      "consejo": 0.20,
+      "caso": 0.15,
+      "tendencia": 0.10,
+      "venta": 0.05
+    }
+  },
+  "topic_framework": ["problem", "explanation", "solution", "recommendation"],
+  "weekly_slots": {
+    "lunes": "consejo",
+    "miercoles": "caso",
+    "viernes": "tendencia",
+    "domingo": "venta"
+  },
+  "legacy_map": {
+    "valor": ["educacion", "consejo", "caso", "tendencia"],
+    "venta": ["venta"]
+  }
+}

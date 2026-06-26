@@ -1,270 +1,251 @@
-# Contexto — EM+Acción / EasyMarketingOne
+# Contexto técnico — EM+Acción
 
-Documento de referencia para operadores, agentes y desarrollo.  
-**Actualizado:** 2026-06-20 · **Repo:** `github.com/shidalgo0925/easytech_marketing`
-
----
-
-## Qué es
-
-**EasyMarketingOne** es el motor de marketing autónomo de **EasyTech Services** (Panamá), desplegado en el VPS *ArrozConPollo* (`/opt/easytech_marketing`).
-
-La **UI del dashboard** se llama **EM+Acción**:
-
-- Logo: engranaje cobre girando + **EM** fijo + **+Acción** (Fraunces itálico)
-- App Meta Developers: **EMAccion** (ID `944229778615599`)
-- Page Facebook: **Easy Technology Services** (ID `1156663574198754`)
-
-Internamente sigue usando rutas/API `accio/` y variable `ACCIO_API_KEY` (sin renombrar infra).
+Documento maestro para operadores, programadores y agentes IA.  
+**Actualizado:** 2026-06-22 · **Repo:** `github.com/shidalgo0925/easytech_marketing` · **Commit base:** `6732a05`
 
 ---
 
-## Para qué sirve
+## 1. Objetivo estratégico
 
-| Función | Descripción |
-|---------|-------------|
-| **Dashboard EM+Acción** | KPIs, cola de posts, leads Odoo, campañas, calendario, métricas, flyers, conectores |
-| **Orquestador** | API REST que ejecuta pipeline, publicaciones y órdenes |
-| **Conectores** | LinkedIn ✅ · Facebook ✅ · Instagram ⏳ · Google/TikTok OAuth listo · Ads stub |
-| **Automatización** | Cron LinkedIn/Meta; scraper domingos; leads → Odoo |
+**EMAcción** es el **motor comercial central** de EasyTech — no un publicador de contenido.
 
----
+Debe: conocer el portafolio · detectar oportunidades · clasificar · generar campañas · publicar · capturar leads · EN1 CRM · medir · optimizar.
 
-## URLs principales
-
-| Recurso | URL |
-|---------|-----|
-| Dashboard EM+Acción | https://n8n.etsrv.site/accio/dashboard/ |
-| API motor | https://n8n.etsrv.site/accio/ |
-| Meta OAuth | https://n8n.etsrv.site/meta/ |
-| Google OAuth | https://n8n.etsrv.site/google/ |
-| TikTok OAuth | https://n8n.etsrv.site/tiktok/ |
-| Política privacidad | https://n8n.etsrv.site/accio/privacidad/ |
-| Icono app 1024 | https://n8n.etsrv.site/accio/dashboard/em-accion-app-icon-1024.png |
-| Landing guía leads | https://n8n.etsrv.site/guia/ |
-| Odoo CRM | https://easydb.etsrv.site |
-| Meta Developers | https://developers.facebook.com/apps/944229778615599/ |
+Los productos (EN1, EPOSOne, EPayRoll, Odoo, EClassOne…) son **destinos**, no motores de marketing independientes.
 
 ---
 
-## Arquitectura
+## 2. Estado técnico actual (jun 2026)
+
+### Repositorio
+
+| Item | Valor |
+|------|-------|
+| Repo | `github.com/shidalgo0925/easytech_marketing` |
+| VPS prod | `/opt/easytech_marketing` |
+| Rama | `main` |
+| Commit base auditoría | `6732a05` |
+
+### Motor
+
+| Item | Valor |
+|------|-------|
+| Servicio | `easytech-accio-engine` |
+| Puerto | `8092` |
+| Auth | `ACCIO_API_KEY` |
+| Infra rutas | `/accio/` (sin renombrar) |
+
+### Dashboard EM+Acción
+
+- URL: https://n8n.etsrv.site/accio/dashboard/
+- Estilo: verde bosque + cobre (`accio-design.css`)
+- Tabs: Resumen · Campañas · Calendario · Métricas · Flyers · Conectores
+
+### Cola editorial
+
+| Métrica | Valor |
+|---------|-------|
+| Posts en cola | 22 |
+| Publicados LinkedIn | 3 |
+| Próximo | `linkedin_04_fe_errores` (30 jun 2026) |
+| Regla interina | 3 valor + 1 venta (75/25) |
+
+Archivos: `content_queue.json` · `campaigns.json` · `calendar.json` · `orders.json` · `tasks.json`
+
+### CRM
+
+| | Actual | Objetivo |
+|---|--------|----------|
+| CRM | **Odoo** (`easydb.etsrv.site`) | **EN1 CRM** |
+| Scraper | `scraper_panama.py` → CSV → Odoo | Mantener + EN1 |
+| Landing | `/guia/` (1 genérica) | Landings por producto |
+
+---
+
+## 3. Conectores
+
+| Canal | Estado |
+|-------|--------|
+| LinkedIn | ✅ Publicó 3 posts |
+| Facebook | ✅ OAuth OK, publisher listo |
+| Instagram | ⏳ Falta `META_IG_USER_ID` |
+| Google Business | ⏳ Falta OAuth |
+| YouTube / TikTok / Ads | ❌ Stub |
+| X / Blog / Email | ❌ No existe |
+
+Registro: `Marketing/accio/connectors.json`
+
+---
+
+## 4. API activa
+
+### Dashboard (requiere `ACCIO_API_KEY`)
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  EM+Acción Dashboard (navegador)                        │
-│  accio-design.css · dashboard.html · privacidad.html    │
-└────────────────────┬────────────────────────────────────┘
-                     │ ACCIO_API_KEY
-┌────────────────────▼────────────────────────────────────┐
-│  Accio Engine :8092  (easytech-accio-engine)            │
-│  app.py · dashboard_data · executor · queue_store       │
-└──┬──────────┬──────────┬──────────┬────────────────────┘
-   │          │          │          │
-LinkedIn   Meta OAuth  Google OAuth  TikTok OAuth
-:8091      :8093       :8094         :8095
-   │          │          │
-publishers  meta_publisher.py  connectors/publishers/
-   │          │
-content_queue.json · Marketing/flyers/ · Odoo CRM
+GET /accio/dashboard/api/summary
+GET /accio/dashboard/api/campaigns
+GET /accio/dashboard/api/calendar
+GET /accio/dashboard/api/metrics
+GET /accio/dashboard/api/flyers
+GET /accio/dashboard/api/connectors
 ```
 
-**nginx** (`n8n.etsrv.site`) hace proxy a cada servicio.
+### Motor
+
+```
+GET  /accio/health
+GET  /accio/status
+GET  /accio/content/queue
+GET  /accio/orders
+POST /accio/orders
+POST /accio/tick
+POST /accio/run/pipeline
+POST /accio/run/publish-linkedin
+POST /accio/run/publish-meta
+POST /accio/run/publish-channel
+POST /accio/content/queue
+POST /accio/calendar
+GET  /accio/files/tree
+GET  /accio/tasks
+```
+
+### No existe aún
+
+- Oportunidades / clasificación IA
+- Generador de campañas IA
+- Knowledge API integrada
+- EN1 sync
+- Analítica de clics
 
 ---
 
-## Servicios systemd (VPS)
+## 5. Servicios systemd
 
 | Servicio | Puerto | Rol |
 |----------|--------|-----|
 | `easytech-accio-engine` | 8092 | Dashboard + API |
-| `easytech-meta-oauth` | 8093 | OAuth Facebook/IG |
-| `easytech-linkedin-oauth` | 8091 | OAuth LinkedIn |
-| `easytech-google-oauth` | 8094 | OAuth Google Business / YouTube |
-| `easytech-tiktok-oauth` | 8095 | OAuth TikTok |
+| `easytech-meta-oauth` | 8093 | Facebook/IG |
+| `easytech-linkedin-oauth` | 8091 | LinkedIn |
+| `easytech-google-oauth` | 8094 | Google |
+| `easytech-tiktok-oauth` | 8095 | TikTok |
 | `easytech-lead-api` | 8080 | Leads → Odoo |
 
 Reiniciar `easytech-accio-engine` tras cambios en `.env`.
 
 ---
 
-## Design system (UI)
+## 6. Medición actual
 
-**Paleta:** Verde bosque profundo + acento cobre  
-Archivo: `Motor_Tecnico/accio_engine/static/accio-design.css`
-
-| Token | Hex | Uso |
-|-------|-----|-----|
-| `--accio-bg-base` | `#10211A` | Fondo |
-| `--accio-bg-surface` | `#19332A` | Cards |
-| `--accio-accent` | `#C8843C` | Marca, CTA |
-| `--accio-text-primary` | `#EFF4F1` | Texto + datos en tablas/KPIs |
-
-**Logo EM+Acción:** HTML/CSS animado (`.em-gear-ring`, `.em-monogram`, `.em-wordmark`).  
-**Fuentes:** Fraunces (display), Inter (UI), IBM Plex Mono (datos).
+| Métrica | Estado |
+|---------|--------|
+| Leads Odoo por origen | ✅ |
+| Posts publicados | ✅ |
+| Conversión guía/post | ⚠️ Aproximada |
+| Clics UTM / landing | ❌ |
+| Ventas / demos | ❌ |
+| Aprendizaje automático | ❌ |
 
 ---
 
-## Estrategia editorial de contenido
-
-### Regla actual (Fase B — interina)
-
-**3 posts de valor + 1 de venta/consejo** por cada bloque de 4 (**75% / 25%**).  
-**Todos los posts llevan imagen** (flyer PNG en `Marketing/flyers/`).
-
-| Tipo | Qué publicamos |
-|------|----------------|
-| `valor` | Educativo: errores comunes, checklists, insights de sector — sin pitch duro |
-| `venta` | Demo, producto, CTA claro (DEMO / EN1 / DIAGNÓSTICO) |
-
-### Regla objetivo (Fase E — vNext)
-
-**95% valor / 5% venta** con matriz por tipo: educación 50% · consejos 20% · casos 15% · tendencias 10% · venta 5%.  
-Calendario inteligente por día (L consejo · Mi caso · Vi tendencia · Do venta).
-
-Ver **`docs/ROADMAP.md` → Fase E** para el plan completo del motor de conocimiento.
-
-Archivos:
-
-- Cola: `Marketing/content_queue.json` (campo `content_type`)
-- Calendario: `Marketing/accio/calendar.json`
-- Campañas: `Marketing/accio/campaigns.json`
-- Referencia rápida: `Marketing/CALENDARIO_PUBLICACION.md`
-- Catálogo flyers: `Marketing/flyers/manifest.json`
-
-### LinkedIn — estado cola
-
-| Estado | Posts |
-|--------|-------|
-| **Publicados** | #1 FE+Odoo · #2 Diagnóstico · #3 Odoo ERP |
-| **Pendientes** | #4–#11 (cadencia 3:1, jun–jul 2026) |
-
-Próximo pendiente: `linkedin_04_fe_errores` (2026-06-30, valor, flyer #3).
-
-### Otros canales pendientes
-
-Facebook 4 · Instagram 4 · Google Business 1 · YouTube 1 · TikTok 1 — ver calendario.
-
-**Flyer faltante:** #10 IIUS (`manifest.json` → `status: missing`).
-
----
-
-## Conectores
-
-Registro: `Marketing/accio/connectors.json` · Guía: `docs/CONECTAR_REDES.md`
-
-| Canal | Modo | Estado operativo |
-|-------|------|------------------|
-| LinkedIn | live | Activo |
-| Facebook Page | live | Activo (OAuth OK) |
-| Instagram Business | live | Falta `META_IG_USER_ID` / scopes IG |
-| Google Business | live | Falta OAuth + location ID |
-| YouTube | stub | OAuth compartido Google |
-| TikTok | stub | OAuth listo; publisher pendiente |
-| Meta Ads / Google Ads | stub | Estructura |
-
----
-
-## Meta / Facebook — estado
-
-### Completado
-
-- App **EMAccion** + permisos de prueba
-- OAuth Facebook → Page **Activo** en dashboard
-- Política privacidad publicada
-- Icono 1024×1024 en static
-- Scopes Instagram inválidos removidos de OAuth default
-
-### Pendiente
-
-- Meta Básica: subir icono + URL privacidad + categoría **Negocios**
-- Verificación empresa Easy Technology Services (en revisión)
-- App Review / publicar app en producción
-- Conectar Instagram (caso de uso + scopes)
-- Rotar **App Secret** (expuesto en chat histórico)
-
----
-
-## Datos y archivos clave
+## 7. Brecha resumida
 
 ```
-/opt/easytech_marketing/
-├── .env                          # Secretos (NO git)
-├── .env.example                  # Plantilla variables
-├── Motor_Tecnico/
-│   ├── accio_engine/             # Dashboard + API
-│   │   └── static/
-│   │       ├── dashboard.html
-│   │       ├── accio-design.css
-│   │       ├── privacidad.html
-│   │       └── em-accion-app-icon-1024.png
-│   ├── meta_oauth.py · meta_publisher.py
-│   ├── google_oauth.py · tiktok_oauth.py
-│   └── connectors/               # Registry + publishers
-├── Marketing/
-│   ├── content_queue.json
-│   ├── flyers/ + manifest.json
-│   └── accio/                    # calendar, campaigns, connectors
-├── docs/CONTEXTO.md              # Este archivo
-└── deploy/systemd/
+HOY                              OBJETIVO V1
+──────────────────────────────────────────────────
+Publicador + dashboard        →  Agente comercial IA
+Cola manual + cron            →  Opportunity Engine
+Flyers estáticos              →  Campaign Engine + imágenes IA
+Odoo CRM                      →  EN1 CRM
+1 landing                     →  Landings por producto
+LI + FB parcial               →  LI+FB+IG+Blog+Email
+Sin Knowledge operativo       →  Knowledge Engine (Fase E)
 ```
 
----
-
-## Variables `.env` (referencia, sin valores)
-
-Ver `.env.example`. Grupos principales:
-
-- `ACCIO_API_KEY`, `ACCIO_ENGINE_PORT`
-- `LINKEDIN_*`
-- `META_APP_ID`, `META_PAGE_ID`, `META_PAGE_ACCESS_TOKEN`, `META_OAUTH_PORT`
-- `GOOGLE_CLIENT_*`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GOOGLE_BUSINESS_LOCATION_ID`
-- `TIKTOK_CLIENT_*`, `TIKTOK_ACCESS_TOKEN`
+Detalle: `docs/EMACCION_GAP_ANALYSIS.md`
 
 ---
 
-## Operación diaria
+## 8. Arquitectura objetivo
 
-1. **Dashboard** → KPIs, conectores, cola, publicar siguiente
-2. **Odoo** → leads y pipeline comercial
-3. **Operador humano** → DMs LinkedIn, cierre comercial
-4. **Cron** → LinkedIn Mar/Jue/Vie 13:00 PA · Meta Mié/Vie · scraper domingos
-
-Docs: `docs/OPERAR_SIN_CURSOR.md`, `docs/ACCIO_API.md`, `docs/ROADMAP.md`
-
----
-
-## Publicar manualmente
-
-```bash
-# LinkedIn — dry-run
-python3 Motor_Tecnico/linkedin_publisher.py --dry-run
-
-# Facebook — dry-run
-python3 Motor_Tecnico/meta_publisher.py --platform=facebook --dry-run --force
+```
+Internet / Redes
+      │
+      ▼
+EMAcción (Agente Comercial IA)
+      │
+      ├── Knowledge Engine
+      ├── Opportunity Engine
+      ├── Campaign Engine
+      ├── Publisher
+      └── Analytics
+      │
+      ▼
+Producto (EN1 · EPOSOne · EPayRoll · Odoo · EClassOne)
+      │
+      ▼
+Landing específica → EN1 CRM → Demo → Cliente
 ```
 
-O desde dashboard → **Publicar siguiente** / **Publicar Meta**.
+Detalle: `docs/EMACCION_ARCHITECTURE.md`
 
 ---
 
-## Fases del proyecto (resumen)
+## 9. Fase E — Knowledge Engine (prioridad inmediata)
 
-| Fase | Estado |
-|------|--------|
-| A — Git, deploy, docs | ✅ En producción |
-| B — Cola editorial, leads | 🔄 Cola 3:1 (75/25 interina) |
-| C — Campañas, calendario UI, métricas | ✅ |
-| **E — Motor conocimiento y valor** | ⏳ **Prioridad antes de escalar canales** |
-| D — Conectores multicanal | 🔄 LinkedIn + FB live; resto pendiente |
-| F — EN1 + recomendaciones | 📋 Tras E |
+Archivos iniciados (versionados en Git):
 
-Detalle completo: **`docs/ROADMAP.md`**
+```
+Marketing/accio/business_context.json
+Marketing/accio/editorial_rules.json
+Marketing/knowledge/
+Motor_Tecnico/accio_engine/knowledge_api.py  ← preparatorio, NO integrado a app.py aún
+```
+
+Detalle: `docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`
 
 ---
 
-## Contacto y CTA
+## 10. URLs
 
-- CTA principal: **DIAGNÓSTICO**
-- Guía: https://n8n.etsrv.site/guia/
+| Recurso | URL |
+|---------|-----|
+| Dashboard | https://n8n.etsrv.site/accio/dashboard/ |
+| API | https://n8n.etsrv.site/accio/ |
+| Meta OAuth | https://n8n.etsrv.site/meta/ |
+| Guía leads | https://n8n.etsrv.site/guia/ |
+| Odoo CRM | https://easydb.etsrv.site |
+| Meta Developers | https://developers.facebook.com/apps/944229778615599/ |
+
+---
+
+## 11. Orden de implementación
+
+1. Fase A — Base técnica estable
+2. Fase E — Knowledge Engine
+3. Fase F — Opportunity Engine
+4. Fase D — Landings por producto
+5. Fase I — EN1 CRM
+6. Fase H — Publisher multicanal completo
+7. Fase J — Analítica
+8. Fase K — Agentes especializados
+
+Roadmap completo: `docs/ROADMAP.md`
+
+---
+
+## 12. Contacto y CTA
+
+- CTA: **DIAGNÓSTICO**
 - WhatsApp: +507 6688-4938
-- Email: easytechservices25@gmail.com / info@easytech.services
+- Email: easytechservices25@gmail.com
+- Guía: https://n8n.etsrv.site/guia/
+
+---
+
+## 13. Reglas para programadores
+
+- **No implementar runtime sin GO explícito.**
+- No tocar `.env` ni credenciales en commits.
+- No reiniciar producción sin GO.
+- Documentación primero; código después.
+- EN1, EPOSOne, EPayRoll no hacen marketing propio — EMAcción es el cerebro.

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-20",
+  "base_dir": "Marketing/knowledge",
+  "articles": [
+    {
+      "slug": "easytech",
+      "file": "easytech.md",
+      "title": "Easy Technology Services",
+      "product": "empresa",
+      "tags": ["marca", "panama", "consultoria"]
+    },
+    {
+      "slug": "odoo_fe",
+      "file": "odoo_fe.md",
+      "title": "Odoo + Facturación Electrónica",
+      "product": "odoo_fe",
+      "tags": ["erp", "fe", "dgi", "odoo"]
+    },
+    {
+      "slug": "en1",
+      "file": "en1.md",
+      "title": "EasyNodeOne (EN1)",
+      "product": "en1",
+      "tags": ["erp", "cloud", "pyme"]
+    },
+    {
+      "slug": "eposone",
+      "file": "eposone.md",
+      "title": "EPOSOne",
+      "product": "eposone",
+      "tags": ["retail", "pos", "inventario"]
+    },
+    {
+      "slug": "eclassone",
+      "file": "eclassone.md",
+      "title": "EClassOne",
+      "product": "eclassone",
+      "tags": ["educacion", "matricula", "edtech"]
+    },
+    {
+      "slug": "epayroll",
+      "file": "epayroll.md",
+      "title": "EPayRoll",
+      "product": "epayroll",
+      "tags": ["rrhh", "planilla", "panama"]
+    },
+    {
+      "slug": "casos_exito",
+      "file": "casos_exito.md",
+      "title": "Casos de éxito",
+      "product": "general",
+      "tags": ["casos", "social_proof"]
+    },
+    {
+      "slug": "faqs",
+      "file": "faqs.md",
+      "title": "Preguntas frecuentes",
+      "product": "general",
+      "tags": ["faq", "soporte"]
+    }
+  ]
+}

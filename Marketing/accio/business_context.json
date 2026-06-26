@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-20",
+  "empresa": "Easy Technology Services",
+  "industria": "Transformación Digital",
+  "pais": "Panamá",
+  "publico_objetivo": "PYMEs en Panamá (retail, servicios, educación, manufactura ligera)",
+  "productos_servicios": [
+    "Odoo ERP + Facturación Electrónica DGI",
+    "EasyNodeOne (EN1) — plataforma todo en uno",
+    "EPOSOne — punto de venta e inventario",
+    "EClassOne — gestión académica",
+    "EThesisOne — tesis universitarias",
+    "EPayRoll — planilla Panamá",
+    "Consultoría TI estratégica",
+    "Desarrollo de software a medida"
+  ],
+  "diferenciadores": [
+    "Integración FE + ERP en un solo flujo",
+    "Diagnóstico tecnológico gratuito (30 min)",
+    "Implementación y soporte local en Panamá",
+    "Enfoque en adopción real del equipo, no solo licencias"
+  ],
+  "problemas_que_resuelve": [
+    "Procesos manuales y retrabajo entre áreas",
+    "Sistemas desconectados (FE, inventario, contabilidad)",
+    "Falta de indicadores para decidir",
+    "Software comprado que el equipo no usa",
+    "Cumplimiento DGI sin visibilidad operativa"
+  ],
+  "tono_comunicacion": "Profesional, cercano, educativo. Hablar de problemas reales antes de vender. Panamá primero.",
+  "objetivos_comerciales": [
+    "Generar diagnósticos tecnológicos cualificados",
+    "Posicionar a EasyTech como autoridad en digitalización PYME",
+    "Capturar leads vía guías y contenido de valor",
+    "Nutrir pipeline Odoo hacia demo y cierre"
+  ],
+  "cta_principal": "DIAGNÓSTICO",
+  "contacto": {
+    "email": "easytechservices25@gmail.com",
+    "whatsapp": "+507 6688-4938",
+    "guia": "https://n8n.etsrv.site/guia/"
+  }
+}

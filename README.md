@@ -43,8 +43,11 @@ Ver [docs/INSTALACION.md](docs/INSTALACION.md)
 
 | Doc | Contenido |
 |-----|-----------|
-| [CONTEXTO.md](docs/CONTEXTO.md) | **Contexto completo del sistema** |
-| [ROADMAP.md](docs/ROADMAP.md) | Fases A–D |
+| [CONTEXTO.md](docs/CONTEXTO.md) | **Contexto técnico completo** |
+| [ROADMAP.md](docs/ROADMAP.md) | Roadmap fases A–K |
+| [EMACCION_ARCHITECTURE.md](docs/EMACCION_ARCHITECTURE.md) | Arquitectura objetivo |
+| [EMACCION_GAP_ANALYSIS.md](docs/EMACCION_GAP_ANALYSIS.md) | Brecha hoy vs V1 comercial |
+| [EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md](docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md) | Fase E Knowledge Engine |
 | [CONECTAR_REDES.md](docs/CONECTAR_REDES.md) | OAuth por canal |
 | [ACCIO_API.md](docs/ACCIO_API.md) | API REST |
 | [OPERAR_SIN_CURSOR.md](docs/OPERAR_SIN_CURSOR.md) | Operación diaria |

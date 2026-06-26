@@ -1,308 +1,234 @@
-# EM+Acción / EasyMarketingOne — Roadmap unificado
+# EM+Acción — Roadmap estratégico EasyTech
 
-**Principio rector:** Si no afinamos el contenido, solo automatizamos ruido.  
-**Prioridad estratégica:** Completar **Fase E** (motor de conocimiento y valor) **antes** de escalar todos los canales de Fase D.
+**Producto estratégico:** EMAcción es el **motor comercial central** del ecosistema EasyTech.  
+**Regla:** No es un publicador de contenido — es motor de oportunidades, campañas, publicación, captura y medición.  
+**Repo:** `github.com/shidalgo0925/easytech_marketing` · **VPS:** `/opt/easytech_marketing`
 
-**Visión vNext:**
+**Visión:**
 
 ```
-Educar → Generar confianza → Capturar leads → Nutrir prospectos → Convertir clientes
+Internet → EMAcción → Oportunidad → Producto → Campaña → Publicación
+    → Landing → EN1 CRM → Seguimiento → Demo → Analítica → Optimización
 ```
 
-Antes EM+Acción solo publicaba. Ahora debe ser **motor de autoridad digital y generación de demanda** para EasyTech.
+**Orden de implementación:**
+
+1. Consolidar base técnica (Fase A)
+2. Completar Knowledge Engine (Fase E)
+3. Opportunity Engine (Fase F)
+4. Campaign Engine (Fase G)
+5. Publisher multicanal (Fase H)
+6. EN1 CRM (Fase I)
+7. Analítica (Fase J)
+8. Agentes especializados (Fase K)
+
+> **No implementar runtime sin GO explícito.** Este documento es la fuente de verdad del roadmap.
 
 ---
 
 ## Mapa de fases
 
-| Fase | Nombre | Estado | Notas |
-|------|--------|--------|-------|
-| **A** | Seguridad y despliegue | ✅ | Motor en producción, Git, systemd |
-| **B** | Operación | 🔄 | Cola editorial activa; leads y secretos pendientes |
-| **C** | Plataforma dashboard | ✅ | Campañas, calendario UI, métricas, flyers |
-| **E** | **Motor de conocimiento y valor** | ⏳ **Siguiente** | Antes de escalar D.4–D.8 |
-| **D** | Conectores multicanal | 🔄 Parcial | LinkedIn + FB live; IG/Google/TikTok pendientes |
-| **F** | EN1 + recomendaciones | 📋 | Tras E + leads validados (ex-Fase 3–4 plan maestro) |
+| Fase | Nombre | Estado | Prioridad |
+|------|--------|--------|-----------|
+| **A** | Base técnica EMAcción | 🔄 70% | Alta |
+| **B** | Canales actuales | 🔄 Parcial | Alta |
+| **C** | Cola editorial | 🔄 Parcial | Media |
+| **D** | Landings comerciales | 📋 Pendiente | Alta |
+| **E** | Knowledge Engine | ⏳ **Inmediata** | **Crítica** |
+| **F** | Opportunity Engine | 📋 Pendiente | Alta |
+| **G** | Campaign Engine IA | 📋 Pendiente | Alta |
+| **H** | Publisher multicanal | 🔄 Parcial | Media |
+| **I** | EN1 CRM Integration | 📋 Pendiente | Alta |
+| **J** | Analytics Engine | 📋 Pendiente | Media |
+| **K** | Agentes especializados | 📋 Futuro | Baja |
 
-> **Orden de ejecución recomendado:** A → B → C → **E** → D (completar) → F  
-> D.1–D.3 pueden seguir en paralelo mientras arranca E; **no escalar** YouTube/TikTok/Ads masivos hasta E2–E4 operativos.
-
-Detalle histórico del plan maestro Accio: `docs/ACCIO_MARKETING_ENGINE.md`
-
----
-
-## Fase A — Seguridad ✅
-
-- [x] Motor vivo en ArrozConPollo (`/opt/easytech_marketing`)
-- [x] Git + `.gitignore` + push GitHub `shidalgo0925/easytech_marketing`
-- [x] `deploy/systemd` + `crontab.example`
-- [x] `docs/INSTALACION.md`
-- [ ] Backup `.env` offline cifrado
+Docs relacionados: `EMACCION_ARCHITECTURE.md` · `EMACCION_GAP_ANALYSIS.md` · `EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`
 
 ---
 
-## Fase B — Operación 🔄
+## Fase A — Base técnica EMAcción
 
-- [x] Cola LinkedIn #4–#11 reestructurada (ver regla editorial actual abajo)
-- [x] 3 posts LinkedIn publicados (#1–#3)
-- [ ] Validar leads Odoo (origen guía vs scraper)
-- [ ] Confirmar cron LinkedIn/Meta en logs
-- [ ] Rotar secretos expuestos (Meta App Secret)
+**Objetivo:** Plataforma estable, documentada y desplegable.
 
----
+| Tarea | Estado |
+|-------|--------|
+| Servicio systemd `easytech-accio-engine` :8092 | ✅ |
+| Dashboard protegido `ACCIO_API_KEY` | ✅ |
+| Git en GitHub | ✅ |
+| `docs/INSTALACION.md` | ✅ |
+| Backup `.env` offline cifrado | ❌ |
+| Separar DEV / TEST / PROD | ❌ |
+| Limpiar archivos huérfanos en repo | 🔄 |
+| Documentar deploy completo | 🔄 |
 
-## Fase C — Plataforma ✅
-
-- [x] Módulo campañas (`Marketing/accio/campaigns.json`)
-- [x] Calendario editorial UI + `calendar.json`
-- [x] Panel métricas (clicks, conversiones)
-- [x] Biblioteca flyers en dashboard
-- [x] Dashboard EM+Acción (design system, conectores, privacidad)
-
----
-
-## Fase E — Motor de Conocimiento y Valor ⏳ PRIORITARIA
-
-**Objetivo:** Que EM+Acción publique contenido útil, educativo y contextualizado — no solo publicidad.
-
-### E1. Contexto empresarial configurable
-
-| Campo | Ejemplo EasyTech |
-|-------|------------------|
-| Empresa | Easy Technology Services |
-| Industria | Transformación Digital |
-| País | Panamá |
-| Público objetivo | PYMEs Panamá |
-| Productos/Servicios | Odoo+FE, EN1, EPOSOne, EClassOne, EPayRoll, consultoría |
-| Diferenciadores | Integración FE+ERP, diagnóstico gratis, implementación local |
-| Problemas que resuelve | Procesos manuales, falta de integración, falta de indicadores |
-| Tono | Profesional, cercano, educativo |
-| Objetivos comerciales | Generar diagnósticos tecnológicos |
-
-**UI objetivo:** Dashboard → Configuración → Contexto de Negocio
-
-| Hoy | Gap |
-|-----|-----|
-| Contexto disperso en `docs/CONTEXTO.md`, `PROMPT_OPERADOR.md`, `.cursor/rules/` | Falta módulo editable en dashboard + `Marketing/accio/business_context.json` |
-
-**Entregables:**
-
-- [ ] `Marketing/accio/business_context.json` (schema + defaults EasyTech)
-- [ ] API `GET/POST /accio/config/business-context`
-- [ ] Pantalla en dashboard EM+Acción
-- [ ] Inyectar contexto en generación de copy y prompts del operador
+**Criterio de cierre:** Repo limpio, deploy documentado, `.env` respaldado, servicio estable.
 
 ---
 
-### E2. Base de conocimiento (Knowledge Base)
+## Fase B — Canales actuales
 
-El motor debe aprender de documentos, web corporativa, casos de éxito, FAQs, servicios y roadmaps.
+**Objetivo:** LinkedIn, Facebook e Instagram publicando correctamente.
 
-**Repositorio objetivo:**
+| Canal | Estado |
+|-------|--------|
+| LinkedIn | ✅ 3 posts publicados, cron activo |
+| Facebook | ✅ OAuth OK, publisher listo, sin publicar aún |
+| Instagram | ⏳ Publisher sí, falta `META_IG_USER_ID` |
+| Google Business | ⏳ Código sí, falta OAuth |
+| YouTube / TikTok / Ads | ❌ Stub |
+| X / Blog / Email | ❌ No existe |
 
-```
-Marketing/knowledge/
-├── easytech.md
-├── en1.md
-├── eposone.md
-├── eclassone.md
-├── epayroll.md
-├── odoo_fe.md
-├── casos_exito.md
-└── faqs.md
-```
-
-| Hoy | Gap |
-|-----|-----|
-| Flyers + borradores sueltos en `Marketing/LinkedIn/`, `Marketing/Facebook/` | No existe `Marketing/knowledge/` |
-| Guía lead magnet: https://n8n.etsrv.site/guia/ | Sin indexación ni ingestión al motor |
-
-**Entregables:**
-
-- [ ] Crear `Marketing/knowledge/` con fichas por producto
-- [ ] `Marketing/knowledge/manifest.json` (fuentes, tags, producto)
-- [ ] Script ingestión: MD/PDF → chunks (fase 2: embeddings)
-- [ ] API consulta contexto para generador de temas
+**Criterio de cierre:** LI + FB + IG publicando en producción.
 
 ---
 
-### E3. Generador de temas (no posts aleatorios)
+## Fase C — Cola editorial
 
-Estructura obligatoria por pieza:
+**Objetivo:** Planificar, aprobar, publicar y registrar resultado.
 
-```
-Problema → Explicación → Solución → Recomendación
-```
+Archivos: `content_queue.json` · `campaigns.json` · `calendar.json` · `orders.json` · `tasks.json`
 
-Ejemplo: *¿Por qué fracasan los proyectos ERP?* → errores comunes → consecuencias → buenas prácticas → checklist.
+| Tarea | Estado |
+|-------|--------|
+| Cola 22 posts, 3 publicados | ✅ |
+| Regla 3 valor + 1 venta (75/25 interina) | ✅ |
+| Estados draft/approved/scheduled/published/failed | ❌ |
+| Modelo de campaña unificado | 🔄 |
 
-| Hoy | Gap |
-|-----|-----|
-| Posts manuales/agente en `content_queue.json` con buena estructura editorial | Sin generador automático ni plantilla enforced |
-| Campo `content_type` (`valor` \| `venta`) | Sin campo `topic_framework` ni validación de estructura |
-
-**Entregables:**
-
-- [ ] Plantilla JSON post: `problem`, `explanation`, `solution`, `recommendation`
-- [ ] Validador pre-publicación en `validate_flyers.py` o módulo nuevo
-- [ ] Endpoint `POST /accio/content/generate-topic` (LLM + contexto E1 + KB E2)
+**Criterio de cierre:** Cola con estados completos y trazabilidad post-publicación.
 
 ---
 
-### E4. Matriz de valor (distribución automática)
+## Fase D — Landings comerciales
 
-**Objetivo vNext (Fase E):**
+**Objetivo:** Una landing por producto con formulario, UTM y origen EMAcción.
 
-| Tipo | % |
-|------|---|
-| Educación | 50% |
-| Consejos | 20% |
-| Casos reales | 15% |
-| Tendencias | 10% |
-| Venta directa | 5% |
+| Landing | Producto | Estado |
+|---------|----------|--------|
+| `/guia/` | FE Panamá (genérica) | ✅ |
+| `/en1-eventos` | EN1 eventos | ❌ |
+| `/en1-cursos` | EN1 cursos | ❌ |
+| `/eposone` | EPOSOne | ❌ |
+| `/epayroll` | EPayRoll | ❌ |
+| `/odoo` | Odoo + FE | ❌ |
+| `/eclassone` | EClassOne | ❌ |
 
-**Regla:** 95% aportar valor · 5% vender.
+Cada landing: mensaje · CTA · formulario · UTM · producto · conexión futura EN1 CRM.
 
-**Regla actual (interina — Fase B):** 3 valor + 1 venta por bloque de 4 (**75% / 25%**).  
-Implementada en `content_queue.json` → `content_type`: `valor` | `venta`.
-
-| Hoy | Gap |
-|-----|-----|
-| `content_type` binario valor/venta | Ampliar a: `educacion`, `consejo`, `caso`, `tendencia`, `venta` |
-| Calendario manual | Motor debe balancear % al encolar siguiente post |
-
-**Entregables:**
-
-- [ ] Ampliar `content_type` en cola y campañas
-- [ ] Reglas de balanceo en `accio_engine` al proponer siguiente post
-- [ ] Migrar cola pendiente de 75/25 → matriz 95/5 gradualmente
+**Criterio de cierre:** 6 landings mínimas operativas.
 
 ---
 
-### E5. Generación inteligente de flyers
+## Fase E — Knowledge Engine ⏳ PRIORITARIA
 
-**Hoy:** Tema → flyer PNG estático (`Marketing/flyers/` + `manifest.json`).
+**Objetivo:** EMAcción conoce todo el portafolio EasyTech.
 
-**Objetivo:**
+Ver **`docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`**.
 
-```
-Contexto (E1) + KB (E2) + Tema (E3) + Objetivo (E4)
-    → Copy → Título → Diseño → Flyer educativo (no banner publicitario)
-```
+| Tarea | Estado |
+|-------|--------|
+| `Marketing/knowledge/` (fichas MD) | 🔄 Iniciado |
+| `Marketing/accio/business_context.json` | 🔄 Iniciado |
+| `Marketing/accio/editorial_rules.json` | 🔄 Iniciado |
+| `knowledge_api.py` (módulo preparatorio) | 🔄 Sin integrar a `app.py` |
+| Endpoints API knowledge en motor | ❌ |
+| UI Configuración en dashboard | ❌ |
+| Matriz producto-sector-necesidad | ❌ |
 
-Ejemplo: *IA para PYMEs* + objetivo *Educar* → checklist visual + CTA suave.
-
-| Hoy | Gap |
-|-----|-----|
-| 11 flyers PNG manuales (#10 IIUS falta) | Sin pipeline generativo |
-| Flyer obligatorio para LinkedIn/Meta ✅ | Sin templates dinámicos por tipo de valor |
-
-**Entregables:**
-
-- [ ] Templates HTML/SVG por tipo (educación, checklist, consejo, caso)
-- [ ] Generador PNG (headless) o integración Canva/Figma API
-- [ ] CTA suave configurable por matriz E4
+**Criterio de cierre:** Motor consulta KB y genera contenido coherente por producto y sector.
 
 ---
 
-### E6. Calendario editorial inteligente
+## Fase F — Opportunity Engine
 
-**Objetivo:** El motor asigna tipo de contenido por día, manteniendo equilibrio E4.
+**Objetivo:** Señal externa → oportunidad comercial clasificada.
 
-| Día | Tipo sugerido |
-|-----|---------------|
-| Lunes | Consejo |
-| Miércoles | Caso real |
-| Viernes | Tendencia |
-| Domingo | Venta (único slot comercial semanal) |
+| Tarea | Estado |
+|-------|--------|
+| `opportunity_engine.py` | ❌ |
+| `Marketing/accio/opportunities.json` | ❌ |
+| Detección por keywords | ❌ |
+| Clasificación sector/necesidad/producto | ❌ |
+| Estados: detected → classified → approved → campaign_created | ❌ |
 
-| Hoy | Gap |
-|-----|-----|
-| `calendar.json` + fechas fijas Mar/Jue/Vie 13:00 PA | Sin lógica día→tipo |
-| Cron LinkedIn/Meta separados | Sin orquestador que elija post según matriz |
-
-**Entregables:**
-
-- [ ] Reglas `editorial_rules.json` (día, tipo, canal, peso)
-- [ ] Job semanal: generar/revisar calendario desde matriz E4
-- [ ] Dashboard: vista semanal por tipo de valor
+**Criterio de cierre:** Una publicación detectada se convierte en oportunidad con producto recomendado.
 
 ---
 
-### E7. Biblioteca de valor ETS (lead magnets)
+## Fase G — Campaign Engine IA
 
-Activos reutilizables para captura y nutrición:
+**Objetivo:** Oportunidad aprobada → campaña lista para revisión.
 
-- Checklists · Guías · Plantillas · Infografías · Mini cursos · Whitepapers
+Genera: copy · hashtags · CTA · landing · prompt imagen · canal · fecha.
 
-Flujo: **Lead magnet → landing → CRM (Odoo) → nutrición**
-
-| Hoy | Gap |
-|-----|-----|
-| Guía FE Panamá (`/guia/`) ✅ | Una sola pieza |
-| Posts enlazan guía en first_comment | Sin biblioteca estructurada |
-
-**Entregables:**
-
-- [ ] `Marketing/lead_magnets/` (PDF/MD + metadata)
-- [ ] Catálogo en dashboard + UTM por magnet
-- [ ] Primeros activos: *10 errores al implementar ERP*, *Checklist FE Panamá*, *Diagnóstico PYME*
-- [ ] Integración Odoo: tag origen + secuencia nutrición
+**Criterio de cierre:** Oportunidad aprobada produce campaña en estado `draft`.
 
 ---
 
-### Criterio de éxito Fase E
+## Fase H — Publisher multicanal
 
-- [ ] Contexto negocio editable sin tocar código
-- [ ] KB con ≥6 fichas producto + casos de éxito
-- [ ] Nuevo post generado sigue Problema→Recomendación
-- [ ] Cola respeta matriz 95/5 en ventana de 20 posts
-- [ ] ≥1 lead magnet nuevo capturando en Odoo
-- [ ] Flyer educativo generado (no solo PNG estático de catálogo)
+**Objetivo:** Post aprobado publicable en LI + FB + IG.
 
----
+| Prioridad | Canales |
+|-----------|---------|
+| Fase inicial | LinkedIn, Facebook, Instagram |
+| Segunda | Blog, Email, Google Business |
+| Tercera | X, YouTube, TikTok, Ads |
 
-## Fase D — Conectores multicanal 🔄
-
-Estrategia: **estructura primero, APIs después** (`docs/ARQUITECTURA_CONECTORES.md`).  
-**Pausa de escalado:** completar E2–E4 antes de activar cron masivo en YouTube/TikTok/Ads.
-
-| # | Canal | Estado | OAuth / Publisher |
-|---|-------|--------|-------------------|
-| D.1 | LinkedIn | ✅ live | https://n8n.etsrv.site/linkedin/ |
-| D.2 | Facebook Page | ✅ live | https://n8n.etsrv.site/meta/ |
-| D.3 | Instagram | ⏳ | OAuth Meta; falta `META_IG_USER_ID` |
-| D.4 | Google Business | ⏳ | https://n8n.etsrv.site/google/ |
-| D.5 | YouTube | stub | OAuth Google compartido |
-| D.6 | TikTok | stub | https://n8n.etsrv.site/tiktok/ |
-| D.7 | Meta Ads | stub | — |
-| D.8 | Google Ads | stub | — |
-
-Registro: `Marketing/accio/connectors.json` · Guía: `docs/CONECTAR_REDES.md`
-
-**Después de Fase E:** republicar cola FB/IG/Google con copy generado desde KB, no catálogo de productos repetido.
+**Criterio de cierre:** Un post aprobado publica en los 3 canales principales con ID externo registrado.
 
 ---
 
-## Fase F — EN1 y recomendaciones comerciales 📋
+## Fase I — EN1 CRM Integration
 
-Consolida ex-Fase 3–4 del plan maestro (`ACCIO_MARKETING_ENGINE.md`).
+**Objetivo:** Todo lead de EMAcción entra en EN1 CRM (Odoo queda transitorio).
 
-- [ ] `en1_sync.py` — lead → EN1 pipeline
-- [ ] Reglas enrutamiento: EN1 vs Odoo vs ambos
-- [ ] Scoring prospectos (scraper + señales FE/sector)
-- [ ] Recomendaciones: qué vender, a quién, qué campaña (inputs: Odoo + métricas + E7)
+| Tarea | Estado |
+|-------|--------|
+| `en1_sync.py` | ❌ |
+| Lead con origen, canal, campaña, producto, UTM, landing | ❌ |
+| Odoo como transición | ✅ Actual |
+
+**Criterio de cierre:** Formulario landing → EN1 CRM automático.
 
 ---
 
-## Reglas editoriales — resumen
+## Fase J — Analytics Engine
+
+**Objetivo:** Saber qué campañas generan leads reales.
+
+Métricas: clics · CTR · leads · demos · ventas · costo/lead · rendimiento por producto/campaña.
+
+UTM: `utm_source` · `utm_medium` · `utm_campaign` · `utm_content` · `utm_product`
+
+**Criterio de cierre:** Dashboard de conversión por campaña y producto.
+
+---
+
+## Fase K — Agentes especializados (futuro)
+
+| Agente | Rol |
+|--------|-----|
+| Trend Hunter | Busca oportunidades |
+| Opportunity Analyzer | Clasifica necesidades |
+| Campaign Planner | Decide campaña |
+| Copywriter IA | Escribe publicaciones |
+| Image Creator | Genera imágenes |
+| Publisher | Publica |
+| Community Manager IA | Responde comentarios |
+| Lead Analyzer | Califica prospectos |
+| Sales Assistant | Agenda demos |
+
+**Criterio de cierre:** EMAcción opera como agente comercial asistido.
+
+---
+
+## Reglas editoriales
 
 | Versión | Regla | Dónde |
 |---------|-------|-------|
-| **Actual (B)** | 3 valor + 1 venta (75/25) | `content_queue.json`, `CALENDARIO_PUBLICACION.md` |
-| **Objetivo (E)** | Matriz 95/5 por tipo | E4 + E6 |
-
-La cola jun–jul 2026 ya usa `valor`/`venta` con copy educativo. Al cerrar E4, migrar tipos y rebalancear.
+| Interina (C) | 3 valor + 1 venta (75/25) | `content_queue.json` |
+| Objetivo (E) | Matriz 95/5 por tipo | `editorial_rules.json` |
 
 ---
 
@@ -310,10 +236,11 @@ La cola jun–jul 2026 ya usa `valor`/`venta` con copy educativo. Al cerrar E4, 
 
 | Doc | Contenido |
 |-----|-----------|
-| [CONTEXTO.md](CONTEXTO.md) | Estado operativo del sistema |
-| [ACCIO_MARKETING_ENGINE.md](ACCIO_MARKETING_ENGINE.md) | Visión Accio cerebro + brazos |
+| [CONTEXTO.md](CONTEXTO.md) | Estado operativo |
+| [EMACCION_ARCHITECTURE.md](EMACCION_ARCHITECTURE.md) | Arquitectura objetivo |
+| [EMACCION_GAP_ANALYSIS.md](EMACCION_GAP_ANALYSIS.md) | Brecha hoy vs V1 |
+| [EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md](EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md) | Fase E detalle |
+| [ACCIO_MARKETING_ENGINE.md](ACCIO_MARKETING_ENGINE.md) | Plan maestro histórico |
 | [CONECTAR_REDES.md](CONECTAR_REDES.md) | OAuth por canal |
-| [CALENDARIO_PUBLICACION.md](../Marketing/CALENDARIO_PUBLICACION.md) | Cola actual |
-| [PROMPT_OPERADOR.md](../Marketing/accio/PROMPT_OPERADOR.md) | Prompt agente Accio |
 
-**Actualizado:** 2026-06-20
+**Actualizado:** 2026-06-22 · **Último commit base:** `6732a05`
