@@ -4,3 +4,4 @@ pandas>=2.0.0
 python-dotenv>=1.0.0
 ddgs>=9.0.0
 flask>=3.0.0
+cryptography>=42.0.0

@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "updated_at": "2026-06-26",
+  "tenants": [
+    {
+      "tenant_id": "easytech",
+      "display_name": "Easy Technology Services",
+      "status": "active",
+      "default_locale": "es-PA",
+      "timezone": "America/Panama",
+      "crm_target": "odoo",
+      "domains": [
+        "easytech.services",
+        "emaccion.etsrv.site",
+        "n8n.etsrv.site"
+      ],
+      "created_at": "2026-06-19T00:00:00Z"
+    },
+    {
+      "tenant_id": "relatic",
+      "display_name": "Relatic",
+      "status": "active",
+      "default_locale": "es-PA",
+      "timezone": "America/Panama",
+      "crm_target": "en1",
+      "domains": [
+        "relatic.com"
+      ],
+      "created_at": "2026-06-26T00:00:00Z"
+    }
+  ]
+}

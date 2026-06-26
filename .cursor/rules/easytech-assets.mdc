@@ -5,7 +5,10 @@ alwaysApply: true
 
 # EasyTech Marketing — assets y rutas
 
-Proyecto: `/opt/easytech_marketing` · Dashboard: **EM+Acción** · Contexto: `docs/CONTEXTO.md`
+Proyecto: `/opt/easytech_marketing` · Dashboard: **EM+Acción**  
+Contexto: `docs/CONTEXTO.md` · Snapshot sesión: `docs/EMACCION_CONTEXTO_OPERATIVO.md`
+
+**URLs:** https://emaccion.etsrv.site/accio/dashboard/easytech/ · Login: `/accio/login/`
 
 ## Editorial
 

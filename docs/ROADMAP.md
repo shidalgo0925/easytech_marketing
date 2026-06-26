@@ -1,28 +1,18 @@
-# EM+Acción — Roadmap estratégico EasyTech
+# EM+Acción V2 — Roadmap operativo
 
-**Producto estratégico:** EMAcción es el **motor comercial central** del ecosistema EasyTech.  
-**Regla:** No es un publicador de contenido — es motor de oportunidades, campañas, publicación, captura y medición.  
-**Repo:** `github.com/shidalgo0925/easytech_marketing` · **VPS:** `/opt/easytech_marketing`
+**Producto:** EM+Acción (EasyMarketingOne)  
+**Plan maestro:** [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md)  
+**Estado vs código:** [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md)  
+**Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
+**Runtime:** requiere **GO explícito** por fase.
 
-**Visión:**
+---
+
+## Orden obligatorio V2
 
 ```
-Internet → EMAcción → Oportunidad → Producto → Campaña → Publicación
-    → Landing → EN1 CRM → Seguimiento → Demo → Analítica → Optimización
+A → B → C → D → E → F → G → H → I → J → K → L → M → N → O → P
 ```
-
-**Orden de implementación:**
-
-1. Consolidar base técnica (Fase A)
-2. Completar Knowledge Engine (Fase E)
-3. Opportunity Engine (Fase F)
-4. Campaign Engine (Fase G)
-5. Publisher multicanal (Fase H)
-6. EN1 CRM (Fase I)
-7. Analítica (Fase J)
-8. Agentes especializados (Fase K)
-
-> **No implementar runtime sin GO explícito.** Este documento es la fuente de verdad del roadmap.
 
 ---
 
@@ -30,205 +20,132 @@ Internet → EMAcción → Oportunidad → Producto → Campaña → Publicació
 
 | Fase | Nombre | Estado | Prioridad |
 |------|--------|--------|-----------|
-| **A** | Base técnica EMAcción | 🔄 70% | Alta |
-| **B** | Canales actuales | 🔄 Parcial | Alta |
-| **C** | Cola editorial | 🔄 Parcial | Media |
-| **D** | Landings comerciales | 📋 Pendiente | Alta |
-| **E** | Knowledge Engine | ⏳ **Inmediata** | **Crítica** |
-| **F** | Opportunity Engine | 📋 Pendiente | Alta |
-| **G** | Campaign Engine IA | 📋 Pendiente | Alta |
-| **H** | Publisher multicanal | 🔄 Parcial | Media |
-| **I** | EN1 CRM Integration | 📋 Pendiente | Alta |
-| **J** | Analytics Engine | 📋 Pendiente | Media |
-| **K** | Agentes especializados | 📋 Futuro | Baja |
-
-Docs relacionados: `EMACCION_ARCHITECTURE.md` · `EMACCION_GAP_ANALYSIS.md` · `EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`
+| **A** | Base técnica | 🔄 ~75% | **Activa — cerrar** |
+| **B** | Multi-Tenant Core | 🔄 ~65% | **Activa — cerrar** |
+| **C** | Configuration Center | 🔄 ~25% | Alta |
+| **D** | Knowledge Engine | 🔄 ~35% | Alta |
+| **E** | Opportunity Engine | 📋 | Alta |
+| **F** | Campaign Engine | 📋 | Alta |
+| **G** | Image Engine | 📋 | Media |
+| **H** | Publisher | 🔄 parcial | Media |
+| **I** | Landing Manager | 📋 | Alta |
+| **J** | CRM Integration | 🔄 Odoo | Alta |
+| **K** | Analytics | 🔄 básico | Media |
+| **L** | Learning Engine | 📋 | Media |
+| **M** | Community Manager IA | 📋 | Baja |
+| **N** | Scheduler | 🔄 manual | Media |
+| **O** | Automation Engine | 📋 | Media |
+| **P** | API Marketplace | 📋 | Baja |
 
 ---
 
-## Fase A — Base técnica EMAcción
+## Fase A — Base técnica
 
-**Objetivo:** Plataforma estable, documentada y desplegable.
+**Objetivo:** DEV · TEST · PROD independientes. Motor estable.
 
 | Tarea | Estado |
 |-------|--------|
-| Servicio systemd `easytech-accio-engine` :8092 | ✅ |
-| Dashboard protegido `ACCIO_API_KEY` | ✅ |
-| Git en GitHub | ✅ |
-| `docs/INSTALACION.md` | ✅ |
-| Backup `.env` offline cifrado | ❌ |
+| systemd + servicios OAuth | ✅ |
+| Git + repo documentado | ✅ |
+| nginx + proxy `/accio/` | ✅ |
+| emaccion.etsrv.site vhost | 🔄 |
+| SSL origen / Cloudflare Full | 🔄 |
+| Backup `.env` cifrado | ❌ |
 | Separar DEV / TEST / PROD | ❌ |
-| Limpiar archivos huérfanos en repo | 🔄 |
-| Documentar deploy completo | 🔄 |
+| Logs y deploy documentados | 🔄 |
 
-**Criterio de cierre:** Repo limpio, deploy documentado, `.env` respaldado, servicio estable.
-
----
-
-## Fase B — Canales actuales
-
-**Objetivo:** LinkedIn, Facebook e Instagram publicando correctamente.
-
-| Canal | Estado |
-|-------|--------|
-| LinkedIn | ✅ 3 posts publicados, cron activo |
-| Facebook | ✅ OAuth OK, publisher listo, sin publicar aún |
-| Instagram | ⏳ Publisher sí, falta `META_IG_USER_ID` |
-| Google Business | ⏳ Código sí, falta OAuth |
-| YouTube / TikTok / Ads | ❌ Stub |
-| X / Blog / Email | ❌ No existe |
-
-**Criterio de cierre:** LI + FB + IG publicando en producción.
+**Cierre:** checklist en `docs/fases/A_CHECKLIST.md` (pendiente) + evidencia pruebas.
 
 ---
 
-## Fase C — Cola editorial
+## Fase B — Multi-Tenant Core
 
-**Objetivo:** Planificar, aprobar, publicar y registrar resultado.
-
-Archivos: `content_queue.json` · `campaigns.json` · `calendar.json` · `orders.json` · `tasks.json`
+**Objetivo:** Un motor, N clientes, cero datos mezclados.
 
 | Tarea | Estado |
 |-------|--------|
-| Cola 22 posts, 3 publicados | ✅ |
-| Regla 3 valor + 1 venta (75/25 interina) | ✅ |
-| Estados draft/approved/scheduled/published/failed | ❌ |
-| Modelo de campaña unificado | 🔄 |
+| `registry.json` + tenants easytech/relatic | ✅ |
+| API `/accio/{tenant_id}/` | ✅ |
+| Dashboard por tenant | ✅ |
+| Datos aislados por carpeta | ✅ |
+| Modelo tenant (logo, color, dominio) | ❌ |
+| Usuarios por tenant | ❌ |
+| Branding por tenant | ❌ |
+| `tenant_id` en todo el modelo | 🔄 |
+| Tests aislamiento | ❌ |
+| Deprecar `Marketing/accio/` legacy | ❌ |
 
-**Criterio de cierre:** Cola con estados completos y trazabilidad post-publicación.
-
----
-
-## Fase D — Landings comerciales
-
-**Objetivo:** Una landing por producto con formulario, UTM y origen EMAcción.
-
-| Landing | Producto | Estado |
-|---------|----------|--------|
-| `/guia/` | FE Panamá (genérica) | ✅ |
-| `/en1-eventos` | EN1 eventos | ❌ |
-| `/en1-cursos` | EN1 cursos | ❌ |
-| `/eposone` | EPOSOne | ❌ |
-| `/epayroll` | EPayRoll | ❌ |
-| `/odoo` | Odoo + FE | ❌ |
-| `/eclassone` | EClassOne | ❌ |
-
-Cada landing: mensaje · CTA · formulario · UTM · producto · conexión futura EN1 CRM.
-
-**Criterio de cierre:** 6 landings mínimas operativas.
+**Doc detalle:** [EMACCION_PHASE_M_MULTI_TENANT.md](EMACCION_PHASE_M_MULTI_TENANT.md) (≡ Fase B V2)
 
 ---
 
-## Fase E — Knowledge Engine ⏳ PRIORITARIA
+## Fase C — Configuration Center
 
-**Objetivo:** EMAcción conoce todo el portafolio EasyTech.
-
-Ver **`docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`**.
+**Objetivo:** Toda configuración desde UI. Sin JSON manual.
 
 | Tarea | Estado |
 |-------|--------|
-| `Marketing/knowledge/` (fichas MD) | 🔄 Iniciado |
-| `Marketing/accio/business_context.json` | 🔄 Iniciado |
-| `Marketing/accio/editorial_rules.json` | 🔄 Iniciado |
-| `knowledge_api.py` (módulo preparatorio) | 🔄 Sin integrar a `app.py` |
-| Endpoints API knowledge en motor | ❌ |
-| UI Configuración en dashboard | ❌ |
+| Tab Configuración (conectores, CRM, API key) | ✅ |
+| Secretos cifrados SQLite | ✅ |
+| Probar conexión | ✅ |
+| Menú completo (usuarios, roles, productos, IA…) | ❌ |
+| Variables · logs · backups desde UI | ❌ |
+| RBAC | ❌ |
+
+**Doc detalle:** [EMACCION_PHASE_N_TENANT_SETTINGS.md](EMACCION_PHASE_N_TENANT_SETTINGS.md) (≡ parte de Fase C V2)
+
+---
+
+## Fase D — Knowledge Engine
+
+**Objetivo:** Conocimiento completo del portafolio por tenant.
+
+| Tarea | Estado |
+|-------|--------|
+| KB por tenant (`knowledge/`) | ✅ easytech |
+| business_context + editorial_rules | ✅ |
+| API + tab Conocimiento | ✅ |
 | Matriz producto-sector-necesidad | ❌ |
+| Converso + competencia | ❌ |
+| Q&A automático | ❌ |
 
-**Criterio de cierre:** Motor consulta KB y genera contenido coherente por producto y sector.
-
----
-
-## Fase F — Opportunity Engine
-
-**Objetivo:** Señal externa → oportunidad comercial clasificada.
-
-| Tarea | Estado |
-|-------|--------|
-| `opportunity_engine.py` | ❌ |
-| `Marketing/accio/opportunities.json` | ❌ |
-| Detección por keywords | ❌ |
-| Clasificación sector/necesidad/producto | ❌ |
-| Estados: detected → classified → approved → campaign_created | ❌ |
-
-**Criterio de cierre:** Una publicación detectada se convierte en oportunidad con producto recomendado.
+**Doc:** [EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md](EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md)
 
 ---
 
-## Fase G — Campaign Engine IA
+## Fases E–P — Resumen
 
-**Objetivo:** Oportunidad aprobada → campaña lista para revisión.
+| Fase | Criterio de cierre (resumen) |
+|------|------------------------------|
+| **E** | Señal web → `opportunities.json` clasificado |
+| **F** | Oportunidad → campaña draft con copy, CTA, landing |
+| **G** | Imágenes generadas por formato/canal |
+| **H** | LI+FB+IG publicando con post ID registrado |
+| **I** | 5+ landings producto con UTM |
+| **J** | Lead → EN1 + adaptadores Odoo/HubSpot/Zoho |
+| **K** | Dashboard conversión por campaña/producto |
+| **L** | Feedback loop campaña → estrategia |
+| **M** | Respuesta IA comentarios/DMs |
+| **N** | Scheduler sugiere hora/día óptimo |
+| **O** | Nurturing email/WhatsApp |
+| **P** | API pública documentada + auth |
 
-Genera: copy · hashtags · CTA · landing · prompt imagen · canal · fecha.
-
-**Criterio de cierre:** Oportunidad aprobada produce campaña en estado `draft`.
-
----
-
-## Fase H — Publisher multicanal
-
-**Objetivo:** Post aprobado publicable en LI + FB + IG.
-
-| Prioridad | Canales |
-|-----------|---------|
-| Fase inicial | LinkedIn, Facebook, Instagram |
-| Segunda | Blog, Email, Google Business |
-| Tercera | X, YouTube, TikTok, Ads |
-
-**Criterio de cierre:** Un post aprobado publica en los 3 canales principales con ID externo registrado.
+Detalle completo: [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) §7–19.
 
 ---
 
-## Fase I — EN1 CRM Integration
+## Dashboard objetivo (§20 plan V2)
 
-**Objetivo:** Todo lead de EMAcción entra en EN1 CRM (Odoo queda transitorio).
-
-| Tarea | Estado |
-|-------|--------|
-| `en1_sync.py` | ❌ |
-| Lead con origen, canal, campaña, producto, UTM, landing | ❌ |
-| Odoo como transición | ✅ Actual |
-
-**Criterio de cierre:** Formulario landing → EN1 CRM automático.
+```
+Dashboard · Oportunidades · Campañas · Publicaciones · Leads · CRM
+Productos · Knowledge · Conectores · Automatizaciones · Métricas · Configuración
+```
 
 ---
 
-## Fase J — Analytics Engine
+## Criterio final V2 (§27)
 
-**Objetivo:** Saber qué campañas generan leads reales.
-
-Métricas: clics · CTR · leads · demos · ventas · costo/lead · rendimiento por producto/campaña.
-
-UTM: `utm_source` · `utm_medium` · `utm_campaign` · `utm_content` · `utm_product`
-
-**Criterio de cierre:** Dashboard de conversión por campaña y producto.
-
----
-
-## Fase K — Agentes especializados (futuro)
-
-| Agente | Rol |
-|--------|-----|
-| Trend Hunter | Busca oportunidades |
-| Opportunity Analyzer | Clasifica necesidades |
-| Campaign Planner | Decide campaña |
-| Copywriter IA | Escribe publicaciones |
-| Image Creator | Genera imágenes |
-| Publisher | Publica |
-| Community Manager IA | Responde comentarios |
-| Lead Analyzer | Califica prospectos |
-| Sales Assistant | Agenda demos |
-
-**Criterio de cierre:** EMAcción opera como agente comercial asistido.
-
----
-
-## Reglas editoriales
-
-| Versión | Regla | Dónde |
-|---------|-------|-------|
-| Interina (C) | 3 valor + 1 venta (75/25) | `content_queue.json` |
-| Objetivo (E) | Matriz 95/5 por tipo | `editorial_rules.json` |
+12 capacidades end-to-end: detectar → clasificar → producto → campaña → contenido → publicar → landing → lead → CRM → seguimiento → medir → aprender.
 
 ---
 
@@ -236,11 +153,10 @@ UTM: `utm_source` · `utm_medium` · `utm_campaign` · `utm_content` · `utm_pro
 
 | Doc | Contenido |
 |-----|-----------|
-| [CONTEXTO.md](CONTEXTO.md) | Estado operativo |
-| [EMACCION_ARCHITECTURE.md](EMACCION_ARCHITECTURE.md) | Arquitectura objetivo |
-| [EMACCION_GAP_ANALYSIS.md](EMACCION_GAP_ANALYSIS.md) | Brecha hoy vs V1 |
-| [EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md](EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md) | Fase E detalle |
-| [ACCIO_MARKETING_ENGINE.md](ACCIO_MARKETING_ENGINE.md) | Plan maestro histórico |
-| [CONECTAR_REDES.md](CONECTAR_REDES.md) | OAuth por canal |
+| [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) | Plan estratégico completo |
+| [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md) | Estado código vs plan |
+| [CONTEXTO.md](CONTEXTO.md) | Operación diaria |
+| [EMACCION_ARCHITECTURE.md](EMACCION_ARCHITECTURE.md) | Arquitectura |
+| [EMACCION_GAP_ANALYSIS.md](EMACCION_GAP_ANALYSIS.md) | Brecha histórica |
 
-**Actualizado:** 2026-06-22 · **Último commit base:** `6732a05`
+**Actualizado:** 2026-06-26 · **Versión roadmap:** 2.0

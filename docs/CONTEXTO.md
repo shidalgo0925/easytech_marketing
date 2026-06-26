@@ -1,17 +1,24 @@
 # Contexto técnico — EM+Acción
 
 Documento maestro para operadores, programadores y agentes IA.  
-**Actualizado:** 2026-06-22 · **Repo:** `github.com/shidalgo0925/easytech_marketing` · **Commit base:** `6732a05`
+**Actualizado:** 2026-06-26 · **Repo:** `github.com/shidalgo0925/easytech_marketing`
+
+**Snapshot operativo (sesión jun 2026):** [EMACCION_CONTEXTO_OPERATIVO.md](EMACCION_CONTEXTO_OPERATIVO.md)  
+**Estado fases V2:** [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md)
 
 ---
 
 ## 1. Objetivo estratégico
 
-**EMAcción** es el **motor comercial central** de EasyTech — no un publicador de contenido.
+**EMAcción V2** es el **Agente Comercial IA multi-empresa** del ecosistema EasyTech.
 
-Debe: conocer el portafolio · detectar oportunidades · clasificar · generar campañas · publicar · capturar leads · EN1 CRM · medir · optimizar.
+**Plan maestro:** `docs/EMACCION_V2_PLAN_MAESTRO.md` · **Estado:** `docs/EMACCION_V2_ESTADO.md`
 
-Los productos (EN1, EPOSOne, EPayRoll, Odoo, EClassOne…) son **destinos**, no motores de marketing independientes.
+Debe servir a **EasyTech**, **Relatic** y futuros clientes con **un solo motor** y datos **100% separados** por empresa (`tenant_id` interno).
+
+**Modelo de producto:** una plataforma, muchas **empresas**. La UI dice *Empresa*; `tenant_id` es infraestructura.
+
+**Regla V2:** No implementar una fase hasta cerrar la anterior (A → B → C → D → … → P).
 
 ---
 
@@ -24,7 +31,6 @@ Los productos (EN1, EPOSOne, EPayRoll, Odoo, EClassOne…) son **destinos**, no 
 | Repo | `github.com/shidalgo0925/easytech_marketing` |
 | VPS prod | `/opt/easytech_marketing` |
 | Rama | `main` |
-| Commit base auditoría | `6732a05` |
 
 ### Motor
 
@@ -32,32 +38,55 @@ Los productos (EN1, EPOSOne, EPayRoll, Odoo, EClassOne…) son **destinos**, no 
 |------|-------|
 | Servicio | `easytech-accio-engine` |
 | Puerto | `8092` |
-| Auth | `ACCIO_API_KEY` |
+| Auth sesión | Flask + `auth.db` (usuarios) + `ACCIO_API_KEY` (integraciones) |
 | Infra rutas | `/accio/` (sin renombrar) |
+
+### Acceso y sesión
+
+| Paso | Ruta |
+|------|------|
+| Login plataforma | `GET/POST /accio/login/` |
+| Selector empresa | `GET /accio/empresas/` |
+| Entrar empresa | `POST /accio/auth/empresas/{tenant_id}/entrar` |
+| Dashboard | `GET /accio/dashboard/{tenant_id}/` |
+
+Auth DB: `Marketing/tenants/.secrets/auth.db` (`users`, `user_tenants`).
 
 ### Dashboard EM+Acción
 
-- URL: https://n8n.etsrv.site/accio/dashboard/
+- URL principal: https://emaccion.etsrv.site/accio/dashboard/easytech/
+- URL alternativa: https://n8n.etsrv.site/accio/dashboard/easytech/
 - Estilo: verde bosque + cobre (`accio-design.css`)
-- Tabs: Resumen · Campañas · Calendario · Métricas · Flyers · Conectores
+- Tabs: Resumen · Campañas · Calendario · Métricas · Flyers · Conocimiento · Conectores · **Configuración**
+- Header: selector **Empresa:** (cambio entre empresas asignadas)
 
-### Cola editorial
+### Cola editorial (easytech)
 
 | Métrica | Valor |
 |---------|-------|
-| Posts en cola | 22 |
+| Posts en cola | ~22 |
+| LinkedIn pendientes | ~8 |
 | Publicados LinkedIn | 3 |
-| Próximo | `linkedin_04_fe_errores` (30 jun 2026) |
-| Regla interina | 3 valor + 1 venta (75/25) |
+| Archivo | `Marketing/tenants/easytech/content_queue.json` |
 
-Archivos: `content_queue.json` · `campaigns.json` · `calendar.json` · `orders.json` · `tasks.json`
+También: `campaigns.json` · `calendar.json` · `orders.json` por tenant.
+
+### Empresas registradas
+
+| ID | Nombre | CRM | Datos |
+|----|--------|-----|-------|
+| `easytech` | Easy Technology Services | Odoo | Cola, campañas, KB completa |
+| `relatic` | Relatic | EN1 | Tenant vacío (aislado) |
+
+Registry: `Marketing/tenants/registry.json`
 
 ### CRM
 
 | | Actual | Objetivo |
 |---|--------|----------|
-| CRM | **Odoo** (`easydb.etsrv.site`) | **EN1 CRM** |
-| Scraper | `scraper_panama.py` → CSV → Odoo | Mantener + EN1 |
+| EasyTech | **Odoo** (`easydb.etsrv.site`) | Mantener + opcional EN1 |
+| Relatic | `crm_target: en1` | EN1 sync (pendiente) |
+| Scraper | `scraper_panama.py` → CSV → Odoo | Mantener |
 | Landing | `/guia/` (1 genérica) | Landings por producto |
 
 ---
@@ -79,43 +108,67 @@ Registro: `Marketing/accio/connectors.json`
 
 ## 4. API activa
 
-### Dashboard (requiere `ACCIO_API_KEY`)
+### Dashboard por empresa (sesión usuario o `ACCIO_API_KEY`)
 
 ```
-GET /accio/dashboard/api/summary
-GET /accio/dashboard/api/campaigns
-GET /accio/dashboard/api/calendar
-GET /accio/dashboard/api/metrics
-GET /accio/dashboard/api/flyers
-GET /accio/dashboard/api/connectors
+GET /accio/{tenant_id}/dashboard/api/summary
+GET /accio/{tenant_id}/dashboard/api/campaigns
+GET /accio/{tenant_id}/dashboard/api/calendar
+GET /accio/{tenant_id}/dashboard/api/metrics
+GET /accio/{tenant_id}/dashboard/api/flyers
+GET /accio/{tenant_id}/dashboard/api/connectors
+GET /accio/{tenant_id}/dashboard/api/knowledge
+GET /accio/{tenant_id}/settings/center
 ```
 
-### Motor
+### Auth y empresas
+
+```
+POST /accio/login/                    # form login plataforma
+GET  /accio/auth/status
+GET  /accio/auth/empresas
+POST /accio/auth/empresas/{id}/entrar
+POST /accio/auth/logout
+```
+
+### Configuración (CRUD)
+
+```
+POST /accio/{tenant_id}/settings/usuarios      # sync auth.db
+POST /accio/{tenant_id}/settings/productos
+POST /accio/{tenant_id}/settings/landings
+POST /accio/{tenant_id}/settings/variables
+POST /accio/{tenant_id}/settings/empresas      # crear (super_admin)
+POST /accio/{tenant_id}/settings/empresas/{id} # editar
+POST /accio/{tenant_id}/settings/empresas/{id}/disable|enable
+```
+
+### Knowledge
+
+```
+GET    /accio/{tenant_id}/knowledge
+GET    /accio/{tenant_id}/knowledge/{slug}
+POST   /accio/{tenant_id}/knowledge              # crear
+POST   /accio/{tenant_id}/knowledge/{slug}       # editar
+DELETE /accio/{tenant_id}/knowledge/{slug}
+POST   /accio/{tenant_id}/content/generate-topic
+```
+
+### Motor (legacy + tenant)
 
 ```
 GET  /accio/health
-GET  /accio/status
-GET  /accio/content/queue
-GET  /accio/orders
-POST /accio/orders
-POST /accio/tick
-POST /accio/run/pipeline
-POST /accio/run/publish-linkedin
-POST /accio/run/publish-meta
-POST /accio/run/publish-channel
-POST /accio/content/queue
-POST /accio/calendar
-GET  /accio/files/tree
-GET  /accio/tasks
+POST /accio/{tenant_id}/run/pipeline
+POST /accio/{tenant_id}/run/publish-linkedin
+POST /accio/{tenant_id}/run/publish-meta
 ```
 
-### No existe aún
+### Pendiente
 
 - Oportunidades / clasificación IA
-- Generador de campañas IA
-- Knowledge API integrada
 - EN1 sync
-- Analítica de clics
+- Cron multi-empresa
+- Analítica UTM / clics
 
 ---
 
@@ -190,18 +243,21 @@ Detalle: `docs/EMACCION_ARCHITECTURE.md`
 
 ---
 
-## 9. Fase E — Knowledge Engine (prioridad inmediata)
+## 9. Knowledge Engine
 
-Archivos iniciados (versionados en Git):
+Integrado en motor y dashboard (tab Conocimiento):
 
 ```
-Marketing/accio/business_context.json
-Marketing/accio/editorial_rules.json
-Marketing/knowledge/
-Motor_Tecnico/accio_engine/knowledge_api.py  ← preparatorio, NO integrado a app.py aún
+Marketing/tenants/{id}/business_context.json
+Marketing/tenants/{id}/editorial_rules.json
+Marketing/tenants/{id}/knowledge/
+Marketing/tenants/{id}/knowledge_manifest.json
+Motor_Tecnico/accio_engine/knowledge_api.py
 ```
 
-Detalle: `docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`
+CRUD artículos KB desde UI. Generador de temas: `POST .../content/generate-topic`.
+
+Detalle histórico: `docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`
 
 ---
 
@@ -209,8 +265,10 @@ Detalle: `docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`
 
 | Recurso | URL |
 |---------|-----|
-| Dashboard | https://n8n.etsrv.site/accio/dashboard/ |
-| API | https://n8n.etsrv.site/accio/ |
+| Dashboard easytech | https://emaccion.etsrv.site/accio/dashboard/easytech/ |
+| Login | https://emaccion.etsrv.site/accio/login/ |
+| API / health | https://emaccion.etsrv.site/accio/ |
+| Proxy n8n | https://n8n.etsrv.site/accio/ |
 | Meta OAuth | https://n8n.etsrv.site/meta/ |
 | Guía leads | https://n8n.etsrv.site/guia/ |
 | Odoo CRM | https://easydb.etsrv.site |
@@ -218,18 +276,17 @@ Detalle: `docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md`
 
 ---
 
-## 11. Orden de implementación
+## 11. Orden de implementación (V2)
 
-1. Fase A — Base técnica estable
-2. Fase E — Knowledge Engine
-3. Fase F — Opportunity Engine
-4. Fase D — Landings por producto
-5. Fase I — EN1 CRM
-6. Fase H — Publisher multicanal completo
-7. Fase J — Analítica
-8. Fase K — Agentes especializados
+Ver [ROADMAP.md](ROADMAP.md) y [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md).
 
-Roadmap completo: `docs/ROADMAP.md`
+```
+A Base → B Multi-tenant → C Config Center → D Knowledge → E Opportunity
+→ F Campaign → G Image → H Publisher → I Landings → J CRM → K Analytics
+→ L Learning → M Community → N Scheduler → O Automation → P API
+```
+
+**Fase activa:** **B** y **C** cerradas en código; siguiente: **D** Knowledge completo + **E** Opportunity.
 
 ---
 
@@ -244,8 +301,14 @@ Roadmap completo: `docs/ROADMAP.md`
 
 ## 13. Reglas para programadores
 
-- **No implementar runtime sin GO explícito.**
+- **No implementar runtime sin GO explícito** (salvo fixes urgentes acordados).
+- **No crear otro EMAcción por cliente** — un motor, muchas empresas (`tenant_id`).
+- **Nada de datos mezclados** entre EasyTech y Relatic.
+- UI: decir **Empresa**, no tenant.
+- Usuarios de login: **auth.db** — al guardar usuarios en Configuración usar `sync_tenant_users`.
+- Credenciales: **tenant_secrets.db** cifrado — no JSON visible en repo.
+- Tras cambios en motor: `sudo systemctl restart easytech-accio-engine`.
+- Tests: `venv/bin/python3 -m unittest tests/test_*.py -v`.
+- Contexto sesión: `docs/EMACCION_CONTEXTO_OPERATIVO.md`.
 - No tocar `.env` ni credenciales en commits.
-- No reiniciar producción sin GO.
-- Documentación primero; código después.
 - EN1, EPOSOne, EPayRoll no hacen marketing propio — EMAcción es el cerebro.

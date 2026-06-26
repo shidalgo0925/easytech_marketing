@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "products": [
+    {
+      "slug": "odoo_erp_facturaci_n_electr_nica_dgi",
+      "name": "Odoo ERP + Facturación Electrónica DGI",
+      "enabled": true,
+      "landing_path": "",
+      "cta": "DIAGNÓSTICO"
+    },
+    {
+      "slug": "easynodeone_en1_plataforma_todo_en_uno",
+      "name": "EasyNodeOne (EN1) — plataforma todo en uno",
+      "enabled": true,
+      "landing_path": "",
+      "cta": "DIAGNÓSTICO"
+    },
+    {
+      "slug": "eposone_punto_de_venta_e_inventario",
+      "name": "EPOSOne — punto de venta e inventario",
+      "enabled": true,
+      "landing_path": "",
+      "cta": "DIAGNÓSTICO"
+    },
+    {
+      "slug": "eclassone_gesti_n_acad_mica",
+      "name": "EClassOne — gestión académica",
+      "enabled": true,
+      "landing_path": "",
+      "cta": "DIAGNÓSTICO"
+    },
+    {
+      "slug": "ethesisone_tesis_universitarias",
+      "name": "EThesisOne — tesis universitarias",
+      "enabled": true,
+      "landing_path": "",
+      "cta": "DIAGNÓSTICO"
+    },
+    {
+      "slug": "epayroll_planilla_panam",
+      "name": "EPayRoll — planilla Panamá",
+      "enabled": true,
+      "landing_path": "",
+      "cta": "DIAGNÓSTICO"
+    },
+    {
+      "slug": "consultor_a_ti_estrat_gica",
+      "name": "Consultoría TI estratégica",
+      "enabled": true,
+      "landing_path": "",
+      "cta": "DIAGNÓSTICO"
+    },
+    {
+      "slug": "desarrollo_de_software_a_medida",
+      "name": "Desarrollo de software a medida",
+      "enabled": true,
+      "landing_path": "",
+      "cta": "DIAGNÓSTICO"
+    }
+  ]
+}

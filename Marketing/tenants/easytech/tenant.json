@@ -1,0 +1,20 @@
+{
+  "tenant_id": "easytech",
+  "display_name": "Easy Technology Services",
+  "status": "active",
+  "crm_target": "odoo",
+  "default_locale": "es-PA",
+  "domains": [
+    "easytech.services",
+    "emaccion.etsrv.site",
+    "n8n.etsrv.site"
+  ],
+  "timezone": "America/Panama",
+  "created_at": "2026-06-19T00:00:00Z",
+  "branding": {
+    "primary_color": "#1a4a2e",
+    "accent_color": "#2d6b44",
+    "logo_url": "/accio/static/em-logomark.svg"
+  },
+  "updated_at": "2026-06-26T06:04:53.226443+00:00"
+}

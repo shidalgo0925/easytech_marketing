@@ -1,0 +1,84 @@
+{
+  "updated_at": "2026-06-19",
+  "project": "Operación ArrozConPollo — EasyTech Marketing",
+  "tasks": [
+    {
+      "id": "server",
+      "title": "Configurar Servidor ArrozConPollo (Linux)",
+      "status": "completed",
+      "phase": 0
+    },
+    {
+      "id": "content",
+      "title": "Crear Contenido de Autoridad",
+      "status": "completed",
+      "phase": 1
+    },
+    {
+      "id": "scraper",
+      "title": "Desarrollo del Lead Scraper",
+      "status": "completed",
+      "phase": 0
+    },
+    {
+      "id": "odoo",
+      "title": "Conexión Odoo CRM",
+      "status": "completed",
+      "phase": 0
+    },
+    {
+      "id": "linkedin",
+      "title": "Publicación automática LinkedIn",
+      "status": "completed",
+      "phase": 2
+    },
+    {
+      "id": "engine",
+      "title": "Accio Marketing Engine (orquestador)",
+      "status": "completed",
+      "phase": 1
+    },
+    {
+      "id": "dashboard",
+      "title": "Dashboard web Accio",
+      "status": "completed",
+      "phase": 1.5
+    },
+    {
+      "id": "posts_5_12",
+      "title": "Calendario posts LinkedIn #5–#12",
+      "status": "completed",
+      "phase": 1
+    },
+    {
+      "id": "guia_pdf",
+      "title": "Guía PDF FE Panamá completa",
+      "status": "pending",
+      "phase": 1
+    },
+    {
+      "id": "en1",
+      "title": "Integración EN1 CRM",
+      "status": "pending",
+      "phase": 3
+    },
+    {
+      "id": "connector_registry",
+      "title": "Registro conectores + stubs Fase D",
+      "status": "completed",
+      "phase": 2
+    },
+    {
+      "id": "meta",
+      "title": "Facebook / Instagram API (OAuth)",
+      "status": "pending",
+      "phase": 2
+    },
+    {
+      "id": "recommend",
+      "title": "Accio recomienda (scoring + campañas)",
+      "status": "pending",
+      "phase": 4
+    }
+  ]
+}

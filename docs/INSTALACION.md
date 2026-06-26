@@ -19,12 +19,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 2. Secretos
+## 2. Secretos y entornos
+
+Ver [DEV_TEST_PROD.md](DEV_TEST_PROD.md) y [deploy/SECRETS.md](../deploy/SECRETS.md).
 
 ```bash
-cp .env.example .env
-nano .env   # ver deploy/SECRETS.md
-chmod 600 .env
+cp deploy/environments/.env.prod.example deploy/secrets/.env.prod
+# Completar valores + chmod 600
 ```
 
 Generar API key:
@@ -72,7 +73,9 @@ curl http://127.0.0.1:8092/accio/health
 curl -H "Authorization: Bearer $ACCIO_API_KEY" http://127.0.0.1:8092/accio/status
 ```
 
-Dashboard: `https://TU_DOMINIO/accio/dashboard/`
+Dashboard: `https://emaccion.etsrv.site/accio/dashboard/easytech/`
+
+Verificar entorno: `curl -s http://127.0.0.1:8092/accio/health` → `"env":"prod"`
 
 ## Landing guía
 

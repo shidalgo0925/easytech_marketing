@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
-"""Fase E — contexto de negocio, knowledge base y generador de temas."""
+"""Fase E — contexto de negocio, knowledge base y generador de temas (multi-tenant)."""
 
 from __future__ import annotations
 
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-PANAMA = ZoneInfo("America/Panama")
+from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, effective_paths, resolve_tenant
 
-BUSINESS_CONTEXT_PATH = BASE_DIR / "Marketing" / "accio" / "business_context.json"
-EDITORIAL_RULES_PATH = BASE_DIR / "Marketing" / "accio" / "editorial_rules.json"
-KNOWLEDGE_DIR = BASE_DIR / "Marketing" / "knowledge"
-KNOWLEDGE_MANIFEST_PATH = KNOWLEDGE_DIR / "manifest.json"
+PANAMA = ZoneInfo("America/Panama")
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 PRODUCT_FLYER = {
     "easytech": 11,
@@ -31,6 +28,10 @@ PRODUCT_FLYER = {
 }
 
 
+def _paths(tenant_id: str) -> dict[str, Path]:
+    return effective_paths(resolve_tenant(tenant_id))
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -40,14 +41,16 @@ def _write_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def load_business_context() -> dict[str, Any]:
-    if not BUSINESS_CONTEXT_PATH.is_file():
+def load_business_context(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    path = _paths(tenant_id)["business_context"]
+    if not path.is_file():
         return {}
-    return _read_json(BUSINESS_CONTEXT_PATH)
+    return _read_json(path)
 
 
-def save_business_context(payload: dict[str, Any]) -> dict[str, Any]:
-    current = load_business_context()
+def save_business_context(payload: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    path = _paths(tenant_id)["business_context"]
+    current = load_business_context(tenant_id)
     allowed = {
         "empresa",
         "industria",
@@ -66,20 +69,22 @@ def save_business_context(payload: dict[str, Any]) -> dict[str, Any]:
             current[key] = payload[key]
     current["version"] = current.get("version", 1)
     current["updated_at"] = datetime.now(PANAMA).strftime("%Y-%m-%d")
-    _write_json(BUSINESS_CONTEXT_PATH, current)
+    _write_json(path, current)
     return current
 
 
-def load_editorial_rules() -> dict[str, Any]:
-    if not EDITORIAL_RULES_PATH.is_file():
+def load_editorial_rules(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    path = _paths(tenant_id)["editorial_rules"]
+    if not path.is_file():
         return {}
-    return _read_json(EDITORIAL_RULES_PATH)
+    return _read_json(path)
 
 
-def load_knowledge_manifest() -> dict[str, Any]:
-    if not KNOWLEDGE_MANIFEST_PATH.is_file():
+def load_knowledge_manifest(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    path = _paths(tenant_id)["knowledge_manifest"]
+    if not path.is_file():
         return {"articles": []}
-    return _read_json(KNOWLEDGE_MANIFEST_PATH)
+    return _read_json(path)
 
 
 def _parse_md_sections(text: str) -> dict[str, str]:
@@ -99,12 +104,13 @@ def _parse_md_sections(text: str) -> dict[str, str]:
     return sections
 
 
-def load_article(slug: str) -> dict[str, Any]:
-    manifest = load_knowledge_manifest()
+def load_article(slug: str, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    paths = _paths(tenant_id)
+    manifest = load_knowledge_manifest(tenant_id)
     entry = next((a for a in manifest.get("articles", []) if a.get("slug") == slug), None)
     if not entry:
         raise FileNotFoundError(f"Artículo no encontrado: {slug}")
-    path = KNOWLEDGE_DIR / entry["file"]
+    path = paths["knowledge_dir"] / entry["file"]
     if not path.is_file():
         raise FileNotFoundError(f"Archivo KB faltante: {entry['file']}")
     body = path.read_text(encoding="utf-8")
@@ -115,11 +121,12 @@ def load_article(slug: str) -> dict[str, Any]:
     }
 
 
-def list_knowledge() -> list[dict[str, Any]]:
-    manifest = load_knowledge_manifest()
+def list_knowledge(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
+    paths = _paths(tenant_id)
+    manifest = load_knowledge_manifest(tenant_id)
     items = []
     for entry in manifest.get("articles", []):
-        path = KNOWLEDGE_DIR / entry["file"]
+        path = paths["knowledge_dir"] / entry["file"]
         items.append(
             {
                 "slug": entry.get("slug"),
@@ -134,7 +141,59 @@ def list_knowledge() -> list[dict[str, Any]]:
     return items
 
 
-def _contact_block(ctx: dict[str, Any]) -> str:
+def save_article(tenant_id: str, payload: dict[str, Any], *, slug: str | None = None) -> dict[str, Any]:
+    """Crea o actualiza un artículo de knowledge base."""
+    paths = _paths(tenant_id)
+    manifest = load_knowledge_manifest(tenant_id)
+    articles: list[dict[str, Any]] = list(manifest.get("articles") or [])
+    raw_slug = (slug or payload.get("slug") or "").strip().lower()
+    if not raw_slug or not raw_slug.replace("_", "").replace("-", "").isalnum():
+        raise ValueError("Slug de artículo inválido")
+    title = (payload.get("title") or raw_slug).strip()
+    product = (payload.get("product") or raw_slug).strip()
+    tags = payload.get("tags") or []
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
+    body = payload.get("body") or ""
+    filename = f"{raw_slug}.md"
+    paths["knowledge_dir"].mkdir(parents=True, exist_ok=True)
+    (paths["knowledge_dir"] / filename).write_text(body, encoding="utf-8")
+    entry = {
+        "slug": raw_slug,
+        "title": title,
+        "product": product,
+        "tags": tags,
+        "file": filename,
+    }
+    found = False
+    for i, row in enumerate(articles):
+        if row.get("slug") == raw_slug:
+            articles[i] = {**row, **entry}
+            found = True
+            break
+    if not found:
+        articles.append(entry)
+    manifest["articles"] = articles
+    manifest["updated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    _write_json(paths["knowledge_manifest"], manifest)
+    return {**entry, "available": True, "chars": len(body)}
+
+
+def delete_article(slug: str, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    paths = _paths(tenant_id)
+    manifest = load_knowledge_manifest(tenant_id)
+    articles = list(manifest.get("articles") or [])
+    entry = next((a for a in articles if a.get("slug") == slug), None)
+    if not entry:
+        raise FileNotFoundError(f"Artículo no encontrado: {slug}")
+    articles = [a for a in articles if a.get("slug") != slug]
+    manifest["articles"] = articles
+    manifest["updated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    _write_json(paths["knowledge_manifest"], manifest)
+    file_path = paths["knowledge_dir"] / entry.get("file", f"{slug}.md")
+    if file_path.is_file():
+        file_path.unlink()
+    return {"slug": slug, "deleted": True}
     contact = ctx.get("contacto") or {}
     email = contact.get("email", "easytechservices25@gmail.com")
     wa = contact.get("whatsapp", "+507 6688-4938")
@@ -180,9 +239,10 @@ def generate_topic(
     product_slug: str = "easytech",
     content_type: str = "educacion",
     platform: str = "linkedin",
+    tenant_id: str = DEFAULT_TENANT,
 ) -> dict[str, Any]:
-    ctx = load_business_context()
-    article = load_article(product_slug)
+    ctx = load_business_context(tenant_id)
+    article = load_article(product_slug, tenant_id)
     sections = article["sections"]
     ct = _normalize_content_type(content_type)
     title = (topic or "").strip() or article.get("title") or "Tema sin título"
@@ -235,7 +295,8 @@ def generate_topic(
     text = "\n".join(lines)
     product = article.get("product", product_slug)
     flyer_num = PRODUCT_FLYER.get(product_slug) or PRODUCT_FLYER.get(product) or 11
-    manifest_path = BASE_DIR / "Marketing" / "flyers" / "manifest.json"
+    paths = _paths(tenant_id)
+    manifest_path = paths["flyers_manifest"]
     manifest = _read_json(manifest_path) if manifest_path.is_file() else {"flyers": []}
     flyer_entry = next((f for f in manifest.get("flyers", []) if f.get("num") == flyer_num), None)
     flyer_name = flyer_entry.get("file") if flyer_entry else "11_diagnostico_gratuito.png"
@@ -249,6 +310,7 @@ def generate_topic(
     post_id = f"{platform}_{datetime.now(PANAMA).strftime('%Y%m%d')}_{slug_safe}"
 
     return {
+        "tenant_id": tenant_id,
         "topic": title,
         "product_slug": product_slug,
         "content_type": ct,
@@ -283,8 +345,8 @@ def generate_topic(
     }
 
 
-def editorial_balance(queue_posts: list[dict[str, Any]]) -> dict[str, Any]:
-    rules = load_editorial_rules()
+def editorial_balance(queue_posts: list[dict[str, Any]], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    rules = load_editorial_rules(tenant_id)
     pending = [p for p in queue_posts if p.get("status") == "pending"]
     counts: dict[str, int] = {"valor": 0, "venta": 0}
     for p in pending:
@@ -308,11 +370,12 @@ def editorial_balance(queue_posts: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def knowledge_summary() -> dict[str, Any]:
-    articles = list_knowledge()
+def knowledge_summary(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    articles = list_knowledge(tenant_id)
     return {
-        "business_context": load_business_context(),
-        "editorial_rules": load_editorial_rules(),
+        "tenant_id": tenant_id,
+        "business_context": load_business_context(tenant_id),
+        "editorial_rules": load_editorial_rules(tenant_id),
         "articles": articles,
         "articles_count": len(articles),
         "articles_available": sum(1 for a in articles if a.get("available")),

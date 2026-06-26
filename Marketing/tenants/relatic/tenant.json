@@ -1,0 +1,11 @@
+{
+  "tenant_id": "relatic",
+  "display_name": "Relatic",
+  "timezone": "America/Panama",
+  "created_at": "2026-06-26T00:00:00Z",
+  "branding": {
+    "primary_color": "#1a2f4d",
+    "accent_color": "#3d7ea6",
+    "logo_url": "/accio/static/em-logomark.svg"
+  }
+}

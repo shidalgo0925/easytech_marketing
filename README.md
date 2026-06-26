@@ -6,9 +6,13 @@ Dashboard UI: **EM+Acción** · Repo: `github.com/shidalgo0925/easytech_marketin
 
 > Accio Work Desktop quedó sin créditos. **Este motor propio sigue vivo.**
 
-## Contexto completo
+## Plan maestro V2
 
-Ver **[docs/CONTEXTO.md](docs/CONTEXTO.md)** — arquitectura, URLs, conectores, estrategia editorial 3:1, Meta, operación diaria.
+Ver **[docs/EMACCION_V2_PLAN_MAESTRO.md](docs/EMACCION_V2_PLAN_MAESTRO.md)** — arquitectura, fases A–P, criterio de finalización.
+
+**Estado actual:** [docs/EMACCION_V2_ESTADO.md](docs/EMACCION_V2_ESTADO.md) · **Roadmap:** [docs/ROADMAP.md](docs/ROADMAP.md)
+
+**Regla:** No avanzar de fase sin cerrar la anterior.
 
 ## Estado actual (jun 2026)
 
@@ -28,7 +32,8 @@ Ver **[docs/CONTEXTO.md](docs/CONTEXTO.md)** — arquitectura, URLs, conectores,
 
 | Servicio | URL |
 |----------|-----|
-| Dashboard EM+Acción | https://n8n.etsrv.site/accio/dashboard/ |
+| Dashboard EM+Acción | https://emaccion.etsrv.site/accio/dashboard/easytech/ |
+| Dashboard (n8n) | https://n8n.etsrv.site/accio/dashboard/ |
 | API | https://n8n.etsrv.site/accio/ |
 | Meta OAuth | https://n8n.etsrv.site/meta/ |
 | Privacidad | https://n8n.etsrv.site/accio/privacidad/ |
@@ -43,8 +48,11 @@ Ver [docs/INSTALACION.md](docs/INSTALACION.md)
 
 | Doc | Contenido |
 |-----|-----------|
-| [CONTEXTO.md](docs/CONTEXTO.md) | **Contexto técnico completo** |
-| [ROADMAP.md](docs/ROADMAP.md) | Roadmap fases A–K |
+| [EMACCION_V2_PLAN_MAESTRO.md](docs/EMACCION_V2_PLAN_MAESTRO.md) | **Plan maestro V2 (A–P)** |
+| [EMACCION_V2_ESTADO.md](docs/EMACCION_V2_ESTADO.md) | Estado código vs plan |
+| [ROADMAP.md](docs/ROADMAP.md) | Roadmap operativo V2 |
+| [CONTEXTO.md](docs/CONTEXTO.md) | Contexto técnico maestro |
+| [EMACCION_CONTEXTO_OPERATIVO.md](docs/EMACCION_CONTEXTO_OPERATIVO.md) | **Snapshot sesión jun 2026** (modelo empresa, auth, CRUD) |
 | [EMACCION_ARCHITECTURE.md](docs/EMACCION_ARCHITECTURE.md) | Arquitectura objetivo |
 | [EMACCION_GAP_ANALYSIS.md](docs/EMACCION_GAP_ANALYSIS.md) | Brecha hoy vs V1 comercial |
 | [EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md](docs/EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md) | Fase E Knowledge Engine |

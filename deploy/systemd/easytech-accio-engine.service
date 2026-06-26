@@ -1,5 +1,5 @@
 [Unit]
-Description=EasyMarketingOne Accio Engine (orquestador)
+Description=EasyMarketingOne Accio Engine PROD
 After=network.target easytech-lead-api.service
 
 [Service]
@@ -8,6 +8,9 @@ User=papichulo
 WorkingDirectory=/opt/easytech_marketing
 Environment=PATH=/opt/easytech_marketing/venv/bin
 Environment=PYTHONUNBUFFERED=1
+Environment=ACCIO_ENV=prod
+EnvironmentFile=-/opt/easytech_marketing/deploy/secrets/.env.prod
+EnvironmentFile=-/opt/easytech_marketing/.env
 ExecStart=/opt/easytech_marketing/venv/bin/python3 /opt/easytech_marketing/Motor_Tecnico/accio_engine/app.py
 Restart=always
 RestartSec=5

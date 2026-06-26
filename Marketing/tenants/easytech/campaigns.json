@@ -1,0 +1,105 @@
+{
+  "updated_at": "2026-06-20",
+  "editorial_rule": "3 valor + 1 venta por cada 4 posts LinkedIn",
+  "campaigns": [
+    {
+      "id": "camp_fe_odoo",
+      "post_id": "linkedin_01_fe_odoo",
+      "product": "Facturacion Electronica + Odoo",
+      "flyer_num": 3,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_diagnostico",
+      "post_id": "linkedin_02_diagnostico",
+      "product": "Diagnostico tecnologico gratuito",
+      "flyer_num": 11,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_odoo",
+      "post_id": "linkedin_03_implementamos_odoo",
+      "product": "Implementacion Odoo ERP",
+      "flyer_num": 2,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "ODOO"
+    },
+    {
+      "id": "camp_fe_errores",
+      "post_id": "linkedin_04_fe_errores",
+      "product": "Facturacion Electronica + Odoo",
+      "flyer_num": 3,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_mapa_ti",
+      "post_id": "linkedin_05_mapa_tecnologico",
+      "product": "Consultoria TI estrategica",
+      "flyer_num": 4,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_planilla_consejo",
+      "post_id": "linkedin_06_planilla_consejo",
+      "product": "EPayRoll planilla Panama",
+      "flyer_num": 9,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "PLANILLA"
+    },
+    {
+      "id": "camp_demo",
+      "post_id": "linkedin_07_demo_plataformas",
+      "product": "Demo plataformas sin costo",
+      "flyer_num": 12,
+      "content_type": "venta",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DEMO"
+    },
+    {
+      "id": "camp_retail",
+      "post_id": "linkedin_08_retail_inventario",
+      "product": "EPOSOne punto de venta",
+      "flyer_num": 8,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DIAGNOSTICO"
+    },
+    {
+      "id": "camp_eclassone",
+      "post_id": "linkedin_09_educacion_matricula",
+      "product": "EClassOne gestion academica",
+      "flyer_num": 6,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DEMO"
+    },
+    {
+      "id": "camp_ethesistone",
+      "post_id": "linkedin_10_tesis_caos",
+      "product": "EThesisOne tesis academicas",
+      "flyer_num": 7,
+      "content_type": "valor",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "DEMO"
+    },
+    {
+      "id": "camp_en1",
+      "post_id": "linkedin_11_en1_demo",
+      "product": "EN1 / EasyNodeOne",
+      "flyer_num": 5,
+      "content_type": "venta",
+      "landing": "https://n8n.etsrv.site/guia/",
+      "cta": "EN1"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Datos agregados para el dashboard Accio."""
+"""Datos agregados para el dashboard Accio (multi-tenant)."""
 
 from __future__ import annotations
 
@@ -13,39 +13,43 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from Motor_Tecnico.accio_engine import executor, queue_store
+from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, effective_paths, list_tenants, resolve_tenant
 from Motor_Tecnico.connectors.registry import all_connector_views
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 PANAMA = ZoneInfo("America/Panama")
-STAGE_MARKETING = "Nuevo - Marketing"
-CAMPAIGNS_PATH = BASE_DIR / "Marketing" / "accio" / "campaigns.json"
-CALENDAR_PATH = BASE_DIR / "Marketing" / "accio" / "calendar.json"
-MANIFEST_PATH = BASE_DIR / "Marketing" / "flyers" / "manifest.json"
-PUBLISH_LOG_PATH = BASE_DIR / "Marketing" / "publish_log.json"
-META_LOG_PATH = BASE_DIR / "Marketing" / "meta_publish_log.json"
-FLYERS_DIR = BASE_DIR / "Marketing" / "flyers"
 
 
-def load_connectors() -> list[dict[str, Any]]:
-    return all_connector_views()
+def _paths(tenant_id: str) -> dict[str, Path]:
+    return effective_paths(resolve_tenant(tenant_id))
 
 
-def _odoo_client():
-    url = os.environ["ODOO_URL"].rstrip("/")
-    db = os.environ["ODOO_DB"]
-    user = os.environ["ODOO_USER"]
-    password = os.environ["ODOO_PASSWORD"]
+def load_connectors(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
+    return all_connector_views(tenant_id)
+
+
+def _odoo_client(tenant_id: str = DEFAULT_TENANT):
+    from Motor_Tecnico.accio_engine import tenant_secrets
+
+    url = (
+        tenant_secrets.get_secret(tenant_id, "crm", "odoo_url")
+        or os.environ.get("ODOO_URL", "")
+    ).rstrip("/")
+    db = tenant_secrets.get_secret(tenant_id, "crm", "odoo_db") or os.environ.get("ODOO_DB", "")
+    user = tenant_secrets.get_secret(tenant_id, "crm", "odoo_user") or os.environ.get("ODOO_USER", "")
+    password = tenant_secrets.get_secret(tenant_id, "crm", "odoo_password") or os.environ.get("ODOO_PASSWORD", "")
     common = xmlrpc.client.ServerProxy(f"{url}/xmlrpc/2/common", allow_none=True)
     uid = common.authenticate(db, user, password, {})
     if not uid:
         raise RuntimeError("Auth Odoo fallida")
     models = xmlrpc.client.ServerProxy(f"{url}/xmlrpc/2/object", allow_none=True)
-    return db, uid, password, models
+    return db, uid, password, models, url
 
 
-def fetch_odoo_leads(limit: int = 12) -> dict[str, Any]:
+def fetch_odoo_leads(limit: int = 12, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    STAGE_MARKETING = "Nuevo - Marketing"
     try:
-        db, uid, password, models = _odoo_client()
+        db, uid, password, models, url = _odoo_client(tenant_id)
         fields = ["name", "contact_name", "email_from", "phone", "create_date", "stage_id", "source_id"]
         leads = models.execute_kw(
             db,
@@ -99,15 +103,15 @@ def fetch_odoo_leads(limit: int = 12) -> dict[str, Any]:
             "total": total_count,
             "marketing_stage": marketing_count,
             "recent": formatted,
-            "odoo_url": os.environ.get("ODOO_URL", "").rstrip("/"),
+            "odoo_url": url,
         }
     except Exception as exc:
         return {"ok": False, "error": str(exc), "recent": [], "total": 0, "marketing_stage": 0}
 
 
-def fetch_leads_by_source() -> dict[str, Any]:
+def fetch_leads_by_source(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     try:
-        db, uid, password, models = _odoo_client()
+        db, uid, password, models, _url = _odoo_client(tenant_id)
         groups = models.execute_kw(
             db,
             uid,
@@ -141,23 +145,25 @@ def _flyer_num_from_post(post: dict[str, Any], manifest: dict[str, Any]) -> int 
     return None
 
 
-def _load_manifest() -> dict[str, Any]:
-    if not MANIFEST_PATH.exists():
+def _load_manifest(tenant_id: str) -> dict[str, Any]:
+    path = _paths(tenant_id)["flyers_manifest"]
+    if not path.exists():
         return {"flyers": [], "extras": []}
-    return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def load_campaigns() -> list[dict[str, Any]]:
-    manifest = _load_manifest()
+def load_campaigns(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
+    paths = _paths(tenant_id)
+    manifest = _load_manifest(tenant_id)
     topic_by_num = {f["num"]: f.get("topic", "") for f in manifest.get("flyers", [])}
     defs: dict[str, dict[str, Any]] = {}
-    if CAMPAIGNS_PATH.exists():
-        data = json.loads(CAMPAIGNS_PATH.read_text(encoding="utf-8"))
+    if paths["campaigns"].exists():
+        data = json.loads(paths["campaigns"].read_text(encoding="utf-8"))
         for camp in data.get("campaigns", []):
             if camp.get("post_id"):
                 defs[camp["post_id"]] = camp
 
-    queue = executor.load_content_queue()
+    queue = executor.load_content_queue(tenant_id)
     campaigns = []
     for post in queue.get("posts", []):
         post_id = post.get("id", "")
@@ -183,11 +189,12 @@ def load_campaigns() -> list[dict[str, Any]]:
     return campaigns
 
 
-def load_calendar_view() -> dict[str, Any]:
-    if not CALENDAR_PATH.exists():
+def load_calendar_view(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    cal_path = _paths(tenant_id)["calendar"]
+    if not cal_path.exists():
         return {"weeks": [], "timezone": "America/Panama"}
-    calendar = json.loads(CALENDAR_PATH.read_text(encoding="utf-8"))
-    queue_by_id = {p["id"]: p for p in executor.load_content_queue().get("posts", []) if p.get("id")}
+    calendar = json.loads(cal_path.read_text(encoding="utf-8"))
+    queue_by_id = {p["id"]: p for p in executor.load_content_queue(tenant_id).get("posts", []) if p.get("id")}
     weeks = []
     for week in calendar.get("weeks", []):
         posts = []
@@ -210,9 +217,9 @@ def load_calendar_view() -> dict[str, Any]:
     }
 
 
-def load_flyers_library() -> dict[str, Any]:
-    manifest = _load_manifest()
-    queue = executor.load_content_queue()
+def load_flyers_library(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    manifest = _load_manifest(tenant_id)
+    queue = executor.load_content_queue(tenant_id)
     used_nums: set[int] = set()
     for post in queue.get("posts", []):
         num = _flyer_num_from_post(post, manifest)
@@ -257,13 +264,15 @@ def load_flyers_library() -> dict[str, Any]:
     }
 
 
-def load_metrics() -> dict[str, Any]:
-    status = executor.get_status()
+def load_metrics(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    paths = _paths(tenant_id)
+    status = executor.get_status(tenant_id)
     publish_log: list[dict[str, Any]] = []
-    if PUBLISH_LOG_PATH.exists():
-        publish_log = json.loads(PUBLISH_LOG_PATH.read_text(encoding="utf-8"))
+    pl_path = paths["publish_log"]
+    if pl_path.exists():
+        publish_log = json.loads(pl_path.read_text(encoding="utf-8"))
 
-    sources = fetch_leads_by_source()
+    sources = fetch_leads_by_source(tenant_id)
     guia_leads = 0
     scraper_leads = 0
     linkedin_leads = 0
@@ -279,7 +288,7 @@ def load_metrics() -> dict[str, Any]:
 
     published = status["content_queue"]["linkedin_published"]
     pending = status["content_queue"]["linkedin_pending"]
-    odoo = fetch_odoo_leads(limit=1)
+    odoo = fetch_odoo_leads(limit=1, tenant_id=tenant_id)
     total_leads = odoo.get("total", 0) if odoo.get("ok") else 0
     marketing_leads = odoo.get("marketing_stage", 0) if odoo.get("ok") else 0
 
@@ -309,8 +318,8 @@ def load_metrics() -> dict[str, Any]:
     }
 
 
-def pending_posts() -> list[dict[str, Any]]:
-    queue = executor.load_content_queue()
+def pending_posts(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
+    queue = executor.load_content_queue(tenant_id)
     items = []
     for post in queue.get("posts", []):
         if post.get("status") != "pending":
@@ -330,8 +339,8 @@ def pending_posts() -> list[dict[str, Any]]:
     return items
 
 
-def published_posts(limit: int = 5) -> list[dict[str, Any]]:
-    queue = executor.load_content_queue()
+def published_posts(limit: int = 5, tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
+    queue = executor.load_content_queue(tenant_id)
     items = [p for p in queue.get("posts", []) if p.get("status") == "published"]
     items.sort(key=lambda p: p.get("published_at") or "", reverse=True)
     return [
@@ -344,11 +353,19 @@ def published_posts(limit: int = 5) -> list[dict[str, Any]]:
     ]
 
 
-def get_summary() -> dict[str, Any]:
-    status = executor.get_status()
-    orders = queue_store.list_orders(limit=15)
+def get_summary(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    tenant = resolve_tenant(tenant_id)
+    status = executor.get_status(tenant_id)
+    orders = queue_store.list_orders(limit=15, tenant_id=tenant_id)
+    tenants_meta = [
+        {"tenant_id": t.tenant_id, "display_name": t.display_name}
+        for t in list_tenants()
+    ]
     return {
         "ok": True,
+        "tenant_id": tenant_id,
+        "tenant_name": tenant.display_name,
+        "tenants": tenants_meta,
         "time_panama": datetime.now(PANAMA).strftime("%Y-%m-%d %H:%M %Z"),
         "stats": {
             "linkedin_pending": status["content_queue"]["linkedin_pending"],
@@ -358,15 +375,15 @@ def get_summary() -> dict[str, Any]:
             "prospection_csv": status["prospection_csv_rows"],
             "orders_pending": status["orders_pending"],
         },
-        "pending_posts": pending_posts(),
-        "published_posts": published_posts(),
-        "campaigns": load_campaigns(),
-        "calendar": load_calendar_view(),
-        "metrics": load_metrics(),
-        "flyers": load_flyers_library(),
-        "connectors": load_connectors(),
+        "pending_posts": pending_posts(tenant_id),
+        "published_posts": published_posts(tenant_id=tenant_id),
+        "campaigns": load_campaigns(tenant_id),
+        "calendar": load_calendar_view(tenant_id),
+        "metrics": load_metrics(tenant_id),
+        "flyers": load_flyers_library(tenant_id),
+        "connectors": load_connectors(tenant_id),
         "orders": orders,
-        "odoo": fetch_odoo_leads(),
+        "odoo": fetch_odoo_leads(tenant_id=tenant_id),
         "links": {
             "n8n": "https://n8n.etsrv.site",
             "guia": "https://n8n.etsrv.site/guia/",

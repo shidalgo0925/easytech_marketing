@@ -3,104 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EM+Acción — Command Center</title>
-  <link rel="icon" href="/accio/dashboard/em-logomark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/accio/dashboard/accio-design.css">
+  <title>EMAccion — Command Center</title>
+  <link rel="icon" href="/accio/static/em-logomark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+  <link rel="stylesheet" href="/accio/static/accio-design.css">
 </head>
 <body>
-  <div id="login" class="login-overlay">
-    <div class="login-box">
-      <div class="login-brand em-logo">
-        <span class="em-logo-lockup">
-          <span class="em-logo-icon" aria-hidden="true">
-            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g class="em-gear-ring" stroke="currentColor" fill="none">
-                <circle cx="18" cy="18" r="14" stroke-width="1.5" stroke-dasharray="2.4 1.9"/>
-                <circle cx="18" cy="18" r="11.5" stroke-width="1" opacity="0.45"/>
-                <path stroke-width="1.25" stroke-linecap="round" d="M18 2.5v3M18 30.5v3M2.5 18h3M30.5 18h3M6.8 6.8l2.1 2.1M27.1 27.1l2.1 2.1M6.8 29.2l2.1-2.1M27.1 8.9l2.1-2.1"/>
-              </g>
-            </svg>
-            <span class="em-monogram">EM</span>
-          </span>
-          <span class="em-plus">+</span>
-        </span>
-        <span class="em-wordmark">Acción</span>
-      </div>
-      <p>Command center de marketing autónomo. Ingresa tu <strong>ACCIO_API_KEY</strong>.</p>
-      <input type="password" id="apiKeyInput" placeholder="ACCIO_API_KEY" autocomplete="off">
-      <button class="accio-btn-primary" style="width:100%" onclick="saveKey()">Entrar al terminal</button>
-    </div>
-  </div>
-
-  <div id="app" class="hidden">
-    <header class="accio-header">
-      <div class="accio-header-left">
-        <a class="accio-brand em-logo" href="/accio/dashboard/" aria-label="EM+Acción">
-          <span class="em-logo-lockup">
-            <span class="em-logo-icon" aria-hidden="true">
-              <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g class="em-gear-ring" stroke="currentColor" fill="none">
-                  <circle cx="18" cy="18" r="14" stroke-width="1.5" stroke-dasharray="2.4 1.9"/>
-                  <circle cx="18" cy="18" r="11.5" stroke-width="1" opacity="0.45"/>
-                  <path stroke-width="1.25" stroke-linecap="round" d="M18 2.5v3M18 30.5v3M2.5 18h3M30.5 18h3M6.8 6.8l2.1 2.1M27.1 27.1l2.1 2.1M6.8 29.2l2.1-2.1M27.1 8.9l2.1-2.1"/>
-                </g>
-              </svg>
-              <span class="em-monogram">EM</span>
-            </span>
-            <span class="em-plus">+</span>
-          </span>
-          <span class="em-wordmark">Acción</span>
+  <div id="app">
+    <header class="topbar">
+      <div class="topbar-left">
+        <a class="topbar-brand" href="/accio/dashboard/" aria-label="EMAccion">
+          <svg class="topbar-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <g class="em-gear-ring" stroke="currentColor" fill="none">
+              <circle cx="18" cy="18" r="14" stroke-width="1.5" stroke-dasharray="2.4 1.9"/>
+              <circle cx="18" cy="18" r="11.5" stroke-width="1" opacity="0.45"/>
+            </g>
+          </svg>
+          <span class="brand-name">EMAccion</span>
         </a>
-        <div class="accio-client" title="Cliente activo">
-          <span class="accio-kpi-label" style="margin:0">Cliente</span>
-          <span class="accio-client-name" id="clientName">EasyTech Services</span>
+        <div class="empresa-pill empresa-pill--claro" title="Empresa activa">
+          <span class="empresa-pill-label">Empresa:</span>
+          <select id="tenantSelect" class="empresa-select" aria-label="Cambiar empresa" onchange="switchEmpresa(this.value)"></select>
+          <i class="ti ti-chevron-down empresa-chevron"></i>
         </div>
-        <div class="accio-clock" id="clock"></div>
       </div>
-      <div class="accio-header-right">
-        <span class="accio-status-live">Operador autónomo</span>
-        <button class="accio-btn-secondary" onclick="loadData()">Actualizar</button>
-        <button class="accio-btn-primary" id="btnPrimary" onclick="runPrimaryAction()">Publicar siguiente</button>
+      <div class="topbar-right">
+        <div class="topbar-clock" id="clock"></div>
+        <span class="status-pill" id="userBadge">Usuario</span>
+        <button class="btn-ghost" type="button" onclick="loadData()">Actualizar</button>
+        <button class="btn-primary" type="button" id="btnPrimary" onclick="runPrimaryAction()">
+          <i class="ti ti-send"></i> Publicar siguiente
+        </button>
         <div class="accio-menu">
-          <button class="accio-btn-icon" id="menuToggle" aria-label="Más acciones" onclick="toggleMenu(event)">···</button>
+          <button class="btn-ghost btn-icon" type="button" id="menuToggle" aria-label="Más acciones" onclick="toggleMenu(event)">
+            <i class="ti ti-dots"></i>
+          </button>
           <div class="accio-menu-panel" id="actionMenu">
-            <button class="accio-menu-item" onclick="runPipeline(); closeMenu()">Ejecutar pipeline</button>
-            <button class="accio-menu-item" onclick="runPublish(false); closeMenu()">Publicar LinkedIn</button>
-            <button class="accio-menu-item" onclick="runMetaPublish(false); closeMenu()">Publicar Meta</button>
-            <button class="accio-menu-item danger" onclick="runPublish(true); closeMenu()">Forzar LinkedIn</button>
+            <button class="accio-menu-item" type="button" onclick="runPipeline(); closeMenu()">Ejecutar pipeline</button>
+            <button class="accio-menu-item" type="button" onclick="runPublish(false); closeMenu()">Publicar LinkedIn</button>
+            <button class="accio-menu-item" type="button" onclick="runMetaPublish(false); closeMenu()">Publicar Meta</button>
+            <button class="accio-menu-item" type="button" onclick="logoutDashboard(); closeMenu()">Cerrar sesión</button>
+            <button class="accio-menu-item danger" type="button" onclick="runPublish(true); closeMenu()">Forzar LinkedIn</button>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="accio-main">
-      <nav class="accio-tabs" id="tabs">
-        <button class="accio-tab active" data-tab="resumen">Resumen</button>
-        <button class="accio-tab" data-tab="campanas">Campañas</button>
-        <button class="accio-tab" data-tab="calendario">Calendario</button>
-        <button class="accio-tab" data-tab="metricas">Métricas</button>
-        <button class="accio-tab" data-tab="flyers">Flyers</button>
-        <button class="accio-tab" data-tab="conocimiento">Conocimiento</button>
-        <button class="accio-tab" data-tab="conectores">Conectores</button>
-      </nav>
+    <nav class="navbar" id="tabs" aria-label="Secciones del dashboard">
+      <button class="nav-item active" type="button" data-tab="resumen">Resumen</button>
+      <button class="nav-item" type="button" data-tab="campanas">Campañas</button>
+      <button class="nav-item" type="button" data-tab="calendario">Calendario</button>
+      <button class="nav-item" type="button" data-tab="metricas">Métricas</button>
+      <button class="nav-item" type="button" data-tab="flyers">Flyers</button>
+      <button class="nav-item" type="button" data-tab="conocimiento">Conocimiento</button>
+      <button class="nav-item" type="button" data-tab="conectores">Conectores</button>
+      <button class="nav-item" type="button" data-tab="configuracion">Configuración</button>
+    </nav>
+
+    <main class="content">
 
       <div id="panel-resumen" class="tab-panel active">
-        <div class="accio-kpi-grid" id="stats"></div>
-        <div class="accio-grid">
-          <section class="accio-card">
-            <div class="accio-card-head">Cola de publicaciones</div>
-            <div class="accio-card-body accio-table-wrap" id="postsTable"></div>
-          </section>
-          <section class="accio-card">
-            <div class="accio-card-head">
-              Leads CRM
-              <a id="odooLink" href="#" target="_blank">Abrir Odoo →</a>
+        <div class="resumen-empresa-banner" id="resumenEmpresaBanner"></div>
+        <div class="metrics-grid accio-kpi-grid" id="stats"></div>
+        <div class="panels-grid accio-grid">
+          <section class="panel accio-card">
+            <div class="panel-header accio-card-head">
+              <h2 class="panel-title"><i class="ti ti-clock-hour-4"></i> Cola de publicaciones</h2>
             </div>
-            <div class="accio-card-body accio-table-wrap" id="leadsTable"></div>
+            <div class="panel-body accio-card-body" id="postsTable"></div>
           </section>
-          <section class="accio-card" style="grid-column: 1 / -1">
-            <div class="accio-card-head">Órdenes del motor</div>
-            <div class="accio-card-body accio-table-wrap" id="ordersTable"></div>
+          <section class="panel accio-card">
+            <div class="panel-header accio-card-head">
+              <h2 class="panel-title"><i class="ti ti-user-check"></i> Leads CRM</h2>
+              <a class="panel-link" id="odooLink" href="#" target="_blank">Abrir Odoo <i class="ti ti-arrow-right"></i></a>
+            </div>
+            <div class="panel-body accio-card-body" id="leadsTable"></div>
+          </section>
+          <section class="panel accio-card panel-full">
+            <div class="panel-header accio-card-head">
+              <h2 class="panel-title"><i class="ti ti-list"></i> Órdenes del motor</h2>
+            </div>
+            <div class="panel-body accio-card-body" id="ordersTable"></div>
           </section>
         </div>
       </div>
@@ -153,8 +136,12 @@
             <div class="accio-card-body accio-form" id="businessContextForm"></div>
           </section>
           <section class="accio-card">
-            <div class="accio-card-head">Knowledge Base</div>
+            <div class="accio-card-head">
+              <span>Knowledge Base</span>
+              <span id="knowledgeHeadActions"></span>
+            </div>
             <div class="accio-card-body accio-table-wrap" id="knowledgeTable"></div>
+            <div class="accio-card-body accio-form" id="knowledgeEditor" style="display:none"></div>
           </section>
           <section class="accio-card" style="grid-column: 1 / -1">
             <div class="accio-card-head">Generador de temas · Fase E</div>
@@ -173,30 +160,82 @@
         </section>
       </div>
 
+      <div id="panel-configuracion" class="tab-panel">
+        <div class="accio-kpi-grid" id="settingsStats"></div>
+        <div class="config-layout">
+          <nav class="config-subnav" id="configSubnav">
+            <button type="button" class="config-nav active" data-config="empresa">Información general</button>
+            <button type="button" class="config-nav" data-config="usuarios">Usuarios</button>
+            <button type="button" class="config-nav" data-config="productos">Productos</button>
+            <button type="button" class="config-nav" data-config="crm">CRM</button>
+            <button type="button" class="config-nav" data-config="conectores">Conectores</button>
+            <button type="button" class="config-nav" data-config="landing">Landings</button>
+            <button type="button" class="config-nav" data-config="publicacion">Publicación</button>
+            <button type="button" class="config-nav" data-config="variables">Variables</button>
+            <button type="button" class="config-nav" data-config="ia">IA</button>
+            <button type="button" class="config-nav" data-config="logs">Logs</button>
+            <button type="button" class="config-nav" data-config="backups">Backups</button>
+            <button type="button" class="config-nav" data-config="seguridad">Seguridad</button>
+          </nav>
+          <div class="config-content">
+            <section class="config-section active config-section--claro" id="config-empresa"></section>
+            <section class="config-section" id="config-usuarios"></section>
+            <section class="config-section" id="config-productos"></section>
+            <section class="config-section" id="config-conectores"></section>
+            <section class="config-section" id="config-crm"></section>
+            <section class="config-section" id="config-landing"></section>
+            <section class="config-section" id="config-publicacion"></section>
+            <section class="config-section" id="config-variables"></section>
+            <section class="config-section" id="config-ia"></section>
+            <section class="config-section" id="config-logs"></section>
+            <section class="config-section" id="config-backups"></section>
+            <section class="config-section" id="config-seguridad"></section>
+          </div>
+        </div>
+      </div>
+
       <div class="accio-links" id="quickLinks"></div>
     </main>
   </div>
 
   <script>
-    const KEY_STORAGE = 'accio_dashboard_key';
+    const TENANT_ID = (window.__ACCIO_TENANT__ || 'easytech');
+    const TENANTS = window.__ACCIO_TENANTS__ || [{ id: 'easytech', name: 'EasyTech' }];
     let lastData = null;
     let lastKnowledge = null;
+    let lastSettings = null;
     let lastGenerated = null;
     let activeTab = 'resumen';
+    let sessionRole = 'viewer';
+    let sessionGlobalRole = null;
+    let sessionPerms = new Set(['read']);
 
-    function getKey() { return sessionStorage.getItem(KEY_STORAGE) || ''; }
+    function isPlatformAdmin() {
+      return sessionGlobalRole === 'super_admin';
+    }
 
-    function saveKey() {
-      const v = document.getElementById('apiKeyInput').value.trim();
-      if (!v) return;
-      sessionStorage.setItem(KEY_STORAGE, v);
-      document.getElementById('login').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
-      loadData();
+    async function switchEmpresa(id) {
+      if (id === TENANT_ID) return;
+      try {
+        await fetch('/accio/auth/empresas/' + encodeURIComponent(id) + '/entrar', {
+          method: 'POST',
+          credentials: 'include',
+        });
+      } catch (_) { /* ignore */ }
+      location.href = `/accio/dashboard/${id}/`;
+    }
+    const switchTenant = switchEmpresa;
+
+    function can(perm) {
+      return sessionPerms.has(perm) || sessionPerms.has('admin') || sessionRole === 'admin';
+    }
+
+    function tenantApi(path) {
+      return `/accio/${TENANT_ID}${path}`;
     }
 
     function authHeaders() {
-      return { 'Authorization': 'Bearer ' + getKey(), 'Content-Type': 'application/json' };
+      return { 'Content-Type': 'application/json', 'X-Accio-Tenant': TENANT_ID };
     }
 
     function toast(msg, isError) {
@@ -208,40 +247,52 @@
     }
 
     async function api(path, opts = {}) {
-      const res = await fetch('/accio/dashboard/api' + path, {
+      const res = await fetch(tenantApi('/dashboard/api' + path), {
         ...opts,
+        credentials: 'include',
         headers: { ...authHeaders(), ...(opts.headers || {}) },
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
-        sessionStorage.removeItem(KEY_STORAGE);
-        location.reload();
+        const next = encodeURIComponent(location.pathname + location.search);
+        location.href = `/accio/login/?next=${next}`;
         throw new Error('Sesión expirada');
       }
       if (!res.ok) throw new Error(data.error || res.statusText);
       return data;
     }
 
-    function kpi(label, value, accent) {
-      return `<div class="accio-kpi-card">
-        <div class="accio-kpi-label">${label}</div>
-        <div class="accio-kpi-value${accent ? ' is-accent' : ''}">${value}</div>
+    function kpi(label, value, colorClass) {
+      const cls = colorClass || KPI_COLORS[label] || 'c-neutral';
+      return `<div class="metric-card accio-kpi-card ${cls}">
+        <div class="metric-label accio-kpi-label">${label}</div>
+        <div class="metric-value accio-kpi-value">${value}</div>
       </div>`;
     }
 
+    const KPI_COLORS = {
+      'Posts pendientes': 'c-amber',
+      'FB / IG pend.': 'c-blue',
+      'Publicados': 'c-green',
+      'Prospectos CSV': 'c-neutral',
+      'Leads Odoo': 'c-green',
+      'Etapa marketing': 'c-green',
+      'Órdenes pend.': 'c-red',
+    };
+
     function platformBadge(platform) {
       const p = (platform || '').toLowerCase();
-      let cls = 'default';
-      if (p === 'linkedin') cls = 'linkedin';
-      else if (['facebook', 'instagram', 'meta_ads'].includes(p)) cls = 'meta';
-      return `<span class="accio-badge accio-badge--${cls}">${platform || '?'}</span>`;
+      let cls = 'badge-gray';
+      if (p === 'linkedin') cls = 'badge-blue';
+      else if (['facebook', 'instagram', 'meta_ads', 'meta'].includes(p)) cls = 'badge-blue';
+      return `<span class="badge ${cls}">${platform || '?'}</span>`;
     }
 
     function statusClass(s) {
-      if (s === 'completed' || s === 'published') return 'status-ok';
-      if (s === 'failed') return 'status-fail';
-      if (s === 'running') return 'status-run';
-      return 'status-pending';
+      if (s === 'completed' || s === 'published') return 'badge badge-green';
+      if (s === 'failed') return 'badge badge-danger';
+      if (s === 'running') return 'badge badge-blue';
+      return 'badge badge-amber';
     }
 
     function tableWrap(html) {
@@ -259,7 +310,7 @@
 
     function switchTab(name) {
       activeTab = name;
-      document.querySelectorAll('.accio-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      document.querySelectorAll('.navbar .nav-item').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
       updatePrimaryLabel();
     }
@@ -274,6 +325,7 @@
         flyers: 'Actualizar assets',
         conocimiento: 'Generar tema',
         conectores: 'Validar conectores',
+        configuracion: 'Guardar configuración',
       };
       btn.textContent = labels[activeTab] || 'Operar';
     }
@@ -286,19 +338,34 @@
     }
 
     document.getElementById('tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.accio-tab');
+      const tab = e.target.closest('.navbar .nav-item');
       if (tab) {
         switchTab(tab.dataset.tab);
         if (tab.dataset.tab === 'conocimiento' && !lastKnowledge) loadKnowledge();
+        if (tab.dataset.tab === 'configuracion' && !lastSettings) loadSettings();
       }
     });
 
+    function initEmpresaSelector() {
+      const sel = document.getElementById('tenantSelect');
+      if (!sel) return;
+      sel.innerHTML = TENANTS.map(t =>
+        `<option value="${t.id}" ${t.id === TENANT_ID ? 'selected' : ''}>${t.name}</option>`
+      ).join('');
+    }
+    const initTenantSelector = initEmpresaSelector;
+
     function renderResumen(data) {
+      const banner = document.getElementById('resumenEmpresaBanner');
+      const empresaName = data.tenant_name || window.__ACCIO_EMPRESA_NAME__ || TENANT_ID;
+      if (banner) {
+        banner.innerHTML = `<span class="resumen-empresa-label">Empresa activa</span><strong class="resumen-empresa-name">${esc(empresaName)}</strong>`;
+      }
       const s = data.stats;
       document.getElementById('stats').innerHTML = [
         kpi('Posts pendientes', s.linkedin_pending),
         kpi('FB / IG pend.', `${s.facebook_pending||0} / ${s.instagram_pending||0}`),
-        kpi('Publicados', s.linkedin_published, true),
+        kpi('Publicados', s.linkedin_published),
         kpi('Prospectos CSV', s.prospection_csv),
         kpi('Leads Odoo', data.odoo.ok ? data.odoo.total : '—'),
         kpi('Etapa marketing', data.odoo.ok ? data.odoo.marketing_stage : '—'),
@@ -307,15 +374,15 @@
 
       const posts = data.pending_posts;
       document.getElementById('postsTable').innerHTML = posts.length ? `
-        <table class="accio-table"><thead><tr>
-          <th>Canal</th><th>ID</th><th>Programado</th><th>Flyer</th><th>Vista previa</th>
-        </tr></thead><tbody>${posts.map(p => `<tr>
-          <td>${platformBadge(p.platform)}</td>
-          <td class="is-mono">${p.id}</td>
-          <td class="is-mono">${(p.scheduled_at||'').slice(0,16)}</td>
-          <td>${p.flyer}</td>
-          <td>${p.preview}</td>
-        </tr>`).join('')}</tbody></table>
+        <div class="tbl-head tbl-queue">
+          <span>Canal</span><span>ID</span><span>Programado</span><span>Vista previa</span>
+        </div>
+        ${posts.map(p => `<div class="tbl-row tbl-queue">
+          <span>${platformBadge(p.platform)}</span>
+          <span class="is-mono">${p.id}</span>
+          <span class="is-mono">${(p.scheduled_at||'').slice(0,16)}</span>
+          <span class="tbl-muted">${p.preview}</span>
+        </div>`).join('')}
       ` : '<div class="empty">No hay posts pendientes</div>';
 
       const odoo = data.odoo;
@@ -323,13 +390,15 @@
         document.getElementById('odooLink').href = odoo.odoo_url + '/web#action=crm.crm_lead_action_pipeline';
       }
       document.getElementById('leadsTable').innerHTML = odoo.ok && odoo.recent.length ? `
-        <table class="accio-table"><thead><tr><th>Lead</th><th>Email</th><th>Etapa</th><th>Origen</th></tr></thead>
-        <tbody>${odoo.recent.map(l => `<tr>
-          <td>${l.name}</td>
-          <td>${l.email}</td>
-          <td>${l.stage}</td>
-          <td>${l.source}</td>
-        </tr>`).join('')}</tbody></table>
+        <div class="tbl-head tbl-leads">
+          <span>Lead</span><span>Email</span><span>Etapa</span><span>Origen</span>
+        </div>
+        ${odoo.recent.map(l => `<div class="tbl-row tbl-leads">
+          <span>${l.name}</span>
+          <span class="tbl-muted">${l.email}</span>
+          <span>${l.stage}</span>
+          <span class="tbl-muted">${l.source}</span>
+        </div>`).join('')}
       ` : `<div class="empty">${odoo.error || 'Sin leads recientes'}</div>`;
 
       const orders = data.orders;
@@ -490,7 +559,10 @@
         <label>Público objetivo<textarea id="ctxPublico" rows="2">${esc(c.publico_objetivo||'')}</textarea></label>
         <label>Tono<textarea id="ctxTono" rows="2">${esc(c.tono_comunicacion||'')}</textarea></label>
         <label>CTA principal<input id="ctxCta" value="${esc(c.cta_principal||'DIAGNÓSTICO')}"></label>`;
-      if (c.empresa) document.getElementById('clientName').textContent = c.empresa;
+      if (c.empresa) {
+        const sel = document.getElementById('tenantSelect');
+        if (sel && sel.selectedOptions[0]) sel.selectedOptions[0].textContent = c.empresa;
+      }
     }
 
     function esc(s) {
@@ -510,14 +582,106 @@
 
     async function saveBusinessContext() {
       try {
-        const r = await fetch('/accio/config/business-context', {
+        const r = await fetch(tenantApi('/config/business-context'), {
           method: 'POST', headers: authHeaders(),
           body: JSON.stringify({ context: getBusinessContextPayload() }),
         });
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Error al guardar');
         toast('Contexto guardado');
-        if (data.context?.empresa) document.getElementById('clientName').textContent = data.context.empresa;
+        if (data.context?.empresa) {
+          const sel = document.getElementById('tenantSelect');
+          if (sel && sel.selectedOptions[0]) sel.selectedOptions[0].textContent = data.context.empresa;
+        }
+      } catch (e) { toast(e.message, true); }
+    }
+
+    let knowledgeEditSlug = null;
+
+    function hideKnowledgeEditor() {
+      knowledgeEditSlug = null;
+      const ed = document.getElementById('knowledgeEditor');
+      if (ed) { ed.style.display = 'none'; ed.innerHTML = ''; }
+    }
+
+    function knowledgeEditorHtml(article, isNew) {
+      const a = article || {};
+      return `
+        <h4>${isNew ? 'Nuevo artículo' : 'Editar artículo'}</h4>
+        <label>Slug<input id="kbSlug" value="${esc(a.slug||'')}" ${isNew ? '' : 'readonly'}></label>
+        <label>Título<input id="kbTitle" value="${esc(a.title||'')}"></label>
+        <label>Producto<input id="kbProduct" value="${esc(a.product||'')}"></label>
+        <label>Tags (csv)<input id="kbTags" value="${esc((a.tags||[]).join(', '))}"></label>
+        <label>Contenido (Markdown)<textarea id="kbBody" rows="12">${esc(a.body||'')}</textarea></label>
+        <div class="config-crud-bar">
+          <button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveKnowledgeArticle()">Guardar</button>
+          <button type="button" class="accio-btn-secondary accio-btn-sm" onclick="hideKnowledgeEditor()">Cancelar</button>
+        </div>`;
+    }
+
+    async function newKnowledgeArticle() {
+      if (!can('config')) return toast('Sin permiso', true);
+      knowledgeEditSlug = null;
+      const ed = document.getElementById('knowledgeEditor');
+      ed.style.display = 'block';
+      ed.innerHTML = knowledgeEditorHtml({}, true);
+      ed.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function editKnowledgeArticle(slug) {
+      if (!can('config')) return toast('Sin permiso', true);
+      try {
+        const r = await fetch(tenantApi('/knowledge/' + encodeURIComponent(slug)), {
+          headers: authHeaders(), credentials: 'include',
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'No se pudo cargar');
+        knowledgeEditSlug = slug;
+        const ed = document.getElementById('knowledgeEditor');
+        ed.style.display = 'block';
+        ed.innerHTML = knowledgeEditorHtml(data.article, false);
+        ed.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function saveKnowledgeArticle() {
+      if (!can('config')) return toast('Sin permiso', true);
+      const payload = {
+        slug: document.getElementById('kbSlug')?.value.trim(),
+        title: document.getElementById('kbTitle')?.value.trim(),
+        product: document.getElementById('kbProduct')?.value.trim(),
+        tags: (document.getElementById('kbTags')?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+        body: document.getElementById('kbBody')?.value || '',
+      };
+      if (!payload.slug) return toast('Slug obligatorio', true);
+      const path = knowledgeEditSlug
+        ? '/knowledge/' + encodeURIComponent(knowledgeEditSlug)
+        : '/knowledge';
+      try {
+        const r = await fetch(tenantApi(path), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al guardar');
+        toast('Artículo guardado');
+        hideKnowledgeEditor();
+        loadKnowledge();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function deleteKnowledgeArticle(slug) {
+      if (!can('config')) return toast('Sin permiso', true);
+      if (!confirm(`¿Eliminar artículo «${slug}»?`)) return;
+      try {
+        const r = await fetch(tenantApi('/knowledge/' + encodeURIComponent(slug)), {
+          method: 'DELETE', headers: authHeaders(), credentials: 'include',
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al eliminar');
+        toast('Artículo eliminado');
+        hideKnowledgeEditor();
+        loadKnowledge();
       } catch (e) { toast(e.message, true); }
     }
 
@@ -530,17 +694,28 @@
         kpi('Venta en cola', `${bal.venta_pct ?? 0}%`, true),
       ].join('');
       renderBusinessContextForm(data.business_context);
+      const headActions = document.getElementById('knowledgeHeadActions');
+      if (headActions) {
+        headActions.innerHTML = can('config')
+          ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="newKnowledgeArticle()">+ Artículo</button>'
+          : '';
+      }
       const articles = data.articles || [];
+      const canEdit = can('config');
       document.getElementById('knowledgeTable').innerHTML = articles.length ? `
         <table class="accio-table"><thead><tr>
-          <th>Slug</th><th>Título</th><th>Producto</th><th>Chars</th><th></th>
+          <th>Slug</th><th>Título</th><th>Producto</th><th>Chars</th><th>Estado</th>${canEdit ? '<th class="col-actions"></th>' : ''}
         </tr></thead><tbody>${articles.map(a => `<tr>
-          <td class="is-mono">${a.slug}</td>
-          <td>${a.title}</td>
-          <td>${a.product}</td>
+          <td class="is-mono">${esc(a.slug)}</td>
+          <td>${esc(a.title)}</td>
+          <td>${esc(a.product)}</td>
           <td>${a.chars}</td>
           <td>${a.available ? '<span class="conn-ok">OK</span>' : '<span class="conn-warn">Falta</span>'}</td>
-        </tr>`).join('')}</tbody></table>` : '<div class="empty">Sin artículos</div>';
+          ${canEdit ? `<td class="col-actions">
+            <button type="button" class="accio-btn-secondary accio-btn-sm" onclick="editKnowledgeArticle('${esc(a.slug)}')">Editar</button>
+            <button type="button" class="accio-btn-secondary accio-btn-sm cfg-btn-del" onclick="deleteKnowledgeArticle('${esc(a.slug)}')"><i class="ti ti-trash"></i></button>
+          </td>` : ''}
+        </tr>`).join('')}</tbody></table>` : '<div class="empty">Sin artículos — usa + Artículo para crear uno</div>';
       const slugs = articles.filter(a => a.available).map(a => a.slug);
       document.getElementById('topicGeneratorForm').innerHTML = `
         <label>Producto<select id="genProduct">${slugs.map(s => `<option value="${s}">${s}</option>`).join('')}</select></label>
@@ -568,6 +743,792 @@
       } catch (e) { toast('Knowledge: ' + e.message, true); }
     }
 
+    function settingsFieldHtml(field, prefix) {
+      const ph = field.configured ? `${field.masked || '(configurado)'} — dejar vacío para no cambiar` : '';
+      const type = field.secret ? 'password' : 'text';
+      return `<label>${field.label}
+        <input type="${type}" id="${prefix}_${field.key}" placeholder="${esc(ph)}" autocomplete="off">
+        <span class="field-status status-${field.validation_status}">${field.validation_status}</span>
+      </label>`;
+    }
+
+    function configCard(title, body, saveFn, extraFoot, formClass) {
+      let showSave = false;
+      if (saveFn) {
+        const needsAdmin = ['saveUsuarios', 'savePlatformSettings'].includes(saveFn);
+        showSave = can(needsAdmin ? 'admin' : 'config');
+      }
+      const formCls = 'accio-card-body accio-form' + (formClass ? ' ' + formClass : '');
+      return `<section class="accio-card config-card">
+        <div class="accio-card-head"><span class="config-card-title">${title}</span>
+          ${showSave ? `<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="${saveFn}()">Guardar</button>` : ''}
+        </div>
+        <div class="${formCls}">${body}</div>
+        ${extraFoot ? `<div class="accio-card-foot">${extraFoot}</div>` : ''}
+      </section>`;
+    }
+
+    function cfgDeleteBtn(onclick) {
+      return `<button type="button" class="accio-btn-secondary accio-btn-sm cfg-btn-del" title="Eliminar" onclick="${onclick}"><i class="ti ti-trash"></i></button>`;
+    }
+
+    function removeTableRow(btn) {
+      const tr = btn.closest('tr');
+      if (tr) tr.remove();
+    }
+
+    function normalizeRoleId(role) {
+      const map = { admin: 'tenant_admin', operator: 'marketing_operator' };
+      return map[role] || role || 'viewer';
+    }
+
+    function userRowHtml(u, roles, isNew) {
+      const id = u.id || '';
+      const admin = can('admin');
+      const roleId = normalizeRoleId(u.role);
+      if (isNew) {
+        return `<tr data-new="1">
+          <td><input class="cfg-user-id-new" placeholder="id único" ${admin ? '' : 'readonly'}></td>
+          <td><input class="cfg-user-name" data-id="" value="" ${admin ? '' : 'readonly'}></td>
+          <td><input class="cfg-user-email" data-id="" value="" ${admin ? '' : 'readonly'}></td>
+          <td><select class="cfg-user-role" data-id="" ${admin ? '' : 'disabled'}>${roles.map(r => `<option value="${r.id}">${esc(r.label)}</option>`).join('')}</select></td>
+          <td><input type="checkbox" class="cfg-user-active" data-id="" checked ${admin ? '' : 'disabled'}></td>
+          ${admin ? '<td><input type="password" class="cfg-user-pass" data-id="" placeholder="obligatoria" autocomplete="new-password"></td>' : ''}
+          ${admin ? `<td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>` : ''}
+        </tr>`;
+      }
+      return `<tr data-user-id="${esc(id)}">
+        <td class="is-mono">${esc(id)}</td>
+        <td><input class="cfg-user-name" data-id="${esc(id)}" value="${esc(u.name||'')}" ${admin ? '' : 'readonly'}></td>
+        <td><input class="cfg-user-email" data-id="${esc(id)}" value="${esc(u.email||'')}" ${admin ? '' : 'readonly'}></td>
+        <td><select class="cfg-user-role" data-id="${esc(id)}" ${admin ? '' : 'disabled'}>${roles.map(r => `<option value="${r.id}" ${r.id===roleId?'selected':''}>${esc(r.label)}</option>`).join('')}</select></td>
+        <td><input type="checkbox" class="cfg-user-active" data-id="${esc(id)}" ${u.active?'checked':''} ${admin ? '' : 'disabled'}></td>
+        ${admin ? `<td><input type="password" class="cfg-user-pass" data-id="${esc(id)}" placeholder="nueva (opc.)" autocomplete="new-password"></td>` : ''}
+        ${admin ? `<td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>` : ''}
+      </tr>`;
+    }
+
+    function roleRowHtml(r) {
+      const perms = Array.isArray(r.permissions) ? r.permissions.join(', ') : (r.permissions || '');
+      return `<tr>
+        <td><input class="cfg-role-id" value="${esc(r.id||'')}" placeholder="tenant_admin"></td>
+        <td><input class="cfg-role-label" value="${esc(r.label||'')}"></td>
+        <td><input class="cfg-role-perms" value="${esc(perms)}" placeholder="read, publish, config"></td>
+        <td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>
+      </tr>`;
+    }
+
+    function addRoleRow() {
+      const tbody = document.querySelector('#rolesTable tbody');
+      if (!tbody) return;
+      tbody.insertAdjacentHTML('beforeend', roleRowHtml({ id: '', label: '', permissions: ['read'] }));
+    }
+
+    function productRowHtml(p) {
+      return `<tr>
+        <td><input class="cfg-prod-slug" value="${esc(p.slug||'')}" placeholder="slug"></td>
+        <td><input class="cfg-prod-name" value="${esc(p.name||'')}"></td>
+        <td><input class="cfg-prod-cta" value="${esc(p.cta||'DIAGNÓSTICO')}"></td>
+        <td><input class="cfg-prod-landing" value="${esc(p.landing_path||'')}"></td>
+        <td><input type="checkbox" class="cfg-prod-enabled" ${p.enabled !== false ? 'checked' : ''}></td>
+        <td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>
+      </tr>`;
+    }
+
+    function varRowHtml(v) {
+      return `<tr>
+        <td><input class="cfg-var-key" value="${esc(v.key||'')}"></td>
+        <td><input class="cfg-var-val" value="${esc(v.value||'')}"></td>
+        <td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>
+      </tr>`;
+    }
+
+    function landingRowHtml(l) {
+      return `<tr>
+        <td><input class="cfg-land-slug" value="${esc(l.slug||'')}" placeholder="slug"></td>
+        <td><input class="cfg-land-path" value="${esc(l.path||'')}" placeholder="/ruta"></td>
+        <td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>
+      </tr>`;
+    }
+
+    function addUserRow() {
+      if (!can('admin')) return toast('Solo administradores', true);
+      const tbody = document.querySelector('#usersTable tbody');
+      if (!tbody) return;
+      const roles = lastSettings?.usuarios?.roles || [];
+      tbody.insertAdjacentHTML('beforeend', userRowHtml({}, roles, true));
+    }
+
+    function addLandingRow() {
+      const tbody = document.querySelector('#landingsTable tbody');
+      if (!tbody) return;
+      tbody.insertAdjacentHTML('beforeend', landingRowHtml({}));
+    }
+
+    function showConfigSection(name) {
+      document.querySelectorAll('.config-nav').forEach(b => b.classList.toggle('active', b.dataset.config === name));
+      document.querySelectorAll('.config-section').forEach(s => s.classList.toggle('active', s.id === 'config-' + name));
+    }
+
+    let empresaFormMode = 'edit';
+    let empresaEditId = TENANT_ID;
+
+    function crmOptions(selected) {
+      const opts = [
+        ['odoo', 'Odoo'],
+        ['en1', 'EN1'],
+        ['hubspot', 'HubSpot'],
+        ['zoho', 'Zoho'],
+        ['api', 'API genérica'],
+      ];
+      return opts.map(([v, l]) => `<option value="${v}" ${v === (selected || 'odoo') ? 'selected' : ''}>${l}</option>`).join('');
+    }
+
+    function empresaFormFieldsHtml(company, ctx, branding) {
+      const isNew = empresaFormMode === 'create';
+      const contact = (ctx && typeof ctx.contacto === 'object' && ctx.contacto) ? ctx.contacto : {};
+      const status = company.status || 'active';
+      const b = branding || company.branding || {};
+      const showCode = isNew && isPlatformAdmin();
+      return `
+        ${showCode ? '<label>Código interno (solo plataforma)<input id="empTenantId" placeholder="mi_empresa" autocomplete="off"></label>' : `<input type="hidden" id="empTenantId" value="${esc(empresaEditId)}">`}
+        <label>Nombre de la empresa<input id="empDisplayName" value="${esc(company.display_name || ctx.empresa || '')}"></label>
+        ${isNew ? '' : `<label>Estado<select id="empStatus"><option value="active" ${status==='active'?'selected':''}>Activa</option><option value="disabled" ${status==='disabled'?'selected':''}>Suspendida</option></select></label>`}
+        <label>CRM de la empresa<select id="empCrm">${crmOptions(company.crm_target)}</select></label>
+        <label>Zona horaria<input id="empTimezone" value="${esc(company.timezone || 'America/Panama')}"></label>
+        <label>Idioma / locale<input id="empLocale" value="${esc(company.default_locale || 'es-PA')}"></label>
+        <label>Dominios web (separados por coma)<input id="empDomains" value="${esc((company.domains || []).join(', '))}"></label>
+        <h4 class="config-form-section">Branding</h4>
+        <label>Color primario<input id="empPrimary" type="color" value="${esc(b.primary_color||'#1a4a2e')}"></label>
+        <label>Color acento<input id="empAccent" type="color" value="${esc(b.accent_color||'#3d8b5e')}"></label>
+        <label>Logo URL<input id="empLogo" value="${esc(b.logo_url||'/accio/static/em-logomark.svg')}"></label>
+        ${can('config') ? `<label>Subir logo<input type="file" id="empLogoFile" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>` : ''}
+        <h4 class="config-form-section">Contexto comercial (IA)</h4>
+        <label>Nombre en contenidos<input id="ctxEmpresa" value="${esc(ctx.empresa || company.display_name || '')}"></label>
+        <label>Industria<input id="ctxIndustria" value="${esc(ctx.industria || '')}"></label>
+        <label>País<input id="ctxPais" value="${esc(ctx.pais || '')}"></label>
+        <label>Público objetivo<textarea id="ctxPublico" rows="2">${esc(ctx.publico_objetivo || '')}</textarea></label>
+        <label>Productos / servicios (uno por línea)<textarea id="ctxProductos" rows="4">${esc((ctx.productos_servicios || []).join('\n'))}</textarea></label>
+        <label>Diferenciadores<textarea id="ctxDif" rows="2">${esc((ctx.diferenciadores || []).join('\n'))}</textarea></label>
+        <label>Problemas que resuelve<textarea id="ctxProb" rows="2">${esc((ctx.problemas_que_resuelve || []).join('\n'))}</textarea></label>
+        <label>Objetivos comerciales<textarea id="ctxObjetivos" rows="2">${esc((ctx.objetivos_comerciales || []).join('\n'))}</textarea></label>
+        <label>Tono de comunicación<input id="ctxTono" value="${esc(ctx.tono_comunicacion || '')}"></label>
+        <label>CTA principal<input id="ctxCta" value="${esc(ctx.cta_principal || 'DIAGNÓSTICO')}"></label>
+        <label>Email contacto<input id="ctxContactEmail" value="${esc(contact.email || '')}"></label>
+        <label>WhatsApp<input id="ctxContactWhatsapp" value="${esc(contact.whatsapp || '')}"></label>
+        <label>URL guía / landing<input id="ctxContactGuia" value="${esc(contact.guia || '')}"></label>`;
+    }
+
+    function renderEmpresaSection(data) {
+      const companies = data.empresa?.companies || [];
+      if (empresaFormMode !== 'create') {
+        empresaEditId = isPlatformAdmin() ? (data.empresa?.selected_tenant_id || TENANT_ID) : TENANT_ID;
+      }
+      const ctx = data.empresa?.context || {};
+      const branding = data.tenant?.branding || {};
+      const company = companies.find(c => c.tenant_id === empresaEditId) || {
+        tenant_id: empresaEditId,
+        display_name: data.tenant?.display_name,
+        crm_target: data.crm_target,
+        timezone: data.tenant?.timezone,
+        domains: data.tenant?.domains || [],
+        status: 'active',
+        branding,
+      };
+      const platform = isPlatformAdmin();
+      const listHtml = platform ? `
+            <div class="config-table-wrap">
+              <table class="accio-table" id="empresasTable">
+                <thead><tr><th>Nombre</th><th>Industria</th><th>País</th><th>CRM</th><th>Estado</th><th></th></tr></thead>
+                <tbody>${companies.length ? companies.map(c => `
+                  <tr class="${c.tenant_id === empresaEditId && empresaFormMode !== 'create' ? 'is-selected' : ''}" data-id="${esc(c.tenant_id)}">
+                    <td>${esc(c.display_name)}</td>
+                    <td>${esc(c.industria || '—')}</td>
+                    <td>${esc(c.pais || '—')}</td>
+                    <td>${esc(c.crm_target || '—')}</td>
+                    <td><span class="field-status status-${c.status === 'active' ? 'active' : 'pending'}">${c.status === 'active' ? 'Activa' : 'Suspendida'}</span></td>
+                    <td class="col-actions"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="selectEmpresaCompany('${esc(c.tenant_id)}')">Editar</button></td>
+                  </tr>`).join('') : '<tr><td colspan="6">Sin empresas</td></tr>'}
+                </tbody>
+              </table>
+            </div>` : '';
+      document.getElementById('config-empresa').innerHTML = `
+        <section class="accio-card config-card">
+          <div class="accio-card-head">
+            <span class="config-card-title">${platform ? 'Empresas de la plataforma' : 'Información de la empresa'}</span>
+            ${platform ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="newEmpresaForm()">+ Crear empresa</button>' : ''}
+          </div>
+          <div class="accio-card-body accio-form">
+            ${listHtml}
+            <h4 id="empresaFormTitle">${empresaFormMode === 'create' ? 'Nueva empresa' : (platform ? 'Editar empresa' : company.display_name || 'Mi empresa')}</h4>
+            <div id="empresaFormFields" class="config-form-empresa config-form-2col">${empresaFormFieldsHtml(company, ctx, branding)}</div>
+            <div class="config-crud-bar">
+              ${can('admin') ? '<button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveEmpresaCompany()">Guardar</button>' : ''}
+              ${can('config') ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="uploadEmpresaLogo()">Subir logo</button>' : ''}
+              ${platform && empresaFormMode !== 'create' ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="openEmpresaDashboard()">Abrir dashboard</button>' : ''}
+              ${platform && empresaFormMode === 'edit' && empresaEditId && company.status === 'disabled' ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="enableEmpresaCompany()">Reactivar</button>' : ''}
+              ${platform && empresaFormMode === 'edit' && empresaEditId && empresaEditId !== 'easytech' && company.status !== 'disabled' ? '<button type="button" class="accio-btn-secondary accio-btn-sm cfg-btn-del" onclick="disableEmpresaCompany()">Suspender</button>' : ''}
+            </div>
+            <p class="metric-note">${platform ? 'Como administrador de plataforma puede crear empresas. Cada una opera de forma aislada con sus usuarios, conectores y campañas.' : 'Configure los datos de su organización. Los cambios aplican solo a esta empresa.'}</p>
+          </div>
+        </section>`;
+    }
+
+    function collectEmpresaContext() {
+      const contact = {};
+      const email = document.getElementById('ctxContactEmail')?.value.trim();
+      const whatsapp = document.getElementById('ctxContactWhatsapp')?.value.trim();
+      const guia = document.getElementById('ctxContactGuia')?.value.trim();
+      if (email) contact.email = email;
+      if (whatsapp) contact.whatsapp = whatsapp;
+      if (guia) contact.guia = guia;
+      return {
+        empresa: document.getElementById('empDisplayName')?.value.trim() || document.getElementById('ctxEmpresa')?.value.trim(),
+        industria: document.getElementById('ctxIndustria')?.value,
+        pais: document.getElementById('ctxPais')?.value,
+        publico_objetivo: document.getElementById('ctxPublico')?.value,
+        productos_servicios: splitLines(document.getElementById('ctxProductos')?.value),
+        diferenciadores: splitLines(document.getElementById('ctxDif')?.value),
+        problemas_que_resuelve: splitLines(document.getElementById('ctxProb')?.value),
+        objetivos_comerciales: splitLines(document.getElementById('ctxObjetivos')?.value),
+        tono_comunicacion: document.getElementById('ctxTono')?.value,
+        cta_principal: document.getElementById('ctxCta')?.value,
+        contacto: contact,
+      };
+    }
+
+    function collectEmpresaPayload() {
+      const payload = {
+        display_name: document.getElementById('empDisplayName')?.value.trim(),
+        crm_target: document.getElementById('empCrm')?.value,
+        timezone: document.getElementById('empTimezone')?.value,
+        default_locale: document.getElementById('empLocale')?.value,
+        domains: (document.getElementById('empDomains')?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+        context: collectEmpresaContext(),
+        branding: {
+          primary_color: document.getElementById('empPrimary')?.value,
+          accent_color: document.getElementById('empAccent')?.value,
+          logo_url: document.getElementById('empLogo')?.value,
+        },
+      };
+      if (empresaFormMode === 'create') {
+        payload.tenant_id = document.getElementById('empTenantId')?.value.trim();
+      } else {
+        payload.status = document.getElementById('empStatus')?.value;
+      }
+      return payload;
+    }
+
+    async function refreshTenantsList() {
+      try {
+        const r = await fetch('/accio/tenants', { credentials: 'include' });
+        const data = await r.json();
+        if (data.tenants) {
+          window.__ACCIO_TENANTS__ = data.tenants.map(t => ({ id: t.tenant_id, name: t.display_name }));
+          initTenantSelector();
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    async function selectEmpresaCompany(id) {
+      empresaFormMode = 'edit';
+      empresaEditId = id;
+      try {
+        const r = await fetch(tenantApi('/settings/empresas/' + id), { headers: authHeaders(), credentials: 'include' });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al cargar empresa');
+        const c = data.company || {};
+        document.getElementById('empresaFormTitle').textContent = 'Editar empresa';
+        document.getElementById('empresaFormFields').innerHTML = empresaFormFieldsHtml(c, c.context || {}, c.branding || {});
+        document.querySelectorAll('#empresasTable tr').forEach(tr => tr.classList.toggle('is-selected', tr.dataset.id === id));
+      } catch (e) { toast(e.message, true); }
+    }
+
+    function newEmpresaForm() {
+      if (!can('admin')) return toast('Solo administradores', true);
+      empresaFormMode = 'create';
+      empresaEditId = '';
+      document.getElementById('empresaFormTitle').textContent = 'Nueva empresa';
+      document.getElementById('empresaFormFields').innerHTML = empresaFormFieldsHtml({}, {}, {});
+      document.querySelectorAll('#empresasTable tr').forEach(tr => tr.classList.remove('is-selected'));
+    }
+
+    async function saveEmpresaCompany() {
+      if (!can('admin')) return toast('Solo administradores', true);
+      const payload = collectEmpresaPayload();
+      if (empresaFormMode === 'create') {
+        if (!payload.tenant_id) return toast('ID tenant obligatorio', true);
+        if (!payload.display_name) return toast('Nombre comercial obligatorio', true);
+      }
+      const path = empresaFormMode === 'create'
+        ? '/settings/empresas'
+        : '/settings/empresas/' + empresaEditId;
+      try {
+        const r = await fetch(tenantApi(path), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al guardar');
+        toast(empresaFormMode === 'create' ? 'Empresa creada' : 'Empresa actualizada');
+        empresaFormMode = 'edit';
+        empresaEditId = data.company?.tenant_id || empresaEditId;
+        await refreshTenantsList();
+        await loadSettings();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    function openEmpresaDashboard() {
+      if (!empresaEditId) return;
+      switchTenant(empresaEditId);
+    }
+
+    async function enableEmpresaCompany() {
+      if (!can('admin') || !empresaEditId) return;
+      try {
+        const r = await fetch(tenantApi('/settings/empresas/' + empresaEditId + '/enable'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al reactivar');
+        toast('Empresa reactivada');
+        await refreshTenantsList();
+        await loadSettings();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function disableEmpresaCompany() {
+      if (!can('admin')) return toast('Solo administradores', true);
+      if (!empresaEditId || empresaEditId === 'easytech') return;
+      if (!confirm(`¿Desactivar la empresa «${empresaEditId}»?`)) return;
+      try {
+        const r = await fetch(tenantApi('/settings/empresas/' + empresaEditId + '/disable'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al desactivar');
+        toast('Empresa desactivada');
+        await refreshTenantsList();
+        await loadSettings();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    function renderSettingsCenter(data) {
+      lastSettings = data;
+      const conn = data.conectores || {};
+      const allConn = [...(conn.linkedin||[]), ...(conn.meta||[]), ...(conn.google||[]), ...(conn.tiktok||[])];
+      const ctx = data.empresa?.context || {};
+      const b = data.tenant?.branding || {};
+      const products = data.productos?.products || [];
+      const pub = data.publicacion || {};
+      const rules = pub.editorial_rules || {};
+      const land = data.landing || {};
+      const vars = data.variables || { plain: [], secret: [] };
+      const ia = data.ia || {};
+      const users = data.usuarios?.users || [];
+      const roles = data.usuarios?.roles || [];
+
+      document.getElementById('settingsStats').innerHTML = [
+        kpi('Empresa', data.tenant?.display_name || TENANT_ID, 'c-tenant-claro'),
+        kpi('CRM', data.crm_target || '—'),
+        kpi('Conectores OK', allConn.filter(f => f.validation_status === 'active').length, true),
+        kpi('Productos', products.filter(p => p.enabled).length),
+      ].join('');
+
+      renderEmpresaSection(data);
+
+      const userAdminCols = can('admin') ? '<th>Contraseña</th><th class="col-actions"></th>' : '';
+      document.getElementById('config-usuarios').innerHTML = configCard('Usuarios y roles', `
+        <p class="metric-note">Los usuarios se guardan en el sistema de acceso (login real). Crear, editar o eliminar filas y pulsar Guardar.</p>
+        <div class="config-table-wrap">
+        <table class="accio-table" id="usersTable"><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th>${userAdminCols}</tr></thead>
+        <tbody>${users.map(u => userRowHtml(u, roles, false)).join('')}</tbody></table>
+        </div>
+        ${can('admin') ? '<div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addUserRow()">+ Usuario</button></div>' : ''}
+        <h4 class="config-form-section">Roles personalizados</h4>
+        <div class="config-table-wrap">
+        <table class="accio-table" id="rolesTable"><thead><tr><th>ID</th><th>Etiqueta</th><th>Permisos (csv)</th><th class="col-actions"></th></tr></thead>
+        <tbody>${roles.map(r => roleRowHtml(r)).join('')}</tbody></table>
+        </div>
+        ${can('admin') ? '<div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addRoleRow()">+ Rol</button></div>' : ''}
+      `, 'saveUsuarios');
+
+      document.getElementById('config-productos').innerHTML = configCard('Catálogo de productos', `
+        <div class="config-table-wrap">
+        <table class="accio-table" id="productsTable"><thead><tr><th>Slug</th><th>Nombre</th><th>CTA</th><th>Landing</th><th>Activo</th><th class="col-actions"></th></tr></thead>
+        <tbody>${products.map(p => productRowHtml(p)).join('')}</tbody></table>
+        </div>
+        <div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addProductRow()">+ Producto</button></div>
+      `, 'saveProductos');
+
+      const connBody = '<h4>LinkedIn</h4>' + (conn.linkedin||[]).map(f => settingsFieldHtml(f, 'conn')).join('') +
+        '<h4>Meta (FB / IG)</h4>' + (conn.meta||[]).map(f => settingsFieldHtml(f, 'conn')).join('') +
+        '<h4>Google</h4>' + (conn.google||[]).map(f => settingsFieldHtml(f, 'conn')).join('') +
+        '<h4>TikTok</h4>' + (conn.tiktok||[]).map(f => settingsFieldHtml(f, 'conn')).join('');
+      const connFoot = [['linkedin','LinkedIn'], ['meta','Meta'], ['google','Google'], ['tiktok','TikTok']]
+        .map(([id, label]) => `<button type="button" class="accio-btn-secondary" onclick="testConnector('${id}')">Probar ${label}</button>`).join('');
+      document.getElementById('config-conectores').innerHTML = configCard('APIs / Conectores', connBody, 'saveConnectorSettings', connFoot);
+
+      document.getElementById('config-crm').innerHTML = configCard('CRM destino',
+        (data.crm||[]).map(f => settingsFieldHtml(f, 'crm')).join(''),
+        'saveCrmSettings',
+        '<button type="button" class="accio-btn-secondary" onclick="testCrm()">Probar conexión CRM</button>');
+
+      const landings = land.landings || [];
+      document.getElementById('config-landing').innerHTML = configCard('Landings', `
+        <label>Dominio base<input id="landDomain" value="${esc(land.base_domain||'')}"></label>
+        <label>UTM source por defecto<input id="landUtm" value="${esc(land.default_utm_source||'emaccion')}"></label>
+        <h4>Rutas por producto</h4>
+        <div class="config-table-wrap">
+        <table class="accio-table" id="landingsTable"><thead><tr><th>Slug</th><th>Ruta</th><th class="col-actions"></th></tr></thead>
+        <tbody>${landings.map(l => landingRowHtml(l)).join('')}</tbody></table>
+        </div>
+        <div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addLandingRow()">+ Ruta</button></div>
+      `, 'saveLandings', null, 'config-form-2col');
+
+      document.getElementById('config-publicacion').innerHTML = configCard('Publicación', `
+        <label>Canales por defecto (csv)<input id="pubChannels" value="${esc((pub.default_channels||[]).join(', '))}"></label>
+        <label>Timezone<input id="pubTz" value="${esc(pub.timezone||'America/Panama')}"></label>
+        <label class="config-check"><input type="checkbox" id="pubAuto" ${pub.auto_publish?'checked':''}> Auto-publicar</label>
+        <label class="config-check"><input type="checkbox" id="pubRequireTest" ${pub.require_connection_test?'checked':''}> Requerir test de conexión</label>
+        <h4>Reglas editoriales</h4>
+        <label>Posts por semana<input id="rulePpw" type="number" min="0" value="${esc(rules.posts_per_week||'')}"></label>
+        <label>Longitud máx. caracteres<input id="ruleMaxLen" type="number" value="${esc(rules.max_length||'')}"></label>
+      `, 'savePublicacion', null, 'config-form-2col');
+
+      const secretFields = (vars.secret||[]).map(f => settingsFieldHtml(f, 'varsec')).join('');
+      const plainRows = (vars.plain||[]).map(v => varRowHtml(v)).join('');
+      document.getElementById('config-variables').innerHTML = configCard('Variables', `
+        <h4>Variables públicas</h4>
+        <div class="config-table-wrap">
+        <table class="accio-table"><thead><tr><th>Clave</th><th>Valor</th><th class="col-actions"></th></tr></thead>
+        <tbody id="plainVarsBody">${plainRows}</tbody></table>
+        </div>
+        <div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addVarRow()">+ Variable</button></div>
+        <h4>Secretos</h4>${secretFields || '<p class="metric-note">Sin campos secretos configurados.</p>'}
+      `, 'saveVariables');
+
+      document.getElementById('config-ia').innerHTML = configCard('Configuración IA', `
+        <label>Modelo de temas<select id="iaTopic"><option value="rules" ${ia.topic_model==='rules'?'selected':''}>Reglas</option><option value="llm" ${ia.topic_model==='llm'?'selected':''}>LLM</option></select></label>
+        <label>Modelo de imagen<select id="iaImage"><option value="static_flyers" ${ia.image_model==='static_flyers'?'selected':''}>Flyers estáticos</option><option value="ai" ${ia.image_model==='ai'?'selected':''}>IA generativa</option></select></label>
+        <label>Tono override<textarea id="iaTone" rows="2">${esc(ia.tone_override||'')}</textarea></label>
+        <label class="config-check"><input type="checkbox" id="iaEnabled" ${ia.enabled?'checked':''}> IA habilitada</label>
+      `, 'saveIa', null, 'config-form-2col');
+
+      document.getElementById('config-logs').innerHTML = configCard('Logs del motor', `
+        <div class="accio-form-inline">
+          <select id="logSelect"><option value="accio_tick">accio_tick</option><option value="cron">cron</option></select>
+          <button type="button" class="accio-btn-secondary" onclick="loadConfigLogs()">Actualizar</button>
+        </div>
+        <pre class="config-log-view" id="logViewer">Pulsa Actualizar para cargar.</pre>
+      `);
+
+      document.getElementById('config-backups').innerHTML = configCard('Backups de secretos', `
+        <p class="metric-note">Ejecuta <code>scripts/backup_secrets.sh</code> (cifrado GPG). Requiere BACKUP_GPG_PASSPHRASE en el entorno del servicio.</p>
+        ${can('admin') ? '<button type="button" class="accio-btn-primary" onclick="runBackup()">Ejecutar backup ahora</button>' : '<p class="metric-note">Solo administradores.</p>'}
+        <pre class="config-log-view" id="backupOutput"></pre>
+      `);
+
+      const audit = data.seguridad?.audit || [];
+      const plat = data.platform || [];
+      document.getElementById('config-seguridad').innerHTML = configCard('Auditoría y seguridad', `
+        <p class="metric-note">Secretos cifrados: ${data.seguridad?.secrets_encrypted ? 'sí' : 'no'}</p>
+        <h4>Clave API (integraciones)</h4>
+        <p class="metric-note">Solo para scripts y n8n — no es tu contraseña de acceso.</p>
+        ${plat.map(f => settingsFieldHtml(f, 'plat')).join('')}
+        ${can('admin') ? '<div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="savePlatformSettings()">Guardar clave</button></div>' : ''}
+        <h4>Últimos eventos</h4>
+        <div class="config-table-wrap">
+        <table class="accio-table"><thead><tr><th>Fecha</th><th>Acción</th><th>Namespace</th><th>Usuario</th></tr></thead>
+        <tbody>${audit.length ? audit.map(a => `<tr>
+          <td class="is-mono">${esc((a.ts||'').slice(0,19))}</td>
+          <td>${esc(a.action||'')}</td>
+          <td>${esc(a.namespace||'')}</td>
+          <td>${esc(a.actor||'—')}</td>
+        </tr>`).join('') : '<tr><td colspan="4">Sin eventos recientes</td></tr>'}</tbody></table>
+        </div>
+      `);
+    }
+
+    function collectSettings(prefix, fields) {
+      const payload = {};
+      (fields || []).forEach(f => {
+        const el = document.getElementById(`${prefix}_${f.key}`);
+        if (el && el.value.trim()) payload[f.key] = el.value.trim();
+      });
+      return payload;
+    }
+
+    function splitLines(text) {
+      return (text || '').split('\n').map(s => s.trim()).filter(Boolean);
+    }
+
+    async function loadSettings() {
+      try {
+        const r = await fetch(tenantApi('/settings/center'), { headers: authHeaders(), credentials: 'include' });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error settings');
+        renderSettingsCenter(data);
+      } catch (e) { toast('Config: ' + e.message, true); }
+    }
+
+    async function postSettings(path, body, okMsg) {
+      try {
+        const r = await fetch(tenantApi(path), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+          body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al guardar');
+        toast(okMsg || 'Guardado');
+        await loadSettings();
+        return data;
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function saveEmpresa() {
+      await saveEmpresaCompany();
+    }
+
+    async function saveTenantProfile() {
+      const payload = {
+        display_name: document.getElementById('tpDisplay')?.value,
+        timezone: document.getElementById('tpTimezone')?.value,
+        branding: {
+          primary_color: document.getElementById('tpPrimary')?.value,
+          accent_color: document.getElementById('tpAccent')?.value,
+          logo_url: document.getElementById('tpLogo')?.value,
+        },
+      };
+      try {
+        const r = await fetch(tenantApi('/settings/tenant'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+          body: JSON.stringify({ profile: payload }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al guardar');
+        toast('Branding guardado');
+        lastSettings.tenant = data.profile;
+        initTenantSelector();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    function collectProducts() {
+      return [...document.querySelectorAll('#productsTable tbody tr')].map(tr => ({
+        slug: tr.querySelector('.cfg-prod-slug')?.value.trim(),
+        name: tr.querySelector('.cfg-prod-name')?.value.trim(),
+        cta: tr.querySelector('.cfg-prod-cta')?.value.trim(),
+        landing_path: tr.querySelector('.cfg-prod-landing')?.value.trim(),
+        enabled: tr.querySelector('.cfg-prod-enabled')?.checked,
+      })).filter(p => p.slug);
+    }
+
+    function addProductRow() {
+      const tbody = document.querySelector('#productsTable tbody');
+      if (!tbody) return;
+      tbody.insertAdjacentHTML('beforeend', productRowHtml({ enabled: true }));
+    }
+
+    async function saveProductos() {
+      await postSettings('/settings/productos', { products: collectProducts() }, 'Productos guardados');
+    }
+
+    function collectRoles() {
+      return [...document.querySelectorAll('#rolesTable tbody tr')].map(tr => {
+        const perms = (tr.querySelector('.cfg-role-perms')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+        return {
+          id: tr.querySelector('.cfg-role-id')?.value.trim(),
+          label: tr.querySelector('.cfg-role-label')?.value.trim(),
+          permissions: perms.length ? perms : ['read'],
+        };
+      }).filter(r => r.id);
+    }
+
+    async function saveUsuarios() {
+      if (!can('admin')) return toast('Solo administradores', true);
+      const existingIds = new Set((lastSettings?.usuarios?.users || []).map(u => u.id));
+      const users = [...document.querySelectorAll('#usersTable tbody tr')].map(tr => {
+        const isNew = tr.dataset.new === '1';
+        const id = isNew
+          ? tr.querySelector('.cfg-user-id-new')?.value.trim()
+          : tr.dataset.userId;
+        const row = {
+          id,
+          name: tr.querySelector('.cfg-user-name')?.value.trim(),
+          email: tr.querySelector('.cfg-user-email')?.value.trim(),
+          role: tr.querySelector('.cfg-user-role')?.value,
+          active: tr.querySelector('.cfg-user-active')?.checked,
+        };
+        const pass = tr.querySelector('.cfg-user-pass')?.value;
+        if (pass) row.password = pass;
+        return row;
+      }).filter(u => u.id);
+      for (const u of users) {
+        if (!u.email) return toast(`Email obligatorio para ${u.id}`, true);
+        if (!existingIds.has(u.id) && !u.password) {
+          return toast(`Contraseña obligatoria para usuario nuevo: ${u.id}`, true);
+        }
+      }
+      await postSettings('/settings/usuarios', { users, roles: collectRoles() }, 'Usuarios guardados');
+    }
+
+    async function saveConnectorSettings() {
+      if (!lastSettings) return loadSettings();
+      const conn = lastSettings.conectores || {};
+      const payload = {
+        ...collectSettings('conn', conn.linkedin),
+        ...collectSettings('conn', conn.meta),
+        ...collectSettings('conn', conn.google),
+        ...collectSettings('conn', conn.tiktok),
+      };
+      try {
+        const r = await fetch(tenantApi('/settings/connectors'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al guardar');
+        toast('Conectores guardados');
+        lastSettings.conectores = data.connectors;
+        renderSettingsCenter(lastSettings);
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function saveCrmSettings() {
+      if (!lastSettings) return loadSettings();
+      const payload = collectSettings('crm', lastSettings.crm);
+      try {
+        const r = await fetch(tenantApi('/settings/crm'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al guardar');
+        toast('CRM guardado');
+        lastSettings.crm = data.crm;
+        renderSettingsCenter(lastSettings);
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function saveLandings() {
+      const landings = [...document.querySelectorAll('#landingsTable tbody tr')].map(tr => ({
+        slug: tr.querySelector('.cfg-land-slug')?.value.trim(),
+        path: tr.querySelector('.cfg-land-path')?.value.trim(),
+      })).filter(l => l.slug || l.path);
+      await postSettings('/settings/landings', {
+        base_domain: document.getElementById('landDomain')?.value,
+        default_utm_source: document.getElementById('landUtm')?.value,
+        landings,
+      }, 'Landings guardadas');
+    }
+
+    async function savePublicacion() {
+      const channels = (document.getElementById('pubChannels')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+      await postSettings('/settings/publicacion', {
+        default_channels: channels,
+        timezone: document.getElementById('pubTz')?.value,
+        auto_publish: document.getElementById('pubAuto')?.checked,
+        require_connection_test: document.getElementById('pubRequireTest')?.checked,
+        editorial_rules: {
+          posts_per_week: Number(document.getElementById('rulePpw')?.value || 0),
+          max_length: Number(document.getElementById('ruleMaxLen')?.value || 0),
+        },
+      }, 'Publicación guardada');
+    }
+
+    function collectPlainVars() {
+      return [...document.querySelectorAll('#plainVarsBody tr')].map(tr => ({
+        key: tr.querySelector('.cfg-var-key')?.value.trim(),
+        value: tr.querySelector('.cfg-var-val')?.value.trim(),
+      })).filter(v => v.key);
+    }
+
+    function addVarRow() {
+      const body = document.getElementById('plainVarsBody');
+      if (!body) return;
+      body.insertAdjacentHTML('beforeend', varRowHtml({}));
+    }
+
+    async function saveVariables() {
+      const secrets = collectSettings('varsec', lastSettings?.variables?.secret);
+      await postSettings('/settings/variables', {
+        plain: collectPlainVars(),
+        secrets,
+      }, 'Variables guardadas');
+    }
+
+    async function saveIa() {
+      await postSettings('/settings/ia', {
+        topic_model: document.getElementById('iaTopic')?.value,
+        image_model: document.getElementById('iaImage')?.value,
+        tone_override: document.getElementById('iaTone')?.value,
+        enabled: document.getElementById('iaEnabled')?.checked,
+      }, 'IA guardada');
+    }
+
+    async function savePlatformSettings() {
+      if (!can('admin')) return toast('Solo administradores', true);
+      if (!lastSettings) return loadSettings();
+      const payload = collectSettings('plat', lastSettings.platform);
+      try {
+        const r = await fetch(tenantApi('/settings/platform'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al guardar');
+        toast('Clave de integración guardada (cifrada)');
+        loadSettings();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function loadConfigLogs() {
+      const log = document.getElementById('logSelect')?.value || 'accio_tick';
+      try {
+        const r = await fetch(tenantApi(`/settings/logs?log=${log}&lines=100`), { headers: authHeaders(), credentials: 'include' });
+        const data = await r.json();
+        document.getElementById('logViewer').textContent = (data.lines || []).join('\n') || '(vacío)';
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function runBackup() {
+      try {
+        toast('Ejecutando backup…');
+        const r = await fetch(tenantApi('/settings/backup'), { method: 'POST', headers: authHeaders(), credentials: 'include' });
+        const data = await r.json();
+        document.getElementById('backupOutput').textContent = [data.stdout, data.stderr, data.error].filter(Boolean).join('\n');
+        toast(data.ok ? 'Backup completado' : (data.error || 'Backup falló'), !data.ok);
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function testConnector(id) {
+      try {
+        toast('Probando ' + id + '…');
+        const r = await fetch(tenantApi(`/settings/connectors/${id}/test`), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+        });
+        const data = await r.json();
+        toast(data.ok ? `${id}: conexión OK` : (data.error || data.detail || 'Falló'), !data.ok);
+        loadSettings();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function testCrm() {
+      try {
+        const r = await fetch(tenantApi('/settings/crm/test'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
+        });
+        const data = await r.json();
+        toast(data.ok ? 'CRM: conexión OK' : (data.error || 'Falló'), !data.ok);
+        loadSettings();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    document.getElementById('configSubnav')?.addEventListener('click', e => {
+      const btn = e.target.closest('.config-nav');
+      if (btn) showConfigSection(btn.dataset.config);
+    });
+
     async function generateTopic(enqueue) {
       const product = document.getElementById('genProduct')?.value || 'easytech';
       const content_type = document.getElementById('genType')?.value || 'educacion';
@@ -575,7 +1536,7 @@
       const topic = document.getElementById('genTopic')?.value || '';
       try {
         toast(enqueue ? 'Generando y encolando…' : 'Generando tema…');
-        const r = await fetch('/accio/content/generate-topic', {
+        const r = await fetch(tenantApi('/content/generate-topic'), {
           method: 'POST', headers: authHeaders(),
           body: JSON.stringify({ product_slug: product, content_type, platform, topic, enqueue }),
         });
@@ -620,7 +1581,7 @@
     async function runPipeline() {
       try {
         toast('Ejecutando pipeline…');
-        const r = await fetch('/accio/run/pipeline', { method: 'POST', headers: authHeaders() });
+        const r = await fetch(tenantApi('/run/pipeline'), { method: 'POST', headers: authHeaders(), credentials: 'include' });
         const data = await r.json();
         toast(data.ok ? 'Pipeline completado' : 'Pipeline falló', !data.ok);
         loadData();
@@ -631,8 +1592,8 @@
       if (force && !confirm('¿Publicar Meta ahora?')) return;
       try {
         toast('Publicando Meta…');
-        const r = await fetch('/accio/run/publish-meta', {
-          method: 'POST', headers: authHeaders(),
+        const r = await fetch(tenantApi('/run/publish-meta'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
           body: JSON.stringify({ force, platform: 'all' }),
         });
         const data = await r.json();
@@ -646,8 +1607,8 @@
       if (force && !confirm('¿Forzar publicación LinkedIn?')) return;
       try {
         toast(force ? 'Publicando (forzado)…' : 'Publicando…');
-        const r = await fetch('/accio/run/publish-linkedin', {
-          method: 'POST', headers: authHeaders(),
+        const r = await fetch(tenantApi('/run/publish-linkedin'), {
+          method: 'POST', headers: authHeaders(), credentials: 'include',
           body: JSON.stringify({ force }),
         });
         const data = await r.json();
@@ -657,17 +1618,64 @@
       } catch (e) { toast(e.message, true); }
     }
 
-    if (getKey()) {
-      document.getElementById('login').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
+    async function uploadEmpresaLogo() {
+      if (!can('config')) return toast('Sin permiso', true);
+      const file = document.getElementById('empLogoFile')?.files?.[0];
+      if (!file) return toast('Selecciona un archivo', true);
+      const target = empresaEditId || TENANT_ID;
+      const fd = new FormData();
+      fd.append('logo', file);
+      try {
+        const r = await fetch(`/accio/${target}/settings/logo`, {
+          method: 'POST', credentials: 'include', body: fd,
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al subir');
+        toast('Logo subido');
+        loadSettings();
+      } catch (e) { toast(e.message, true); }
+    }
+    const uploadLogo = uploadEmpresaLogo;
+
+    async function logoutDashboard() {
+      await fetch('/accio/auth/logout', { method: 'POST', credentials: 'include' });
+      location.href = '/accio/login/';
+    }
+
+    const ROLE_LABELS = {
+      super_admin: 'Super administrador de plataforma',
+      tenant_admin: 'Administrador de empresa',
+      marketing_operator: 'Operador de marketing',
+      viewer: 'Solo lectura',
+      admin: 'Administrador de empresa',
+      operator: 'Operador',
+    };
+
+    async function applySessionBadge() {
+      try {
+        const st = await fetch('/accio/auth/status?tenant_id=' + encodeURIComponent(TENANT_ID), { credentials: 'include' });
+        const data = await st.json();
+        if (!data.authenticated) return;
+        sessionRole = data.role || 'viewer';
+        sessionGlobalRole = data.global_role || null;
+        sessionPerms = new Set(data.permissions || []);
+        const badge = document.getElementById('userBadge');
+        const roleLabel = ROLE_LABELS[data.role] || data.role || 'Usuario';
+        if (badge) badge.textContent = `${data.name || 'Usuario'} · ${roleLabel}`;
+        const pub = document.getElementById('btnPrimary');
+        if (pub && !can('publish')) pub.style.display = 'none';
+      } catch (_) { /* ignore */ }
+    }
+
+    function bootstrapDashboard() {
+      initTenantSelector();
       updatePrimaryLabel();
+      applySessionBadge();
       loadData();
       setInterval(loadData, 60000);
-    } else {
-      document.getElementById('apiKeyInput').addEventListener('keydown', e => {
-        if (e.key === 'Enter') saveKey();
-      });
     }
+
+    bootstrapDashboard();
   </script>
 </body>
 </html>

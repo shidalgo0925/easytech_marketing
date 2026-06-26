@@ -19,9 +19,14 @@ if str(BASE_DIR) not in sys.path:
 import requests
 from dotenv import load_dotenv
 
-from Motor_Tecnico.flyer_utils import resolve_flyer_path
-QUEUE_PATH = BASE_DIR / "Marketing" / "content_queue.json"
-LOG_PATH = BASE_DIR / "Marketing" / "publish_log.json"
+from Motor_Tecnico.publisher_tenant import (
+    linkedin_credentials,
+    parse_tenant_arg,
+    publish_log_path,
+    queue_path,
+    resolve_flyer_path,
+)
+
 PANAMA = ZoneInfo("America/Panama")
 
 load_dotenv(BASE_DIR / ".env")
@@ -31,29 +36,27 @@ LINKEDIN_VERSION = "202506"
 IMAGE_WAIT_SEC = int(os.getenv("LINKEDIN_IMAGE_WAIT_SEC", "8"))
 
 
-def require_env(name: str) -> str:
-    value = os.getenv(name, "").strip()
-    if not value:
-        raise SystemExit(f"Falta variable de entorno: {name}")
-    return value
+def load_queue(tenant_id: str) -> dict:
+    path = queue_path(tenant_id)
+    if not path.exists():
+        raise SystemExit(f"No existe la cola: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def load_queue() -> dict:
-    if not QUEUE_PATH.exists():
-        raise SystemExit(f"No existe la cola: {QUEUE_PATH}")
-    return json.loads(QUEUE_PATH.read_text(encoding="utf-8"))
+def save_queue(data: dict, tenant_id: str) -> None:
+    path = queue_path(tenant_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def save_queue(data: dict) -> None:
-    QUEUE_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-
-
-def append_log(entry: dict) -> None:
+def append_log(entry: dict, tenant_id: str) -> None:
+    path = publish_log_path(tenant_id)
     logs: list = []
-    if LOG_PATH.exists():
-        logs = json.loads(LOG_PATH.read_text(encoding="utf-8"))
+    if path.exists():
+        logs = json.loads(path.read_text(encoding="utf-8"))
     logs.append(entry)
-    LOG_PATH.write_text(json.dumps(logs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(logs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def parse_scheduled(value: str) -> datetime:
@@ -176,10 +179,10 @@ def create_post(token: str, author_urn: str, text: str, image_urn: str | None) -
     return post_id or "published"
 
 
-def create_comment(token: str, post_urn: str, text: str) -> None:
+def create_comment(token: str, author_urn: str, post_urn: str, text: str) -> None:
     if not post_urn.startswith("urn:"):
         post_urn = f"urn:li:share:{post_urn}"
-    actor = require_env("LINKEDIN_AUTHOR_URN")
+    actor = author_urn
     resp = requests.post(
         "https://api.linkedin.com/rest/socialActions/{}/comments".format(post_urn.split(":")[-1]),
         headers=_api_headers(token),
@@ -190,15 +193,21 @@ def create_comment(token: str, post_urn: str, text: str) -> None:
         print(f"  Aviso: no se pudo publicar comentario ({resp.status_code}): {resp.text[:200]}")
 
 
-def publish_next(force: bool = False, dry_run: bool = False, allow_text_only: bool = False) -> None:
-    queue = load_queue()
+def publish_next(
+    force: bool = False,
+    dry_run: bool = False,
+    allow_text_only: bool = False,
+    tenant_id: str | None = None,
+) -> None:
+    tenant_id = tenant_id or parse_tenant_arg()
+    queue = load_queue(tenant_id)
     post = pick_next_post(queue, force=force)
     if not post:
-        print("No hay posts pendientes listos para publicar.")
+        print(f"No hay posts pendientes listos para publicar (tenant: {tenant_id}).")
         return
 
-    flyer_path = resolve_flyer_path(post)
-    print(f"Post seleccionado: {post['id']} (programado: {post['scheduled_at']})")
+    flyer_path = resolve_flyer_path(post, tenant_id)
+    print(f"Post seleccionado [{tenant_id}]: {post['id']} (programado: {post['scheduled_at']})")
 
     if dry_run:
         print("DRY RUN — no se publicó nada.")
@@ -212,8 +221,7 @@ def publish_next(force: bool = False, dry_run: bool = False, allow_text_only: bo
             "Corrija la ruta o use --allow-text-only (no recomendado)."
         )
 
-    token = require_env("LINKEDIN_ACCESS_TOKEN")
-    author = require_env("LINKEDIN_AUTHOR_URN")
+    token, author = linkedin_credentials(tenant_id)
 
     image_urn = None
     if flyer_path:
@@ -230,7 +238,7 @@ def publish_next(force: bool = False, dry_run: bool = False, allow_text_only: bo
     if first_comment:
         print("  Esperando 2 min para primer comentario...")
         time.sleep(120)
-        create_comment(token, post_id, first_comment)
+        create_comment(token, author, post_id, first_comment)
 
     for item in queue["posts"]:
         if item["id"] == post["id"]:
@@ -241,10 +249,11 @@ def publish_next(force: bool = False, dry_run: bool = False, allow_text_only: bo
             if image_urn:
                 item["linkedin_image_urn"] = image_urn
             break
-    save_queue(queue)
+    save_queue(queue, tenant_id)
 
     append_log(
         {
+            "tenant_id": tenant_id,
             "id": post["id"],
             "published_at": datetime.now(timezone.utc).isoformat(),
             "linkedin_post_id": post_id,
@@ -252,7 +261,8 @@ def publish_next(force: bool = False, dry_run: bool = False, allow_text_only: bo
             "has_image": bool(image_urn),
             "flyer": post.get("flyer"),
             "flyer_file": flyer_path.name if flyer_path else None,
-        }
+        },
+        tenant_id,
     )
     print("Listo. Cola actualizada.")
 
@@ -261,7 +271,8 @@ def main() -> None:
     force = "--force" in sys.argv
     dry_run = "--dry-run" in sys.argv
     allow_text_only = "--allow-text-only" in sys.argv
-    publish_next(force=force, dry_run=dry_run, allow_text_only=allow_text_only)
+    tenant_id = parse_tenant_arg()
+    publish_next(force=force, dry_run=dry_run, allow_text_only=allow_text_only, tenant_id=tenant_id)
 
 
 if __name__ == "__main__":

@@ -17,9 +17,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from Motor_Tecnico.flyer_utils import flyer_public_url, resolve_flyer_path
-QUEUE_PATH = BASE_DIR / "Marketing" / "content_queue.json"
-LOG_PATH = BASE_DIR / "Marketing" / "meta_publish_log.json"
+from Motor_Tecnico.publisher_tenant import (
+    flyer_public_url,
+    meta_credentials,
+    meta_publish_log_path,
+    parse_tenant_arg,
+    queue_path,
+    resolve_flyer_path,
+)
+
 PANAMA = ZoneInfo("America/Panama")
 GRAPH = "https://graph.facebook.com/v21.0"
 PUBLIC_BASE = os.getenv("PUBLIC_SITE_URL", "https://n8n.etsrv.site").rstrip("/")
@@ -27,29 +33,27 @@ PUBLIC_BASE = os.getenv("PUBLIC_SITE_URL", "https://n8n.etsrv.site").rstrip("/")
 load_dotenv(BASE_DIR / ".env")
 
 
-def require_env(name: str) -> str:
-    value = os.getenv(name, "").strip()
-    if not value:
-        raise SystemExit(f"Falta variable de entorno: {name}")
-    return value
+def load_queue(tenant_id: str) -> dict:
+    path = queue_path(tenant_id)
+    if not path.exists():
+        raise SystemExit(f"No existe la cola: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def load_queue() -> dict:
-    if not QUEUE_PATH.exists():
-        raise SystemExit(f"No existe la cola: {QUEUE_PATH}")
-    return json.loads(QUEUE_PATH.read_text(encoding="utf-8"))
+def save_queue(data: dict, tenant_id: str) -> None:
+    path = queue_path(tenant_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def save_queue(data: dict) -> None:
-    QUEUE_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-
-
-def append_log(entry: dict) -> None:
+def append_log(entry: dict, tenant_id: str) -> None:
+    path = meta_publish_log_path(tenant_id)
     logs: list = []
-    if LOG_PATH.exists():
-        logs = json.loads(LOG_PATH.read_text(encoding="utf-8"))
+    if path.exists():
+        logs = json.loads(path.read_text(encoding="utf-8"))
     logs.append(entry)
-    LOG_PATH.write_text(json.dumps(logs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(logs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def parse_scheduled(value: str) -> datetime:
@@ -114,15 +118,21 @@ def publish_instagram(ig_user_id: str, token: str, text: str, image_url: str | N
     return str(publish.json().get("id") or creation_id)
 
 
-def publish_platform(platform: str, force: bool = False, dry_run: bool = False) -> bool:
-    queue = load_queue()
+def publish_platform(
+    platform: str,
+    force: bool = False,
+    dry_run: bool = False,
+    tenant_id: str | None = None,
+) -> bool:
+    tenant_id = tenant_id or parse_tenant_arg()
+    queue = load_queue(tenant_id)
     post = pick_next_post(queue, platform, force=force)
     if not post:
-        print(f"No hay posts {platform} pendientes listos para publicar.")
+        print(f"No hay posts {platform} pendientes listos para publicar (tenant: {tenant_id}).")
         return False
 
-    print(f"Post seleccionado ({platform}): {post['id']} (programado: {post['scheduled_at']})")
-    flyer_path = resolve_flyer_path(post)
+    print(f"Post seleccionado ({platform}, {tenant_id}): {post['id']} (programado: {post['scheduled_at']})")
+    flyer_path = resolve_flyer_path(post, tenant_id)
     if dry_run:
         print("DRY RUN — no se publicó nada.")
         print(f"  Flyer: {flyer_path or 'NO ENCONTRADO'}")
@@ -132,14 +142,14 @@ def publish_platform(platform: str, force: bool = False, dry_run: bool = False) 
     if post.get("flyer") and not flyer_path:
         raise SystemExit(f"Flyer requerido pero no encontrado: {post.get('flyer')}")
 
-    page_id = require_env("META_PAGE_ID")
-    token = require_env("META_PAGE_ACCESS_TOKEN")
-    image_url = flyer_public_url(post, PUBLIC_BASE)
+    page_id, token, ig_id = meta_credentials(tenant_id)
+    image_url = flyer_public_url(post, PUBLIC_BASE, tenant_id)
 
     if platform == "facebook":
         remote_id = publish_facebook(page_id, token, post["text"], image_url)
     elif platform == "instagram":
-        ig_id = require_env("META_IG_USER_ID")
+        if not ig_id:
+            raise SystemExit(f"Falta META_IG_USER_ID para tenant '{tenant_id}'.")
         remote_id = publish_instagram(ig_id, token, post["text"], image_url)
     else:
         raise SystemExit(f"Plataforma no soportada: {platform}")
@@ -152,16 +162,18 @@ def publish_platform(platform: str, force: bool = False, dry_run: bool = False) 
             item["published_at"] = datetime.now(PANAMA).isoformat()
             item[f"{platform}_post_id"] = remote_id
             break
-    save_queue(queue)
+    save_queue(queue, tenant_id)
 
     append_log(
         {
+            "tenant_id": tenant_id,
             "id": post["id"],
             "platform": platform,
             "published_at": datetime.now(timezone.utc).isoformat(),
             "remote_post_id": remote_id,
             "utm": post.get("utm"),
-        }
+        },
+        tenant_id,
     )
     print("Listo. Cola actualizada.")
     return True
@@ -170,6 +182,7 @@ def publish_platform(platform: str, force: bool = False, dry_run: bool = False) 
 def main() -> None:
     force = "--force" in sys.argv
     dry_run = "--dry-run" in sys.argv
+    tenant_id = parse_tenant_arg()
     platform = "facebook"
     for arg in sys.argv[1:]:
         if arg.startswith("--platform="):
@@ -178,13 +191,13 @@ def main() -> None:
             platform = arg
 
     if platform == "all":
-        ok_fb = publish_platform("facebook", force=force, dry_run=dry_run)
-        ok_ig = publish_platform("instagram", force=force, dry_run=dry_run)
+        ok_fb = publish_platform("facebook", force=force, dry_run=dry_run, tenant_id=tenant_id)
+        ok_ig = publish_platform("instagram", force=force, dry_run=dry_run, tenant_id=tenant_id)
         if not ok_fb and not ok_ig:
             sys.exit(0)
         return
 
-    publish_platform(platform, force=force, dry_run=dry_run)
+    publish_platform(platform, force=force, dry_run=dry_run, tenant_id=tenant_id)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ejecuta acciones del motor Accio sobre componentes existentes."""
+"""Ejecuta acciones del motor Accio sobre componentes existentes (multi-tenant)."""
 
 from __future__ import annotations
 
@@ -10,11 +10,15 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, effective_paths, resolve_tenant
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 VENV_PYTHON = BASE_DIR / "venv" / "bin" / "python3"
-QUEUE_PATH = BASE_DIR / "Marketing" / "content_queue.json"
-CALENDAR_PATH = BASE_DIR / "Marketing" / "accio" / "calendar.json"
 PANAMA = ZoneInfo("America/Panama")
+
+
+def _paths(tenant_id: str) -> dict[str, Path]:
+    return effective_paths(resolve_tenant(tenant_id))
 
 
 def _run_script(script: str, *args: str) -> dict[str, Any]:
@@ -28,50 +32,67 @@ def _run_script(script: str, *args: str) -> dict[str, Any]:
     }
 
 
-def run_pipeline() -> dict[str, Any]:
+def run_pipeline(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     scrape = _run_script("scraper_panama.py")
     if not scrape["ok"]:
-        return {"step": "scraper", **scrape}
+        return {"tenant_id": tenant_id, "step": "scraper", **scrape}
     sync = _run_script("odoo_sync.py")
-    return {"step": "odoo_sync", "scrape": scrape, **sync}
+    return {"tenant_id": tenant_id, "step": "odoo_sync", "scrape": scrape, **sync}
 
 
-def publish_channel(connector_id: str, force: bool = False, dry_run: bool = False) -> dict[str, Any]:
-    args = [f"--connector={connector_id}"]
+def _tenant_args(tenant_id: str) -> list[str]:
+    return [f"--tenant-id={tenant_id}"]
+
+
+def publish_channel(
+    connector_id: str, force: bool = False, dry_run: bool = False, tenant_id: str = DEFAULT_TENANT
+) -> dict[str, Any]:
+    args = [f"--connector={connector_id}", *_tenant_args(tenant_id)]
     if force:
         args.append("--force")
     if dry_run:
         args.append("--dry-run")
-    return _run_script("channel_publisher.py", *args)
+    result = _run_script("channel_publisher.py", *args)
+    result["tenant_id"] = tenant_id
+    return result
 
 
-def publish_linkedin(force: bool = False, dry_run: bool = False) -> dict[str, Any]:
-    args = []
+def publish_linkedin(force: bool = False, dry_run: bool = False, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    args = [*_tenant_args(tenant_id)]
     if force:
         args.append("--force")
     if dry_run:
         args.append("--dry-run")
-    return _run_script("linkedin_publisher.py", *args)
+    result = _run_script("linkedin_publisher.py", *args)
+    result["tenant_id"] = tenant_id
+    return result
 
 
-def publish_meta(platform: str = "all", force: bool = False, dry_run: bool = False) -> dict[str, Any]:
-    args = [f"--platform={platform}"]
+def publish_meta(
+    platform: str = "all", force: bool = False, dry_run: bool = False, tenant_id: str = DEFAULT_TENANT
+) -> dict[str, Any]:
+    args = [f"--platform={platform}", *_tenant_args(tenant_id)]
     if force:
         args.append("--force")
     if dry_run:
         args.append("--dry-run")
-    return _run_script("meta_publisher.py", *args)
+    result = _run_script("meta_publisher.py", *args)
+    result["tenant_id"] = tenant_id
+    return result
 
 
-def load_content_queue() -> dict[str, Any]:
-    return json.loads(QUEUE_PATH.read_text(encoding="utf-8"))
+def load_content_queue(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    path = _paths(tenant_id)["content_queue"]
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def save_content_queue(data: dict[str, Any]) -> None:
-    QUEUE_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+def save_content_queue(data: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> None:
+    path = _paths(tenant_id)["content_queue"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def enqueue_post(post: dict[str, Any]) -> dict[str, Any]:
+def enqueue_post(post: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     required = {"id", "platform", "text", "scheduled_at"}
     missing = required - set(post.keys())
     if missing:
@@ -91,34 +112,35 @@ def enqueue_post(post: dict[str, Any]) -> dict[str, Any]:
         if post.get(key) is not None:
             entry[key] = post[key]
 
-    queue = load_content_queue()
+    queue = load_content_queue(tenant_id)
     posts = queue.setdefault("posts", [])
     for existing in posts:
         if existing.get("id") == entry["id"]:
             raise ValueError(f"Post id duplicado: {entry['id']}")
     posts.append(entry)
-    save_content_queue(queue)
+    save_content_queue(queue, tenant_id)
     return entry
 
 
-def enqueue_posts(posts: list[dict[str, Any]]) -> dict[str, Any]:
+def enqueue_posts(posts: list[dict[str, Any]], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     created = []
     errors = []
     for post in posts:
         try:
-            created.append(enqueue_post(post))
+            created.append(enqueue_post(post, tenant_id))
         except ValueError as exc:
             errors.append({"id": post.get("id"), "error": str(exc)})
     return {"created": created, "errors": errors, "count": len(created)}
 
 
-def set_calendar(calendar: dict[str, Any]) -> dict[str, Any]:
-    CALENDAR_PATH.parent.mkdir(parents=True, exist_ok=True)
+def set_calendar(calendar: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    path = _paths(tenant_id)["calendar"]
+    path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "updated_at": datetime.now(PANAMA).isoformat(),
         **calendar,
     }
-    CALENDAR_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return payload
 
 
@@ -133,15 +155,16 @@ def _platform_queue_stats(posts: list[dict[str, Any]], platform: str) -> dict[st
     }
 
 
-def get_status() -> dict[str, Any]:
-    from Motor_Tecnico.connectors.registry import all_connector_views, load_registry  # noqa: PLC0415
-    from Motor_Tecnico.accio_engine.queue_store import list_orders, load_state  # noqa: PLC0415
+def get_status(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine import queue_store
+    from Motor_Tecnico.connectors.registry import all_connector_views, load_registry
 
-    queue = load_content_queue()
+    paths = _paths(tenant_id)
+    queue = load_content_queue(tenant_id)
     posts = queue.get("posts", [])
-    views = all_connector_views()
+    views = all_connector_views(tenant_id)
 
-    content_queue: dict[str, Any] = {}
+    content_queue: dict[str, Any] = {"tenant_id": tenant_id}
     for view in views:
         pid = view["id"]
         platform = view["platform"]
@@ -149,7 +172,6 @@ def get_status() -> dict[str, Any]:
         content_queue[f"{pid}_pending"] = stats["pending"]
         content_queue[f"{pid}_published"] = stats["published"]
         content_queue[f"{pid}_next"] = stats["next_pending"]
-        # aliases historicos LinkedIn / Meta
         if platform == "linkedin":
             content_queue["linkedin_pending"] = stats["pending"]
             content_queue["linkedin_published"] = stats["published"]
@@ -168,58 +190,69 @@ def get_status() -> dict[str, Any]:
     if csv_path.exists():
         lead_rows = max(0, sum(1 for _ in csv_path.open()) - 1)
 
-    registry = load_registry()
+    registry = load_registry(tenant_id)
     return {
         "engine": "accio_marketing_engine",
-        "version": 2,
+        "version": 3,
+        "tenant_id": tenant_id,
         "strategy": registry.get("strategy"),
         "time_panama": datetime.now(PANAMA).isoformat(),
         "content_queue": content_queue,
         "connectors": views,
         "prospection_csv_rows": lead_rows,
-        "orders_pending": len(list_orders(status="pending")),
-        "state": load_state(),
-        "paths": {
-            "content_queue": str(QUEUE_PATH),
-            "connectors_registry": str(BASE_DIR / "Marketing" / "accio" / "connectors.json"),
-            "flyers_manifest": str(BASE_DIR / "Marketing" / "flyers" / "manifest.json"),
-            "calendar": str(CALENDAR_PATH),
-            "meta_publish_log": str(BASE_DIR / "Marketing" / "meta_publish_log.json"),
-            "publish_logs_dir": str(BASE_DIR / "Marketing" / "publish_logs"),
-        },
+        "orders_pending": len(queue_store.list_orders(status="pending", tenant_id=tenant_id)),
+        "state": queue_store.load_state(tenant_id),
+        "paths": {k: str(v) for k, v in paths.items()},
+    }
+
+
+def _action_handlers(tenant_id: str) -> dict:
+    return {
+        "run_pipeline": lambda p: run_pipeline(tenant_id),
+        "publish_linkedin": lambda p: publish_linkedin(
+            force=bool(p.get("force")), dry_run=bool(p.get("dry_run")), tenant_id=tenant_id
+        ),
+        "publish_facebook": lambda p: publish_meta(
+            platform="facebook", force=bool(p.get("force")), dry_run=bool(p.get("dry_run")), tenant_id=tenant_id
+        ),
+        "publish_instagram": lambda p: publish_meta(
+            platform="instagram", force=bool(p.get("force")), dry_run=bool(p.get("dry_run")), tenant_id=tenant_id
+        ),
+        "publish_meta": lambda p: publish_meta(
+            platform=str(p.get("platform", "all")),
+            force=bool(p.get("force")),
+            dry_run=bool(p.get("dry_run")),
+            tenant_id=tenant_id,
+        ),
+        "publish_channel": lambda p: publish_channel(
+            connector_id=str(p.get("connector") or p.get("platform", "")),
+            force=bool(p.get("force")),
+            dry_run=bool(p.get("dry_run")),
+            tenant_id=tenant_id,
+        ),
+        "enqueue_post": lambda p: {"post": enqueue_post(p["post"], tenant_id)},
+        "enqueue_posts": lambda p: enqueue_posts(p.get("posts", []), tenant_id),
+        "set_calendar": lambda p: set_calendar(p.get("calendar", p), tenant_id),
     }
 
 
 ACTIONS = {
-    "run_pipeline": lambda p: run_pipeline(),
-    "publish_linkedin": lambda p: publish_linkedin(
-        force=bool(p.get("force")), dry_run=bool(p.get("dry_run"))
-    ),
-    "publish_facebook": lambda p: publish_meta(
-        platform="facebook", force=bool(p.get("force")), dry_run=bool(p.get("dry_run"))
-    ),
-    "publish_instagram": lambda p: publish_meta(
-        platform="instagram", force=bool(p.get("force")), dry_run=bool(p.get("dry_run"))
-    ),
-    "publish_meta": lambda p: publish_meta(
-        platform=str(p.get("platform", "all")),
-        force=bool(p.get("force")),
-        dry_run=bool(p.get("dry_run")),
-    ),
-    "publish_channel": lambda p: publish_channel(
-        connector_id=str(p.get("connector") or p.get("platform", "")),
-        force=bool(p.get("force")),
-        dry_run=bool(p.get("dry_run")),
-    ),
-    "enqueue_post": lambda p: {"post": enqueue_post(p["post"])},
-    "enqueue_posts": lambda p: enqueue_posts(p.get("posts", [])),
-    "set_calendar": lambda p: set_calendar(p.get("calendar", p)),
+    "run_pipeline",
+    "publish_linkedin",
+    "publish_facebook",
+    "publish_instagram",
+    "publish_meta",
+    "publish_channel",
+    "enqueue_post",
+    "enqueue_posts",
+    "set_calendar",
 }
 
 
-def execute_action(action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+def execute_action(action: str, params: dict[str, Any] | None = None, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     params = params or {}
-    handler = ACTIONS.get(action)
+    handlers = _action_handlers(tenant_id)
+    handler = handlers.get(action)
     if not handler:
         raise ValueError(f"Accion desconocida: {action}. Validas: {', '.join(sorted(ACTIONS))}")
     return handler(params)

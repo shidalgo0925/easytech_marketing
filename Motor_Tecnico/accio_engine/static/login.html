@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar — EMAccion</title>
+  <link rel="icon" href="/accio/static/em-logomark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/accio/static/accio-design.css">
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card" aria-labelledby="loginTitle">
+      <header class="login-card-head">
+        <div class="login-brand em-logo">
+          <span class="em-logo-icon" aria-hidden="true">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g class="em-gear-ring" stroke="currentColor" fill="none">
+                <circle cx="18" cy="18" r="14" stroke-width="1.5" stroke-dasharray="2.4 1.9"/>
+                <circle cx="18" cy="18" r="11.5" stroke-width="1" opacity="0.45"/>
+                <path stroke-width="1.25" stroke-linecap="round" d="M18 2.5v3M18 30.5v3M2.5 18h3M30.5 18h3M6.8 6.8l2.1 2.1M27.1 27.1l2.1 2.1M6.8 29.2l2.1-2.1M27.1 8.9l2.1-2.1"/>
+              </g>
+            </svg>
+          </span>
+          <span class="em-wordmark">EMAccion</span>
+        </div>
+        <p class="login-tenant" id="loginTenant">Plataforma EMAccion</p>
+      </header>
+
+      <h1 class="login-title" id="loginTitle">Iniciar sesión</h1>
+      <p class="login-subtitle">Acceda con su usuario. Después elegirá la empresa con la que trabajar.</p>
+
+      <form id="loginForm" class="login-form" method="post" action="" autocomplete="on">
+        <label class="login-field">
+          <span>Usuario o email</span>
+          <input type="text" id="userLoginInput" name="username" placeholder="ej. admin@easytech.services" autocomplete="username" required>
+        </label>
+        <label class="login-field">
+          <span>Contraseña</span>
+          <input type="password" id="userPassInput" name="password" placeholder="••••••••" autocomplete="current-password" required>
+        </label>
+        <p class="login-error hidden" id="loginError" role="alert"></p>
+        <button type="submit" class="btn-primary login-submit" id="loginBtn">Entrar</button>
+      </form>
+
+      <footer class="login-foot">
+        <p>¿Problemas para entrar? Contacta al administrador de tu organización.</p>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    const el = document.getElementById('loginTenant');
+    if (window.__ACCIO_TENANT_NAME__ && !window.__ACCIO_PLATFORM_LOGIN__) {
+      el.textContent = window.__ACCIO_TENANT_NAME__;
+    }
+    document.getElementById('loginForm').setAttribute('action', window.location.pathname);
+  </script>
+</body>
+</html>
