@@ -16,7 +16,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from Motor_Tecnico.accio_engine import dashboard_data, executor, files_api, queue_store  # noqa: E402
+from Motor_Tecnico.accio_engine import dashboard_data, executor, files_api, knowledge_api, queue_store  # noqa: E402
 
 load_dotenv(BASE_DIR / ".env")
 
@@ -113,6 +113,70 @@ def dashboard_flyers():
 @require_api_key
 def dashboard_connectors_api():
     return jsonify({"ok": True, "connectors": dashboard_data.load_connectors()})
+
+
+@app.get("/accio/dashboard/api/knowledge")
+@require_api_key
+def dashboard_knowledge():
+    summary = knowledge_api.knowledge_summary()
+    queue = executor.load_content_queue()
+    summary["editorial_balance"] = knowledge_api.editorial_balance(queue.get("posts", []))
+    return jsonify({"ok": True, **summary})
+
+
+@app.get("/accio/config/business-context")
+@require_api_key
+def business_context_get():
+    return jsonify({"ok": True, "context": knowledge_api.load_business_context()})
+
+
+@app.post("/accio/config/business-context")
+@require_api_key
+def business_context_set():
+    body = request.get_json(silent=True) or {}
+    ctx = body.get("context", body)
+    saved = knowledge_api.save_business_context(ctx)
+    return jsonify({"ok": True, "context": saved})
+
+
+@app.get("/accio/knowledge")
+@require_api_key
+def knowledge_list():
+    return jsonify({"ok": True, "articles": knowledge_api.list_knowledge()})
+
+
+@app.get("/accio/knowledge/<slug>")
+@require_api_key
+def knowledge_article(slug: str):
+    try:
+        article = knowledge_api.load_article(slug)
+        return jsonify({"ok": True, "article": article})
+    except FileNotFoundError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 404
+
+
+@app.post("/accio/content/generate-topic")
+@require_api_key
+def content_generate_topic():
+    body = request.get_json(silent=True) or {}
+    try:
+        result = knowledge_api.generate_topic(
+            topic=body.get("topic"),
+            product_slug=(body.get("product_slug") or body.get("product") or "easytech").strip(),
+            content_type=(body.get("content_type") or "educacion").strip(),
+            platform=(body.get("platform") or "linkedin").strip(),
+        )
+    except FileNotFoundError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 404
+
+    if body.get("enqueue"):
+        try:
+            post = executor.enqueue_post(result["post"])
+            result["enqueued"] = post
+        except ValueError as exc:
+            return jsonify({"ok": False, "error": str(exc), "generated": result}), 400
+
+    return jsonify({"ok": True, **result})
 
 
 @app.get("/accio/connectors")

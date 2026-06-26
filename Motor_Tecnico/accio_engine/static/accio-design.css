@@ -718,3 +718,65 @@ input:focus-visible,
 @keyframes slideUp {
   from { transform: translateY(12px); opacity: 0; }
 }
+
+/* Knowledge Engine — Fase E */
+.accio-form {
+  display: grid;
+  gap: var(--accio-space-3);
+  padding: var(--accio-space-4);
+}
+.accio-form label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--accio-space-1);
+  font-size: var(--accio-text-xs);
+  color: var(--accio-text-secondary);
+}
+.accio-form input,
+.accio-form textarea,
+.accio-form select {
+  padding: var(--accio-space-2) var(--accio-space-3);
+  border-radius: var(--accio-radius-md);
+  border: var(--accio-border-width) solid var(--accio-border-strong);
+  background: var(--accio-bg-inset);
+  color: var(--accio-text-primary);
+  font-family: inherit;
+  font-size: var(--accio-text-sm);
+}
+.accio-form-inline {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  align-items: end;
+  margin-bottom: var(--accio-space-4);
+}
+.accio-btn-sm {
+  padding: var(--accio-space-1) var(--accio-space-3);
+  font-size: var(--accio-text-xs);
+}
+.topic-preview {
+  margin-top: var(--accio-space-3);
+  padding: var(--accio-space-4);
+  background: var(--accio-bg-inset);
+  border-radius: var(--accio-radius-md);
+  border: var(--accio-border-width) solid var(--accio-border);
+}
+.topic-meta {
+  display: flex;
+  gap: var(--accio-space-3);
+  align-items: center;
+  margin-bottom: var(--accio-space-3);
+}
+.topic-framework {
+  font-size: var(--accio-text-sm);
+  color: var(--accio-text-secondary);
+  margin-bottom: var(--accio-space-3);
+  line-height: 1.5;
+}
+.topic-text {
+  white-space: pre-wrap;
+  font-size: var(--accio-text-sm);
+  color: var(--accio-text-primary);
+  max-height: 320px;
+  overflow: auto;
+  margin: 0;
+  font-family: var(--accio-font-mono);
+}

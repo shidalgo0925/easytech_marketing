@@ -80,6 +80,7 @@
         <button class="accio-tab" data-tab="calendario">Calendario</button>
         <button class="accio-tab" data-tab="metricas">Métricas</button>
         <button class="accio-tab" data-tab="flyers">Flyers</button>
+        <button class="accio-tab" data-tab="conocimiento">Conocimiento</button>
         <button class="accio-tab" data-tab="conectores">Conectores</button>
       </nav>
 
@@ -141,6 +142,30 @@
         </section>
       </div>
 
+      <div id="panel-conocimiento" class="tab-panel">
+        <div class="accio-kpi-grid" id="knowStats"></div>
+        <div class="accio-grid">
+          <section class="accio-card">
+            <div class="accio-card-head">
+              Contexto de negocio
+              <button class="accio-btn-secondary accio-btn-sm" onclick="saveBusinessContext()">Guardar</button>
+            </div>
+            <div class="accio-card-body accio-form" id="businessContextForm"></div>
+          </section>
+          <section class="accio-card">
+            <div class="accio-card-head">Knowledge Base</div>
+            <div class="accio-card-body accio-table-wrap" id="knowledgeTable"></div>
+          </section>
+          <section class="accio-card" style="grid-column: 1 / -1">
+            <div class="accio-card-head">Generador de temas · Fase E</div>
+            <div class="accio-card-body">
+              <div class="accio-form accio-form-inline" id="topicGeneratorForm"></div>
+              <div class="topic-preview" id="topicPreview"><div class="empty">Genera un tema para ver el preview</div></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
       <div id="panel-conectores" class="tab-panel">
         <section class="accio-card">
           <div class="accio-card-head">Conectores multicanal</div>
@@ -155,6 +180,8 @@
   <script>
     const KEY_STORAGE = 'accio_dashboard_key';
     let lastData = null;
+    let lastKnowledge = null;
+    let lastGenerated = null;
     let activeTab = 'resumen';
 
     function getKey() { return sessionStorage.getItem(KEY_STORAGE) || ''; }
@@ -245,6 +272,7 @@
         calendario: 'Publicar siguiente',
         metricas: 'Actualizar métricas',
         flyers: 'Actualizar assets',
+        conocimiento: 'Generar tema',
         conectores: 'Validar conectores',
       };
       btn.textContent = labels[activeTab] || 'Operar';
@@ -252,13 +280,17 @@
 
     function runPrimaryAction() {
       if (activeTab === 'metricas' || activeTab === 'flyers') return loadData();
+      if (activeTab === 'conocimiento') return generateTopic(false);
       if (activeTab === 'campanas' || activeTab === 'calendario' || activeTab === 'conectores') return switchTab('resumen');
       return runPublish(false);
     }
 
     document.getElementById('tabs').addEventListener('click', e => {
       const tab = e.target.closest('.accio-tab');
-      if (tab) switchTab(tab.dataset.tab);
+      if (tab) {
+        switchTab(tab.dataset.tab);
+        if (tab.dataset.tab === 'conocimiento' && !lastKnowledge) loadKnowledge();
+      }
     });
 
     function renderResumen(data) {
@@ -449,6 +481,125 @@
         </div>`).join('');
     }
 
+    function renderBusinessContextForm(ctx) {
+      const c = ctx || {};
+      document.getElementById('businessContextForm').innerHTML = `
+        <label>Empresa<input id="ctxEmpresa" value="${esc(c.empresa||'')}"></label>
+        <label>Industria<input id="ctxIndustria" value="${esc(c.industria||'')}"></label>
+        <label>País<input id="ctxPais" value="${esc(c.pais||'')}"></label>
+        <label>Público objetivo<textarea id="ctxPublico" rows="2">${esc(c.publico_objetivo||'')}</textarea></label>
+        <label>Tono<textarea id="ctxTono" rows="2">${esc(c.tono_comunicacion||'')}</textarea></label>
+        <label>CTA principal<input id="ctxCta" value="${esc(c.cta_principal||'DIAGNÓSTICO')}"></label>`;
+      if (c.empresa) document.getElementById('clientName').textContent = c.empresa;
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    }
+
+    function getBusinessContextPayload() {
+      return {
+        empresa: document.getElementById('ctxEmpresa')?.value,
+        industria: document.getElementById('ctxIndustria')?.value,
+        pais: document.getElementById('ctxPais')?.value,
+        publico_objetivo: document.getElementById('ctxPublico')?.value,
+        tono_comunicacion: document.getElementById('ctxTono')?.value,
+        cta_principal: document.getElementById('ctxCta')?.value,
+      };
+    }
+
+    async function saveBusinessContext() {
+      try {
+        const r = await fetch('/accio/config/business-context', {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ context: getBusinessContextPayload() }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al guardar');
+        toast('Contexto guardado');
+        if (data.context?.empresa) document.getElementById('clientName').textContent = data.context.empresa;
+      } catch (e) { toast(e.message, true); }
+    }
+
+    function renderKnowledge(data) {
+      lastKnowledge = data;
+      const bal = data.editorial_balance?.current || {};
+      document.getElementById('knowStats').innerHTML = [
+        kpi('Artículos KB', data.articles_available ?? 0),
+        kpi('Valor en cola', `${bal.valor_pct ?? 0}%`),
+        kpi('Venta en cola', `${bal.venta_pct ?? 0}%`, true),
+      ].join('');
+      renderBusinessContextForm(data.business_context);
+      const articles = data.articles || [];
+      document.getElementById('knowledgeTable').innerHTML = articles.length ? `
+        <table class="accio-table"><thead><tr>
+          <th>Slug</th><th>Título</th><th>Producto</th><th>Chars</th><th></th>
+        </tr></thead><tbody>${articles.map(a => `<tr>
+          <td class="is-mono">${a.slug}</td>
+          <td>${a.title}</td>
+          <td>${a.product}</td>
+          <td>${a.chars}</td>
+          <td>${a.available ? '<span class="conn-ok">OK</span>' : '<span class="conn-warn">Falta</span>'}</td>
+        </tr>`).join('')}</tbody></table>` : '<div class="empty">Sin artículos</div>';
+      const slugs = articles.filter(a => a.available).map(a => a.slug);
+      document.getElementById('topicGeneratorForm').innerHTML = `
+        <label>Producto<select id="genProduct">${slugs.map(s => `<option value="${s}">${s}</option>`).join('')}</select></label>
+        <label>Tipo<select id="genType">
+          <option value="educacion">Educación</option>
+          <option value="consejo">Consejo</option>
+          <option value="caso">Caso real</option>
+          <option value="tendencia">Tendencia</option>
+          <option value="venta">Venta</option>
+        </select></label>
+        <label>Canal<select id="genPlatform">
+          <option value="linkedin">LinkedIn</option>
+          <option value="facebook">Facebook</option>
+          <option value="instagram">Instagram</option>
+        </select></label>
+        <label>Tema (opcional)<input id="genTopic" placeholder="Ej: 3 errores al implementar ERP"></label>
+        <button class="accio-btn-primary" onclick="generateTopic(false)">Generar preview</button>
+        <button class="accio-btn-secondary" onclick="generateTopic(true)">Generar y encolar</button>`;
+    }
+
+    async function loadKnowledge() {
+      try {
+        const data = await api('/knowledge');
+        renderKnowledge(data);
+      } catch (e) { toast('Knowledge: ' + e.message, true); }
+    }
+
+    async function generateTopic(enqueue) {
+      const product = document.getElementById('genProduct')?.value || 'easytech';
+      const content_type = document.getElementById('genType')?.value || 'educacion';
+      const platform = document.getElementById('genPlatform')?.value || 'linkedin';
+      const topic = document.getElementById('genTopic')?.value || '';
+      try {
+        toast(enqueue ? 'Generando y encolando…' : 'Generando tema…');
+        const r = await fetch('/accio/content/generate-topic', {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ product_slug: product, content_type, platform, topic, enqueue }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error al generar');
+        lastGenerated = data;
+        const fw = data.topic_framework || {};
+        document.getElementById('topicPreview').innerHTML = `
+          <div class="topic-meta">
+            <span class="accio-badge">${data.content_type}</span>
+            <span class="is-mono">${data.post?.id}</span>
+            ${enqueue && data.enqueued ? '<span class="conn-ok">Encolado</span>' : ''}
+          </div>
+          <div class="topic-framework">
+            <strong>Problema:</strong> ${esc(fw.problem||'—')}<br>
+            <strong>Explicación:</strong> ${esc(fw.explanation||'—')}<br>
+            <strong>Recomendación:</strong> ${esc(fw.recommendation||'—')}
+          </div>
+          <pre class="topic-text">${esc(data.post?.text||'')}</pre>`;
+        if (enqueue) { toast('Post encolado'); loadData(); }
+        else toast('Preview listo');
+      } catch (e) { toast(e.message, true); }
+    }
+
     async function loadData() {
       try {
         const data = await api('/summary');
@@ -460,6 +611,7 @@
         renderMetricas(data);
         renderFlyers(data);
         renderConnectors(data);
+        loadKnowledge();
         document.getElementById('quickLinks').innerHTML = Object.entries(data.links)
           .map(([k, v]) => `<a href="${v}" target="_blank">${k}</a>`).join(' · ');
       } catch (e) { toast('Error: ' + e.message, true); }

@@ -87,6 +87,9 @@ def enqueue_post(post: dict[str, Any]) -> dict[str, Any]:
         "text": post["text"],
         "first_comment": post.get("first_comment", ""),
     }
+    for key in ("content_type", "content_type_v2", "topic_framework", "flyer_num"):
+        if post.get(key) is not None:
+            entry[key] = post[key]
 
     queue = load_content_queue()
     posts = queue.setdefault("posts", [])
