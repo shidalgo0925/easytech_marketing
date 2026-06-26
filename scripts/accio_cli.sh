@@ -6,6 +6,7 @@ set -a
 source .env
 set +a
 BASE="http://127.0.0.1:${ACCIO_ENGINE_PORT:-8092}"
+TENANT="${ACCIO_DEFAULT_TENANT:-easytech}"
 AUTH=(-H "Authorization: Bearer ${ACCIO_API_KEY}")
 
 cmd="${1:-status}"
@@ -16,10 +17,10 @@ case "$cmd" in
     curl -sf "${AUTH[@]}" "$BASE/accio/status" | python3 -m json.tool
     ;;
   orders)
-    curl -sf "${AUTH[@]}" "$BASE/accio/orders" | python3 -m json.tool
+    curl -sf "${AUTH[@]}" "$BASE/accio/${TENANT}/orders" | python3 -m json.tool
     ;;
   tick)
-    curl -sf -X POST "${AUTH[@]}" "$BASE/accio/tick" | python3 -m json.tool
+    curl -sf -X POST "${AUTH[@]}" "$BASE/accio/${TENANT}/tick" | python3 -m json.tool
     ;;
   pipeline)
     curl -sf -X POST "${AUTH[@]}" "$BASE/accio/run/pipeline" | python3 -m json.tool

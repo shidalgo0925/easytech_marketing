@@ -154,9 +154,7 @@ def require_api_key(_func=None):
             token = auth.removeprefix("Bearer ").strip() if auth.startswith("Bearer ") else request.headers.get("X-Accio-Key", "")
             if not _valid_api_key(token, tenant_id):
                 return jsonify({"ok": False, "error": "No autorizado"}), 401
-            allowed, perm = _check_request_permission(tenant_id)
-            if not allowed:
-                return jsonify({"ok": False, "error": f"Permiso denegado: {perm}"}), 403
+            # Bearer API key (cron, Accio Work): permisos de automatización
             return view(*args, **kwargs)
 
         return wrapped
