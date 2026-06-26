@@ -1,6 +1,6 @@
 # Aclaración de arquitectura — Tenant vs Apps en EMAcción
 
-**Estado:** Fase 1 implementada (2026-06-26) · **Pendiente:** UI selector app, colas por app, sync EN1
+**Estado:** Fase 2 implementada (2026-06-27) · **Pendiente:** sync EN1 organizations
 **Fecha:** 2026-06-26  
 **Complementa:** `docs/CONTEXTO.md`, `docs/EMACCION_PHASE_M_MULTI_TENANT.md`
 
@@ -277,13 +277,21 @@ Las capturas de EN1 Dev son referencia de producto; la integración API EN1 ↔ 
 | Concepto acordado | Implementación actual | Gap |
 |-------------------|----------------------|-----|
 | Tenant SaaS | `tenant_id` + `Marketing/tenants/{id}/` | Parcial — vocabulario UI dice “Empresa” |
-| App | `products.json` (catálogo sin cola propia) | **Fase 1** — `apps/registry.json` + API; cola en `default` |
-| `app_id` en contenido | Cola/campañas a nivel tenant | Posts con `app_id: default` (22 migrados en easytech) |
+| App | `products.json` (catálogo sin cola propia) | **Fase 2** — registry + selector UI + colas filtradas por `app_id` |
+| `app_id` en contenido | Cola/campañas a nivel tenant | Posts con `app_id`; filtro por app en API/dashboard/publishers |
 | ETS = un tenant | `easytech` ≈ Easy Technology Services | OK como primer tenant |
 | Relatic como tenant | `relatic` en registry | OK si escenario 2; conflict si era App de ETS |
 | Flyers / IIUS | Globales en `Marketing/flyers/` | Sin `tenant_id` / `app_id` |
 
-**Próximo paso técnico (requiere GO):** Fase 2 — UI selector de app, colas por app, publishers filtrados por `app_id`.
+**Próximo paso técnico (requiere GO):** Fase 3 — sync EN1 organizations → `tenant_id` (read-only).
+
+### Fase 2 implementada (2026-06-27)
+
+- Selector **App** en dashboard (`static/dashboard.html`) — `localStorage` por tenant
+- API dashboard filtrada: `?app_id=` / header `X-Accio-App`
+- `executor.py`, `dashboard_data.py`, `app.py` — colas, status, campañas, calendario, métricas por app
+- Publishers: `linkedin_publisher.py`, `meta_publisher.py` con `--app-id=`
+- App `default` mantiene paths del tenant (retrocompat)
 
 ### Fase 1 implementada (2026-06-26)
 

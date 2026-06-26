@@ -171,6 +171,25 @@ def _tenant_or_404(tenant_id: str):
         return None, str(exc)
 
 
+def _requested_app_id(tenant_id: str) -> str:
+    body = request.get_json(silent=True) if request.method in ("POST", "PATCH", "PUT") else {}
+    if body is None:
+        body = {}
+    raw = (
+        request.args.get("app_id")
+        or request.headers.get("X-Accio-App")
+        or (body.get("app_id") if isinstance(body, dict) else None)
+        or ""
+    )
+    raw = str(raw).strip()
+    if not raw:
+        return marketing_app.default_app_id(tenant_id)
+    try:
+        return marketing_app.normalize_app_id(raw)
+    except marketing_app.AppNotFoundError:
+        return marketing_app.default_app_id(tenant_id)
+
+
 def _serve_dashboard_asset(asset: str):
     if asset not in DASHBOARD_ASSETS:
         return jsonify({"ok": False, "error": "Asset no permitido"}), 404
@@ -983,31 +1002,36 @@ def dashboard_summary(tenant_id: str):
     tenant, err = _tenant_or_404(tenant_id)
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
-    return jsonify(dashboard_data.get_summary(tenant_id))
+    app_id = _requested_app_id(tenant_id)
+    return jsonify(dashboard_data.get_summary(tenant_id, app_id))
 
 
 @app.get("/accio/<tenant_id>/dashboard/api/campaigns")
 @require_api_key
 def dashboard_campaigns(tenant_id: str):
-    return jsonify({"ok": True, "campaigns": dashboard_data.load_campaigns(tenant_id)})
+    app_id = _requested_app_id(tenant_id)
+    return jsonify({"ok": True, "app_id": app_id, "campaigns": dashboard_data.load_campaigns(tenant_id, app_id)})
 
 
 @app.get("/accio/<tenant_id>/dashboard/api/calendar")
 @require_api_key
 def dashboard_calendar(tenant_id: str):
-    return jsonify({"ok": True, **dashboard_data.load_calendar_view(tenant_id)})
+    app_id = _requested_app_id(tenant_id)
+    return jsonify({"ok": True, "app_id": app_id, **dashboard_data.load_calendar_view(tenant_id, app_id)})
 
 
 @app.get("/accio/<tenant_id>/dashboard/api/metrics")
 @require_api_key
 def dashboard_metrics(tenant_id: str):
-    return jsonify({"ok": True, **dashboard_data.load_metrics(tenant_id)})
+    app_id = _requested_app_id(tenant_id)
+    return jsonify({"ok": True, "app_id": app_id, **dashboard_data.load_metrics(tenant_id, app_id)})
 
 
 @app.get("/accio/<tenant_id>/dashboard/api/flyers")
 @require_api_key
 def dashboard_flyers(tenant_id: str):
-    return jsonify({"ok": True, **dashboard_data.load_flyers_library(tenant_id)})
+    app_id = _requested_app_id(tenant_id)
+    return jsonify({"ok": True, "app_id": app_id, **dashboard_data.load_flyers_library(tenant_id, app_id)})
 
 
 @app.get("/accio/<tenant_id>/dashboard/api/connectors")
@@ -1270,13 +1294,14 @@ def status(tenant_id: str):
     tenant, err = _tenant_or_404(tenant_id)
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
-    return jsonify({"ok": True, **executor.get_status(tenant_id)})
+    return jsonify({"ok": True, **executor.get_status(tenant_id, _requested_app_id(tenant_id))})
 
 
 @app.get("/accio/<tenant_id>/content/queue")
 @require_api_key
 def content_queue(tenant_id: str):
-    return jsonify({"ok": True, "queue": executor.load_content_queue(tenant_id)})
+    app_id = _requested_app_id(tenant_id)
+    return jsonify({"ok": True, "app_id": app_id, "queue": executor.load_content_queue_for_app(tenant_id, app_id)})
 
 
 @app.get("/accio/<tenant_id>/orders")
@@ -1339,7 +1364,8 @@ def run_pipeline_now(tenant_id: str):
 @require_api_key
 def publish_linkedin_now(tenant_id: str):
     body = request.get_json(silent=True) or {}
-    params = {"force": bool(body.get("force")), "dry_run": bool(body.get("dry_run"))}
+    app_id = _requested_app_id(tenant_id)
+    params = {"force": bool(body.get("force")), "dry_run": bool(body.get("dry_run")), "app_id": app_id}
     order = queue_store.create_order("publish_linkedin", params, "api", tenant_id)
     order = _run_order(order, tenant_id)
     return jsonify({"ok": order["status"] == "completed", "order": order})

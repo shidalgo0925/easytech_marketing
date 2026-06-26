@@ -21,6 +21,7 @@ from dotenv import load_dotenv
 
 from Motor_Tecnico.publisher_tenant import (
     linkedin_credentials,
+    parse_app_arg,
     parse_tenant_arg,
     publish_log_path,
     queue_path,
@@ -36,15 +37,15 @@ LINKEDIN_VERSION = "202506"
 IMAGE_WAIT_SEC = int(os.getenv("LINKEDIN_IMAGE_WAIT_SEC", "8"))
 
 
-def load_queue(tenant_id: str) -> dict:
-    path = queue_path(tenant_id)
+def load_queue(tenant_id: str, app_id: str | None = None) -> dict:
+    path = queue_path(tenant_id, app_id)
     if not path.exists():
         raise SystemExit(f"No existe la cola: {path}")
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def save_queue(data: dict, tenant_id: str) -> None:
-    path = queue_path(tenant_id)
+def save_queue(data: dict, tenant_id: str, app_id: str | None = None) -> None:
+    path = queue_path(tenant_id, app_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -198,16 +199,23 @@ def publish_next(
     dry_run: bool = False,
     allow_text_only: bool = False,
     tenant_id: str | None = None,
+    app_id: str | None = None,
 ) -> None:
     tenant_id = tenant_id or parse_tenant_arg()
-    queue = load_queue(tenant_id)
+    app_id = app_id if app_id is not None else parse_app_arg()
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    aid = marketing_app.normalize_app_id(app_id or marketing_app.default_app_id(tenant_id))
+    raw = load_queue(tenant_id, aid)
+    posts = marketing_app.posts_for_app(raw.get("posts", []), aid, tenant_id)
+    queue = {**raw, "posts": posts}
     post = pick_next_post(queue, force=force)
     if not post:
-        print(f"No hay posts pendientes listos para publicar (tenant: {tenant_id}).")
+        print(f"No hay posts pendientes listos para publicar (tenant: {tenant_id}, app: {aid}).")
         return
 
     flyer_path = resolve_flyer_path(post, tenant_id)
-    print(f"Post seleccionado [{tenant_id}]: {post['id']} (programado: {post['scheduled_at']})")
+    print(f"Post seleccionado [{tenant_id}/{aid}]: {post['id']} (programado: {post['scheduled_at']})")
 
     if dry_run:
         print("DRY RUN — no se publicó nada.")
@@ -240,7 +248,7 @@ def publish_next(
         time.sleep(120)
         create_comment(token, author, post_id, first_comment)
 
-    for item in queue["posts"]:
+    for item in raw["posts"]:
         if item["id"] == post["id"]:
             item["status"] = "published"
             item["published_at"] = datetime.now(PANAMA).isoformat()
@@ -249,11 +257,12 @@ def publish_next(
             if image_urn:
                 item["linkedin_image_urn"] = image_urn
             break
-    save_queue(queue, tenant_id)
+    save_queue(raw, tenant_id, aid)
 
     append_log(
         {
             "tenant_id": tenant_id,
+            "app_id": aid,
             "id": post["id"],
             "published_at": datetime.now(timezone.utc).isoformat(),
             "linkedin_post_id": post_id,
@@ -272,7 +281,14 @@ def main() -> None:
     dry_run = "--dry-run" in sys.argv
     allow_text_only = "--allow-text-only" in sys.argv
     tenant_id = parse_tenant_arg()
-    publish_next(force=force, dry_run=dry_run, allow_text_only=allow_text_only, tenant_id=tenant_id)
+    app_id = parse_app_arg()
+    publish_next(
+        force=force,
+        dry_run=dry_run,
+        allow_text_only=allow_text_only,
+        tenant_id=tenant_id,
+        app_id=app_id,
+    )
 
 
 if __name__ == "__main__":

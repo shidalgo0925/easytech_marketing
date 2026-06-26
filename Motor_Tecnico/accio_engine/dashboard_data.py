@@ -20,8 +20,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 PANAMA = ZoneInfo("America/Panama")
 
 
-def _paths(tenant_id: str) -> dict[str, Path]:
-    return effective_paths(resolve_tenant(tenant_id))
+def _paths(tenant_id: str, app_id: str | None = None) -> dict[str, Path]:
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    base = effective_paths(resolve_tenant(tenant_id))
+    if not app_id:
+        return base
+    aid = marketing_app.normalize_app_id(app_id)
+    if aid == marketing_app.default_app_id(tenant_id):
+        return base
+    ap = marketing_app.effective_app_paths(tenant_id, aid)
+    return {
+        **base,
+        "content_queue": ap["content_queue"],
+        "calendar": ap["calendar"],
+        "campaigns": ap["campaigns"],
+    }
 
 
 def load_connectors(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
@@ -152,8 +166,8 @@ def _load_manifest(tenant_id: str) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def load_campaigns(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
-    paths = _paths(tenant_id)
+def load_campaigns(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> list[dict[str, Any]]:
+    paths = _paths(tenant_id, app_id)
     manifest = _load_manifest(tenant_id)
     topic_by_num = {f["num"]: f.get("topic", "") for f in manifest.get("flyers", [])}
     defs: dict[str, dict[str, Any]] = {}
@@ -163,7 +177,7 @@ def load_campaigns(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
             if camp.get("post_id"):
                 defs[camp["post_id"]] = camp
 
-    queue = executor.load_content_queue(tenant_id)
+    queue = executor.load_content_queue_for_app(tenant_id, app_id)
     campaigns = []
     for post in queue.get("posts", []):
         post_id = post.get("id", "")
@@ -183,18 +197,23 @@ def load_campaigns(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
                 "linkedin_post_id": post.get("linkedin_post_id"),
                 "landing": base.get("landing", "https://n8n.etsrv.site/guia/"),
                 "cta": base.get("cta", "DIAGNOSTICO"),
+                "app_id": post.get("app_id"),
             }
         )
     campaigns.sort(key=lambda c: c.get("scheduled_at") or "")
     return campaigns
 
 
-def load_calendar_view(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
-    cal_path = _paths(tenant_id)["calendar"]
+def load_calendar_view(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    cal_path = _paths(tenant_id, app_id)["calendar"]
     if not cal_path.exists():
         return {"weeks": [], "timezone": "America/Panama"}
     calendar = json.loads(cal_path.read_text(encoding="utf-8"))
-    queue_by_id = {p["id"]: p for p in executor.load_content_queue(tenant_id).get("posts", []) if p.get("id")}
+    queue_by_id = {
+        p["id"]: p
+        for p in executor.load_content_queue_for_app(tenant_id, app_id).get("posts", [])
+        if p.get("id")
+    }
     weeks = []
     for week in calendar.get("weeks", []):
         posts = []
@@ -217,9 +236,9 @@ def load_calendar_view(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     }
 
 
-def load_flyers_library(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+def load_flyers_library(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
     manifest = _load_manifest(tenant_id)
-    queue = executor.load_content_queue(tenant_id)
+    queue = executor.load_content_queue_for_app(tenant_id, app_id)
     used_nums: set[int] = set()
     for post in queue.get("posts", []):
         num = _flyer_num_from_post(post, manifest)
@@ -264,9 +283,9 @@ def load_flyers_library(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     }
 
 
-def load_metrics(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
-    paths = _paths(tenant_id)
-    status = executor.get_status(tenant_id)
+def load_metrics(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    paths = _paths(tenant_id, app_id)
+    status = executor.get_status(tenant_id, app_id)
     publish_log: list[dict[str, Any]] = []
     pl_path = paths["publish_log"]
     if pl_path.exists():
@@ -318,8 +337,8 @@ def load_metrics(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     }
 
 
-def pending_posts(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
-    queue = executor.load_content_queue(tenant_id)
+def pending_posts(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> list[dict[str, Any]]:
+    queue = executor.load_content_queue_for_app(tenant_id, app_id)
     items = []
     for post in queue.get("posts", []):
         if post.get("status") != "pending":
@@ -339,8 +358,10 @@ def pending_posts(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
     return items
 
 
-def published_posts(limit: int = 5, tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
-    queue = executor.load_content_queue(tenant_id)
+def published_posts(
+    limit: int = 5, tenant_id: str = DEFAULT_TENANT, app_id: str | None = None
+) -> list[dict[str, Any]]:
+    queue = executor.load_content_queue_for_app(tenant_id, app_id)
     items = [p for p in queue.get("posts", []) if p.get("status") == "published"]
     items.sort(key=lambda p: p.get("published_at") or "", reverse=True)
     return [
@@ -353,18 +374,27 @@ def published_posts(limit: int = 5, tenant_id: str = DEFAULT_TENANT) -> list[dic
     ]
 
 
-def get_summary(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+def get_summary(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine import marketing_app
+
     tenant = resolve_tenant(tenant_id)
-    status = executor.get_status(tenant_id)
+    aid = marketing_app.normalize_app_id(app_id or marketing_app.default_app_id(tenant_id))
+    status = executor.get_status(tenant_id, aid)
     orders = queue_store.list_orders(limit=15, tenant_id=tenant_id)
     tenants_meta = [
         {"tenant_id": t.tenant_id, "display_name": t.display_name}
         for t in list_tenants()
     ]
+    apps_meta = [a.to_dict() for a in marketing_app.list_apps(tenant_id)]
+    app_row = next((a for a in apps_meta if a["app_id"] == aid), None)
     return {
         "ok": True,
         "tenant_id": tenant_id,
         "tenant_name": tenant.display_name,
+        "app_id": aid,
+        "app_name": (app_row or {}).get("name", aid),
+        "default_app_id": marketing_app.default_app_id(tenant_id),
+        "apps": apps_meta,
         "tenants": tenants_meta,
         "time_panama": datetime.now(PANAMA).strftime("%Y-%m-%d %H:%M %Z"),
         "stats": {
@@ -375,12 +405,12 @@ def get_summary(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
             "prospection_csv": status["prospection_csv_rows"],
             "orders_pending": status["orders_pending"],
         },
-        "pending_posts": pending_posts(tenant_id),
-        "published_posts": published_posts(tenant_id=tenant_id),
-        "campaigns": load_campaigns(tenant_id),
-        "calendar": load_calendar_view(tenant_id),
-        "metrics": load_metrics(tenant_id),
-        "flyers": load_flyers_library(tenant_id),
+        "pending_posts": pending_posts(tenant_id, aid),
+        "published_posts": published_posts(tenant_id=tenant_id, app_id=aid),
+        "campaigns": load_campaigns(tenant_id, aid),
+        "calendar": load_calendar_view(tenant_id, aid),
+        "metrics": load_metrics(tenant_id, aid),
+        "flyers": load_flyers_library(tenant_id, aid),
         "connectors": load_connectors(tenant_id),
         "orders": orders,
         "odoo": fetch_odoo_leads(tenant_id=tenant_id),

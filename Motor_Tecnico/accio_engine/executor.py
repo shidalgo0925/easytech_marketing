@@ -40,14 +40,21 @@ def run_pipeline(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     return {"tenant_id": tenant_id, "step": "odoo_sync", "scrape": scrape, **sync}
 
 
-def _tenant_args(tenant_id: str) -> list[str]:
-    return [f"--tenant-id={tenant_id}"]
+def _tenant_args(tenant_id: str, app_id: str | None = None) -> list[str]:
+    args = [f"--tenant-id={tenant_id}"]
+    if app_id:
+        args.append(f"--app-id={app_id}")
+    return args
 
 
 def publish_channel(
-    connector_id: str, force: bool = False, dry_run: bool = False, tenant_id: str = DEFAULT_TENANT
+    connector_id: str,
+    force: bool = False,
+    dry_run: bool = False,
+    tenant_id: str = DEFAULT_TENANT,
+    app_id: str | None = None,
 ) -> dict[str, Any]:
-    args = [f"--connector={connector_id}", *_tenant_args(tenant_id)]
+    args = [f"--connector={connector_id}", *_tenant_args(tenant_id, app_id)]
     if force:
         args.append("--force")
     if dry_run:
@@ -57,8 +64,13 @@ def publish_channel(
     return result
 
 
-def publish_linkedin(force: bool = False, dry_run: bool = False, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
-    args = [*_tenant_args(tenant_id)]
+def publish_linkedin(
+    force: bool = False,
+    dry_run: bool = False,
+    tenant_id: str = DEFAULT_TENANT,
+    app_id: str | None = None,
+) -> dict[str, Any]:
+    args = [*_tenant_args(tenant_id, app_id)]
     if force:
         args.append("--force")
     if dry_run:
@@ -69,9 +81,13 @@ def publish_linkedin(force: bool = False, dry_run: bool = False, tenant_id: str 
 
 
 def publish_meta(
-    platform: str = "all", force: bool = False, dry_run: bool = False, tenant_id: str = DEFAULT_TENANT
+    platform: str = "all",
+    force: bool = False,
+    dry_run: bool = False,
+    tenant_id: str = DEFAULT_TENANT,
+    app_id: str | None = None,
 ) -> dict[str, Any]:
-    args = [f"--platform={platform}", *_tenant_args(tenant_id)]
+    args = [f"--platform={platform}", *_tenant_args(tenant_id, app_id)]
     if force:
         args.append("--force")
     if dry_run:
@@ -81,18 +97,43 @@ def publish_meta(
     return result
 
 
-def load_content_queue(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
-    path = _paths(tenant_id)["content_queue"]
+def _resolve_app_id(tenant_id: str, app_id: str | None) -> str:
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    return marketing_app.normalize_app_id(app_id or marketing_app.default_app_id(tenant_id))
+
+
+def load_content_queue(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    path = marketing_app.queue_file_path(tenant_id, app_id)
+    if not path.is_file():
+        return {"posts": []}
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def save_content_queue(data: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> None:
-    path = _paths(tenant_id)["content_queue"]
+def load_content_queue_for_app(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    aid = _resolve_app_id(tenant_id, app_id)
+    data = load_content_queue(tenant_id, aid)
+    posts = marketing_app.posts_for_app(data.get("posts", []), aid, tenant_id)
+    return {**data, "posts": posts, "app_id": aid}
+
+
+def save_content_queue(
+    data: dict[str, Any], tenant_id: str = DEFAULT_TENANT, app_id: str | None = None
+) -> None:
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    path = marketing_app.queue_file_path(tenant_id, app_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def enqueue_post(post: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+def enqueue_post(
+    post: dict[str, Any], tenant_id: str = DEFAULT_TENANT, app_id: str | None = None
+) -> dict[str, Any]:
     required = {"id", "platform", "text", "scheduled_at"}
     missing = required - set(post.keys())
     if missing:
@@ -112,13 +153,16 @@ def enqueue_post(post: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> dict[
         if post.get(key) is not None:
             entry[key] = post[key]
 
-    queue = load_content_queue(tenant_id)
+    aid = _resolve_app_id(tenant_id, post.get("app_id") or app_id)
+    entry["app_id"] = aid
+
+    queue = load_content_queue(tenant_id, aid)
     posts = queue.setdefault("posts", [])
     for existing in posts:
         if existing.get("id") == entry["id"]:
             raise ValueError(f"Post id duplicado: {entry['id']}")
     posts.append(entry)
-    save_content_queue(queue, tenant_id)
+    save_content_queue(queue, tenant_id, aid)
     return entry
 
 
@@ -155,16 +199,18 @@ def _platform_queue_stats(posts: list[dict[str, Any]], platform: str) -> dict[st
     }
 
 
-def get_status(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+def get_status(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine import marketing_app
     from Motor_Tecnico.accio_engine import queue_store
     from Motor_Tecnico.connectors.registry import all_connector_views, load_registry
 
+    aid = _resolve_app_id(tenant_id, app_id)
     paths = _paths(tenant_id)
-    queue = load_content_queue(tenant_id)
+    queue = load_content_queue_for_app(tenant_id, aid)
     posts = queue.get("posts", [])
     views = all_connector_views(tenant_id)
 
-    content_queue: dict[str, Any] = {"tenant_id": tenant_id}
+    content_queue: dict[str, Any] = {"tenant_id": tenant_id, "app_id": aid}
     for view in views:
         pid = view["id"]
         platform = view["platform"]
@@ -191,16 +237,14 @@ def get_status(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
         lead_rows = max(0, sum(1 for _ in csv_path.open()) - 1)
 
     registry = load_registry(tenant_id)
-    from Motor_Tecnico.accio_engine import marketing_app
-
-    apps = marketing_app.list_apps(tenant_id)
     return {
         "engine": "accio_marketing_engine",
         "version": 3,
         "tenant_id": tenant_id,
+        "app_id": aid,
         "default_app_id": marketing_app.default_app_id(tenant_id),
-        "apps_count": len(apps),
-        "apps": [a.to_dict() for a in apps],
+        "apps_count": len(marketing_app.list_apps(tenant_id)),
+        "apps": [a.to_dict() for a in marketing_app.list_apps(tenant_id)],
         "strategy": registry.get("strategy"),
         "time_panama": datetime.now(PANAMA).isoformat(),
         "content_queue": content_queue,
@@ -213,30 +257,46 @@ def get_status(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
 
 
 def _action_handlers(tenant_id: str) -> dict:
+    def _app(p: dict) -> str | None:
+        return p.get("app_id") or None
+
     return {
         "run_pipeline": lambda p: run_pipeline(tenant_id),
         "publish_linkedin": lambda p: publish_linkedin(
-            force=bool(p.get("force")), dry_run=bool(p.get("dry_run")), tenant_id=tenant_id
+            force=bool(p.get("force")),
+            dry_run=bool(p.get("dry_run")),
+            tenant_id=tenant_id,
+            app_id=_app(p),
         ),
         "publish_facebook": lambda p: publish_meta(
-            platform="facebook", force=bool(p.get("force")), dry_run=bool(p.get("dry_run")), tenant_id=tenant_id
+            platform="facebook",
+            force=bool(p.get("force")),
+            dry_run=bool(p.get("dry_run")),
+            tenant_id=tenant_id,
+            app_id=_app(p),
         ),
         "publish_instagram": lambda p: publish_meta(
-            platform="instagram", force=bool(p.get("force")), dry_run=bool(p.get("dry_run")), tenant_id=tenant_id
+            platform="instagram",
+            force=bool(p.get("force")),
+            dry_run=bool(p.get("dry_run")),
+            tenant_id=tenant_id,
+            app_id=_app(p),
         ),
         "publish_meta": lambda p: publish_meta(
             platform=str(p.get("platform", "all")),
             force=bool(p.get("force")),
             dry_run=bool(p.get("dry_run")),
             tenant_id=tenant_id,
+            app_id=_app(p),
         ),
         "publish_channel": lambda p: publish_channel(
             connector_id=str(p.get("connector") or p.get("platform", "")),
             force=bool(p.get("force")),
             dry_run=bool(p.get("dry_run")),
             tenant_id=tenant_id,
+            app_id=_app(p),
         ),
-        "enqueue_post": lambda p: {"post": enqueue_post(p["post"], tenant_id)},
+        "enqueue_post": lambda p: {"post": enqueue_post(p["post"], tenant_id, app_id=_app(p))},
         "enqueue_posts": lambda p: enqueue_posts(p.get("posts", []), tenant_id),
         "set_calendar": lambda p: set_calendar(p.get("calendar", p), tenant_id),
     }

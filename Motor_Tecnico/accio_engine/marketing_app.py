@@ -262,6 +262,22 @@ def effective_app_paths(tenant_id: str, app_id: str | None = None) -> dict[str, 
     }
 
 
+def posts_for_app(posts: list[dict[str, Any]], app_id: str, tenant_id: str) -> list[dict[str, Any]]:
+    """Filtra posts por app_id (cola compartida en app default)."""
+    aid = normalize_app_id(app_id)
+    default = default_app_id(tenant_id)
+
+    def _post_app(post: dict[str, Any]) -> str:
+        return normalize_app_id(post.get("app_id") or default)
+
+    return [p for p in posts if _post_app(p) == aid]
+
+
+def queue_file_path(tenant_id: str, app_id: str | None = None) -> Path:
+    paths = effective_app_paths(tenant_id, app_id)
+    return paths["content_queue"]
+
+
 def ensure_post_app_ids(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> int:
     """Añade app_id a posts sin campo (migración suave)."""
     paths = effective_app_paths(tenant_id, app_id)

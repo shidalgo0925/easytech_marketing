@@ -17,12 +17,23 @@ def parse_tenant_arg(argv: list[str] | None = None) -> str:
     return DEFAULT_TENANT
 
 
+def parse_app_arg(argv: list[str] | None = None) -> str | None:
+    argv = argv if argv is not None else sys.argv[1:]
+    for arg in argv:
+        if arg.startswith("--app-id="):
+            val = arg.split("=", 1)[1].strip().lower()
+            return val or None
+    return None
+
+
 def tenant_paths(tenant_id: str) -> dict[str, Path]:
     return effective_paths(resolve_tenant(tenant_id))
 
 
-def queue_path(tenant_id: str) -> Path:
-    return tenant_paths(tenant_id)["content_queue"]
+def queue_path(tenant_id: str, app_id: str | None = None) -> Path:
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    return marketing_app.queue_file_path(tenant_id, app_id)
 
 
 def publish_log_path(tenant_id: str) -> Path:

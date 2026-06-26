@@ -21,9 +21,14 @@
           </svg>
           <span class="brand-name">EMAccion</span>
         </a>
-        <div class="empresa-pill empresa-pill--claro" title="Empresa activa">
-          <span class="empresa-pill-label">Empresa:</span>
-          <select id="tenantSelect" class="empresa-select" aria-label="Cambiar empresa" onchange="switchEmpresa(this.value)"></select>
+        <div class="empresa-pill empresa-pill--claro" title="Tenant activo">
+          <span class="empresa-pill-label">Tenant:</span>
+          <select id="tenantSelect" class="empresa-select" aria-label="Cambiar tenant" onchange="switchEmpresa(this.value)"></select>
+          <i class="ti ti-chevron-down empresa-chevron"></i>
+        </div>
+        <div class="empresa-pill empresa-pill--claro" title="App / línea de marketing">
+          <span class="empresa-pill-label">App:</span>
+          <select id="appSelect" class="empresa-select" aria-label="Cambiar app" onchange="switchApp(this.value)"></select>
           <i class="ti ti-chevron-down empresa-chevron"></i>
         </div>
       </div>
@@ -201,6 +206,8 @@
   <script>
     const TENANT_ID = (window.__ACCIO_TENANT__ || 'easytech');
     const TENANTS = window.__ACCIO_TENANTS__ || [{ id: 'easytech', name: 'EasyTech' }];
+    const APP_STORAGE_KEY = () => `accio_app_${TENANT_ID}`;
+    let APP_ID = localStorage.getItem(APP_STORAGE_KEY()) || 'default';
     let lastData = null;
     let lastKnowledge = null;
     let lastSettings = null;
@@ -235,7 +242,17 @@
     }
 
     function authHeaders() {
-      return { 'Content-Type': 'application/json', 'X-Accio-Tenant': TENANT_ID };
+      const h = { 'Content-Type': 'application/json', 'X-Accio-Tenant': TENANT_ID };
+      if (APP_ID && APP_ID !== 'default') h['X-Accio-App'] = APP_ID;
+      return h;
+    }
+
+    function apiUrl(path) {
+      let url = tenantApi('/dashboard/api' + path);
+      if (APP_ID && APP_ID !== 'default') {
+        url += (url.includes('?') ? '&' : '?') + 'app_id=' + encodeURIComponent(APP_ID);
+      }
+      return url;
     }
 
     function toast(msg, isError) {
@@ -247,7 +264,7 @@
     }
 
     async function api(path, opts = {}) {
-      const res = await fetch(tenantApi('/dashboard/api' + path), {
+      const res = await fetch(apiUrl(path), {
         ...opts,
         credentials: 'include',
         headers: { ...authHeaders(), ...(opts.headers || {}) },
@@ -355,11 +372,38 @@
     }
     const initTenantSelector = initEmpresaSelector;
 
+    async function initAppSelector() {
+      const sel = document.getElementById('appSelect');
+      if (!sel) return;
+      try {
+        const r = await fetch(`/accio/${TENANT_ID}/apps`, {
+          credentials: 'include',
+          headers: { 'X-Accio-Tenant': TENANT_ID },
+        });
+        const data = await r.json();
+        if (!data.ok) return;
+        const apps = data.apps || [];
+        if (data.default_app_id && !APP_ID) APP_ID = data.default_app_id;
+        sel.innerHTML = apps.map(a =>
+          `<option value="${esc(a.app_id)}" ${a.app_id === APP_ID ? 'selected' : ''}>${esc(a.name)}</option>`
+        ).join('');
+      } catch (_) { /* ignore */ }
+    }
+
+    function switchApp(id) {
+      APP_ID = id || 'default';
+      localStorage.setItem(APP_STORAGE_KEY(), APP_ID);
+      loadData();
+    }
+
     function renderResumen(data) {
       const banner = document.getElementById('resumenEmpresaBanner');
       const empresaName = data.tenant_name || window.__ACCIO_EMPRESA_NAME__ || TENANT_ID;
+      const appName = data.app_name || data.app_id || APP_ID;
       if (banner) {
-        banner.innerHTML = `<span class="resumen-empresa-label">Empresa activa</span><strong class="resumen-empresa-name">${esc(empresaName)}</strong>`;
+        banner.innerHTML = `<span class="resumen-empresa-label">Tenant</span><strong class="resumen-empresa-name">${esc(empresaName)}</strong>
+          <span class="resumen-empresa-sep">·</span>
+          <span class="resumen-empresa-label">App</span><strong class="resumen-empresa-name">${esc(appName)}</strong>`;
       }
       const s = data.stats;
       document.getElementById('stats').innerHTML = [
@@ -1609,7 +1653,7 @@
         toast(force ? 'Publicando (forzado)…' : 'Publicando…');
         const r = await fetch(tenantApi('/run/publish-linkedin'), {
           method: 'POST', headers: authHeaders(), credentials: 'include',
-          body: JSON.stringify({ force }),
+          body: JSON.stringify({ force, app_id: APP_ID }),
         });
         const data = await r.json();
         const ok = data.ok && data.order?.status === 'completed';
@@ -1669,6 +1713,7 @@
 
     function bootstrapDashboard() {
       initTenantSelector();
+      initAppSelector();
       updatePrimaryLabel();
       applySessionBadge();
       loadData();

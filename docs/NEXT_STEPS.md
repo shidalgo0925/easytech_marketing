@@ -1,7 +1,7 @@
 # Próximos pasos — ARROZCONPOLLO
 
 **Actualizado:** 2026-06-27  
-**Estado:** Fase 1 Tenant vs App · push pendiente este commit
+**Estado:** Fase 2 Apps · listo para commit
 
 ---
 
@@ -11,6 +11,7 @@
 - [x] `docs/EMACCION_TENANT_VS_APP.md` — arquitectura SaaS
 - [x] Fase 1 App: `marketing_app.py`, registry, API `/accio/{tenant}/apps`
 - [x] 22 posts easytech con `app_id: default`
+- [x] **Fase 2 Apps** — selector UI dashboard + colas/publishers por `app_id`
 
 ---
 
@@ -18,8 +19,7 @@
 
 1. **Flyer #10 IIUS** — PNG del dueño → `scripts/import_flyer.sh 10_iius.png`
 2. **Post LinkedIn #4** — 2026-06-30 vía cron
-3. **Fase 2 Apps** — selector UI dashboard + colas por `app_id`
-4. **Verificar cron pipeline** — domingo 6:00 → `logs/cron.log`
+3. **Verificar cron pipeline** — domingo 6:00 → `logs/cron.log`
 
 ---
 

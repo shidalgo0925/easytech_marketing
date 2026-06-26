@@ -21,6 +21,7 @@ from Motor_Tecnico.publisher_tenant import (
     flyer_public_url,
     meta_credentials,
     meta_publish_log_path,
+    parse_app_arg,
     parse_tenant_arg,
     queue_path,
     resolve_flyer_path,
@@ -33,15 +34,15 @@ PUBLIC_BASE = os.getenv("PUBLIC_SITE_URL", "https://n8n.etsrv.site").rstrip("/")
 load_dotenv(BASE_DIR / ".env")
 
 
-def load_queue(tenant_id: str) -> dict:
-    path = queue_path(tenant_id)
+def load_queue(tenant_id: str, app_id: str | None = None) -> dict:
+    path = queue_path(tenant_id, app_id)
     if not path.exists():
         raise SystemExit(f"No existe la cola: {path}")
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def save_queue(data: dict, tenant_id: str) -> None:
-    path = queue_path(tenant_id)
+def save_queue(data: dict, tenant_id: str, app_id: str | None = None) -> None:
+    path = queue_path(tenant_id, app_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -123,15 +124,22 @@ def publish_platform(
     force: bool = False,
     dry_run: bool = False,
     tenant_id: str | None = None,
+    app_id: str | None = None,
 ) -> bool:
+    from Motor_Tecnico.accio_engine import marketing_app
+
     tenant_id = tenant_id or parse_tenant_arg()
-    queue = load_queue(tenant_id)
+    app_id = app_id if app_id is not None else parse_app_arg()
+    aid = marketing_app.normalize_app_id(app_id or marketing_app.default_app_id(tenant_id))
+    raw = load_queue(tenant_id, aid)
+    posts = marketing_app.posts_for_app(raw.get("posts", []), aid, tenant_id)
+    queue = {**raw, "posts": posts}
     post = pick_next_post(queue, platform, force=force)
     if not post:
-        print(f"No hay posts {platform} pendientes listos para publicar (tenant: {tenant_id}).")
+        print(f"No hay posts {platform} pendientes listos para publicar (tenant: {tenant_id}, app: {aid}).")
         return False
 
-    print(f"Post seleccionado ({platform}, {tenant_id}): {post['id']} (programado: {post['scheduled_at']})")
+    print(f"Post seleccionado ({platform}, {tenant_id}, app={aid}): {post['id']} (programado: {post['scheduled_at']})")
     flyer_path = resolve_flyer_path(post, tenant_id)
     if dry_run:
         print("DRY RUN — no se publicó nada.")
@@ -156,17 +164,18 @@ def publish_platform(
 
     print(f"  Publicado: {remote_id}")
 
-    for item in queue["posts"]:
+    for item in raw["posts"]:
         if item["id"] == post["id"]:
             item["status"] = "published"
             item["published_at"] = datetime.now(PANAMA).isoformat()
             item[f"{platform}_post_id"] = remote_id
             break
-    save_queue(queue, tenant_id)
+    save_queue(raw, tenant_id, aid)
 
     append_log(
         {
             "tenant_id": tenant_id,
+            "app_id": aid,
             "id": post["id"],
             "platform": platform,
             "published_at": datetime.now(timezone.utc).isoformat(),
@@ -183,6 +192,7 @@ def main() -> None:
     force = "--force" in sys.argv
     dry_run = "--dry-run" in sys.argv
     tenant_id = parse_tenant_arg()
+    app_id = parse_app_arg()
     platform = "facebook"
     for arg in sys.argv[1:]:
         if arg.startswith("--platform="):
@@ -191,13 +201,13 @@ def main() -> None:
             platform = arg
 
     if platform == "all":
-        ok_fb = publish_platform("facebook", force=force, dry_run=dry_run, tenant_id=tenant_id)
-        ok_ig = publish_platform("instagram", force=force, dry_run=dry_run, tenant_id=tenant_id)
+        ok_fb = publish_platform("facebook", force=force, dry_run=dry_run, tenant_id=tenant_id, app_id=app_id)
+        ok_ig = publish_platform("instagram", force=force, dry_run=dry_run, tenant_id=tenant_id, app_id=app_id)
         if not ok_fb and not ok_ig:
             sys.exit(0)
         return
 
-    publish_platform(platform, force=force, dry_run=dry_run, tenant_id=tenant_id)
+    publish_platform(platform, force=force, dry_run=dry_run, tenant_id=tenant_id, app_id=app_id)
 
 
 if __name__ == "__main__":

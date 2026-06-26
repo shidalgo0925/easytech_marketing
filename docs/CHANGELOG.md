@@ -56,10 +56,25 @@ Formato basado en fechas. Solo cambios operativos relevantes en el VPS o repo.
 - Vocabulario: `tenant_provisioning` documentado como CRUD de **tenants**, no apps
 - Posts en cola easytech: campo `app_id: default` (22 posts)
 
-### Pendiente (Fase 2)
-- Selector de app en dashboard
-- Colas y publishers por `app_id`
+### Pendiente (Fase 3)
 - Sync EN1 organizations
+
+---
+
+## 2026-06-27 — Tenant vs App (Fase 2)
+
+### Añadido
+- Selector **App** en dashboard (`Tenant` + `App` en header)
+- Filtrado por `app_id` en API dashboard, cola de contenido, executor y publishers
+- `meta_publisher.py` — soporte `--app-id=`
+- Header `X-Accio-App` y query `?app_id=` en rutas dashboard
+
+### Corregido
+- `load_flyers_library()` — parámetro `app_id` (500 en `/summary`)
+
+### Verificado
+- Tests `test_marketing_app` + `test_tenant_provisioning` → OK
+- `GET /accio/easytech/dashboard/api/summary?app_id=default` → 200 con `app_name`
 
 ---
 
