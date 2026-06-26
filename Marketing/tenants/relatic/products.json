@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-26",
+  "products": [
+    {
+      "slug": "diplomados",
+      "name": "Diplomados",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR DIPLOMADOS"
+    },
+    {
+      "slug": "diplomado_investigacion_aplicada",
+      "name": "Diplomado en investigación aplicada",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "VER DETALLE E INSCRIBIRME"
+    },
+    {
+      "slug": "diplomado_metodologias_investigacion_social",
+      "name": "Diplomado en metodologías de investigación social",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "diplomado_politicas_educativas",
+      "name": "Diplomado en políticas educativas y evaluación",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "cursos",
+      "name": "Cursos",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR CURSOS"
+    },
+    {
+      "slug": "curso_redaccion_cientifica",
+      "name": "Curso de redacción científica y publicación en revistas",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "VER DETALLE E INSCRIBIRME"
+    },
+    {
+      "slug": "curso_analisis_datos",
+      "name": "Curso de análisis de datos para investigación",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "VER DETALLE E INSCRIBIRME"
+    },
+    {
+      "slug": "curso_etica_investigacion",
+      "name": "Curso de fundamentos de ética en investigación",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "talleres",
+      "name": "Talleres",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR TALLERES"
+    },
+    {
+      "slug": "taller_redaccion_cientifica",
+      "name": "Taller de redacción científica",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "taller_presentacion_defensa",
+      "name": "Taller de presentación y defensa de proyectos",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "taller_visibilidad_difusion",
+      "name": "Taller de visibilidad y difusión de resultados",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "certificaciones",
+      "name": "Certificaciones",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR CERTIFICACIONES"
+    },
+    {
+      "slug": "certificacion_gestion_publicacion",
+      "name": "Certificación en gestión de publicación científica",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "certificacion_instrumentos",
+      "name": "Certificación en diseño y evaluación de instrumentos",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "certificacion_liderazgo_investigacion",
+      "name": "Certificación en liderazgo y equipos de investigación",
+      "enabled": true,
+      "landing_path": "/programas",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "publicacion_articulos",
+      "name": "Publicación de artículos",
+      "enabled": true,
+      "landing_path": "/servicios",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "revistas_indexadas",
+      "name": "Revistas indexadas",
+      "enabled": true,
+      "landing_path": "/servicios",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "libros_digitales",
+      "name": "Libros digitales",
+      "enabled": true,
+      "landing_path": "/servicios",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "carteles_cientificos",
+      "name": "Carteles científicos",
+      "enabled": true,
+      "landing_path": "/servicios",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "asesorias",
+      "name": "Asesorías metodológicas",
+      "enabled": true,
+      "landing_path": "/servicios",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "postdoctorados",
+      "name": "Postdoctorados",
+      "enabled": true,
+      "landing_path": "/servicios",
+      "cta": "EXPLORAR EN PLATAFORMA"
+    },
+    {
+      "slug": "comunidad_academica",
+      "name": "Comunidad académica",
+      "enabled": true,
+      "landing_path": "/comunidad",
+      "cta": "EXPLORAR COMUNIDAD"
+    },
+    {
+      "slug": "eventos",
+      "name": "Eventos y encuentros académicos",
+      "enabled": true,
+      "landing_path": "/",
+      "cta": "VER EVENTOS"
+    },
+    {
+      "slug": "plataforma_servicio",
+      "name": "Plataforma de Servicio",
+      "enabled": true,
+      "landing_path": "/servicios",
+      "cta": "REGISTRO GRATIS"
+    }
+  ]
+}

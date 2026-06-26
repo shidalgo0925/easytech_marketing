@@ -1,7 +1,12 @@
 {
   "tenant_id": "relatic",
-  "display_name": "Relatic",
+  "display_name": "Relatic Panamá",
   "timezone": "America/Panama",
+  "subdomain": "relatic",
+  "domains": [
+    "relaticpanama.org"
+  ],
+  "website": "https://relaticpanama.org/",
   "created_at": "2026-06-26T00:00:00Z",
   "branding": {
     "primary_color": "#1a2f4d",

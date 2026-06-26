@@ -1,0 +1,38 @@
+{
+  "updated_at": "2026-06-26T21:43:39.551434+00:00",
+  "note": "Referencia EN1 Dev",
+  "organizations": [
+    {
+      "id": 1,
+      "name": "Easy NodeOne - Dev",
+      "subdomain": null,
+      "status": "active",
+      "registration": "open",
+      "source": "reference"
+    },
+    {
+      "id": 2,
+      "name": "Taller Internacional",
+      "subdomain": "tonydev",
+      "status": "active",
+      "registration": "open",
+      "source": "reference"
+    },
+    {
+      "id": 3,
+      "name": "Relatic Panama Dev",
+      "subdomain": null,
+      "status": "active",
+      "registration": "open",
+      "source": "reference"
+    },
+    {
+      "id": 4,
+      "name": "Modecosa",
+      "subdomain": "fisico",
+      "status": "active",
+      "registration": "open",
+      "source": "reference"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-26",
+  "entity": "Relatic Panamá",
+  "website": "https://relaticpanama.org/",
+  "platform_url": "https://apps.relatic.org/",
+  "jurisdiction_primary": "República de Panamá",
+  "languages": ["es", "en"],
+  "frameworks": [
+    "Ley 81/2019 de Protección de Datos Personales (Panamá)",
+    "Reglamento (UE) 2016/679 — GDPR",
+    "UK GDPR / Data Protection Act 2018",
+    "California Consumer Privacy Act (CCPA) y CPRA",
+    "Virginia Consumer Data Protection Act (VCDPA)",
+    "Colorado Privacy Act (CPA)",
+    "Connecticut Data Privacy Act (CTDPA)",
+    "Utah Consumer Privacy Act (UCPA)",
+    "Lei Geral de Proteção de Dados — LGPD (Brasil)",
+    "COPPA — protección de menores (EE.UU.)",
+    "CAN-SPAM Act (EE.UU.)",
+    "Directiva ePrivacy / cookies (UE)",
+    "ISO/IEC 27001 (marco de referencia de seguridad)"
+  ],
+  "documents": [
+    {
+      "id": "privacidad",
+      "title": "Política de privacidad",
+      "path": "/accio/relatic/legal/privacidad",
+      "required_for": ["GDPR", "CCPA", "Ley 81 Panamá"]
+    },
+    {
+      "id": "terminos",
+      "title": "Términos y condiciones de uso",
+      "path": "/accio/relatic/legal/terminos",
+      "required_for": ["contratos", "e-commerce", "plataforma"]
+    },
+    {
+      "id": "seguridad",
+      "title": "Política de seguridad de la información",
+      "path": "/accio/relatic/legal/seguridad",
+      "required_for": ["GDPR Art. 32", "CCPA", "due diligence"]
+    },
+    {
+      "id": "cookies",
+      "title": "Política de cookies y tecnologías similares",
+      "path": "/accio/relatic/legal/cookies",
+      "required_for": ["ePrivacy", "GDPR", "CCPA"]
+    },
+    {
+      "id": "datos-personales",
+      "title": "Aviso de derechos y transferencias internacionales",
+      "path": "/accio/relatic/legal/datos-personales",
+      "required_for": ["GDPR", "CCPA", "LGPD"]
+    },
+    {
+      "id": "uso-aceptable",
+      "title": "Política de uso aceptable",
+      "path": "/accio/relatic/legal/uso-aceptable",
+      "required_for": ["plataforma", "comunidad académica"]
+    }
+  ],
+  "contacts": {
+    "privacy": "privacy@relaticpanama.org",
+    "legal": "legal@relaticpanama.org",
+    "dpo": "dpo@relaticpanama.org",
+    "security": "security@relaticpanama.org"
+  },
+  "retention_defaults": {
+    "account_data_years": 5,
+    "marketing_logs_months": 24,
+    "security_logs_months": 12
+  },
+  "review_note": "Revisar con asesoría legal antes de vincular en producción como política definitiva."
+}

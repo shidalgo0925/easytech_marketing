@@ -42,6 +42,14 @@ class TestRbac(unittest.TestCase):
             "config",
         )
         self.assertEqual(
+            rbac.permission_for_request("POST", "/accio/easytech/settings/empresas", "easytech"),
+            "platform",
+        )
+        self.assertEqual(
+            rbac.permission_for_request("POST", "/accio/easytech/settings/empresas/relatic/disable", "easytech"),
+            "platform",
+        )
+        self.assertEqual(
             rbac.permission_for_request("POST", "/accio/easytech/run/publish-linkedin", "easytech"),
             "publish",
         )

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-label="Dashboard EM+Acción conectado a redes sociales">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eef6f0"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#1a4a2e" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="720" height="480" fill="url(#bg)" rx="16"/>
+  <!-- channels -->
+  <g font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="600" fill="#3d6648">
+    <g transform="translate(40,40)"><rect width="88" height="36" rx="8" fill="#fff" stroke="#c5e0ce"/><text x="44" y="22" text-anchor="middle">LinkedIn</text></g>
+    <g transform="translate(40,100)"><rect width="88" height="36" rx="8" fill="#fff" stroke="#c5e0ce"/><text x="44" y="22" text-anchor="middle">Facebook</text></g>
+    <g transform="translate(40,160)"><rect width="88" height="36" rx="8" fill="#fff" stroke="#c5e0ce" stroke-dasharray="4 3"/><text x="44" y="22" text-anchor="middle">Instagram</text></g>
+    <g transform="translate(40,220)"><rect width="88" height="36" rx="8" fill="#fff" stroke="#c5e0ce" stroke-dasharray="4 3"/><text x="44" y="22" text-anchor="middle">Google</text></g>
+    <g transform="translate(592,40)"><rect width="88" height="36" rx="8" fill="#fff" stroke="#c5e0ce" stroke-dasharray="4 3"/><text x="44" y="22" text-anchor="middle">TikTok</text></g>
+    <g transform="translate(592,100)"><rect width="88" height="36" rx="8" fill="#fff" stroke="#c5e0ce"/><text x="44" y="22" text-anchor="middle">WhatsApp</text></g>
+    <g transform="translate(592,160)"><rect width="88" height="36" rx="8" fill="#fff" stroke="#c5e0ce"/><text x="44" y="22" text-anchor="middle">Correo</text></g>
+    <g transform="translate(592,220)"><rect width="88" height="36" rx="8" fill="#fff" stroke="#c5e0ce" stroke-dasharray="4 3"/><text x="44" y="22" text-anchor="middle">Blog</text></g>
+  </g>
+  <!-- connector lines -->
+  <g stroke="#b8dcc4" stroke-width="2" fill="none" opacity="0.9">
+    <path d="M128 58 C200 58 220 120 260 140"/>
+    <path d="M128 118 C210 118 230 150 260 160"/>
+    <path d="M128 178 C210 178 230 170 260 180"/>
+    <path d="M128 238 C210 238 230 190 260 200"/>
+    <path d="M592 58 C520 58 500 120 460 140"/>
+    <path d="M592 118 C510 118 490 150 460 160"/>
+    <path d="M592 178 C510 178 490 170 460 180"/>
+    <path d="M592 238 C510 238 490 190 460 200"/>
+  </g>
+  <!-- monitor -->
+  <g filter="url(#sh)" transform="translate(180,72)">
+    <rect width="360" height="280" rx="14" fill="#ffffff" stroke="#c5e0ce" stroke-width="1.5"/>
+    <rect x="16" y="16" width="328" height="36" rx="8" fill="#e8f5ec"/>
+    <text x="32" y="39" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#1a4a2e">EM+Acción · Command Center</text>
+    <rect x="16" y="64" width="100" height="72" rx="8" fill="#f5faf7" stroke="#e2f0e6"/>
+    <rect x="124" y="64" width="100" height="72" rx="8" fill="#f5faf7" stroke="#e2f0e6"/>
+    <rect x="232" y="64" width="112" height="72" rx="8" fill="#d4e9dc" stroke="#b8dcc4"/>
+    <rect x="16" y="148" width="328" height="116" rx="8" fill="#f8fcf9" stroke="#e2f0e6"/>
+    <rect x="28" y="168" width="200" height="10" rx="4" fill="#c5e0ce"/>
+    <rect x="28" y="188" width="160" height="10" rx="4" fill="#d4e9dc"/>
+    <rect x="28" y="208" width="240" height="10" rx="4" fill="#e2f0e6"/>
+    <rect x="28" y="228" width="120" height="10" rx="4" fill="#d4e9dc"/>
+    <rect x="16" y="276" width="328" height="8" rx="4" fill="#1a4a2e" opacity="0.15"/>
+  </g>
+  <rect x="300" y="368" width="120" height="12" rx="6" fill="#1a4a2e" opacity="0.2"/>
+</svg>

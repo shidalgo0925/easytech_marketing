@@ -19,14 +19,15 @@
     },
     {
       "tenant_id": "relatic",
-      "display_name": "Relatic",
+      "display_name": "Relatic Panamá",
       "status": "active",
       "default_locale": "es-PA",
       "timezone": "America/Panama",
       "crm_target": "en1",
       "registration": "open",
+      "subdomain": "relatic",
       "domains": [
-        "relatic.com"
+        "relaticpanama.org"
       ],
       "created_at": "2026-06-26T00:00:00Z"
     }

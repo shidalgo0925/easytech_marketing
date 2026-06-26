@@ -1,1 +1,20 @@
-{"version":1,"articles":[]}
+{
+  "version": 1,
+  "updated_at": "2026-06-26",
+  "articles": [
+    {
+      "slug": "legal_privacidad",
+      "title": "Política de privacidad — resumen operativo",
+      "product": "legal",
+      "tags": ["legal", "privacidad", "GDPR", "CCPA", "Ley81"],
+      "file": "legal_privacidad.md"
+    },
+    {
+      "slug": "legal_cumplimiento",
+      "title": "Marco de cumplimiento internacional",
+      "product": "legal",
+      "tags": ["legal", "compliance", "USA", "UE"],
+      "file": "legal_cumplimiento.md"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-hidden="true">
+  <rect width="640" height="400" fill="#f8fcf9"/>
+  <text x="32" y="48" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#1a4a2e">Cola de publicaciones</text>
+  <g transform="translate(32,72)">
+    <rect width="576" height="64" rx="8" fill="#fff" stroke="#e2f0e6"/>
+    <rect x="16" y="20" width="48" height="24" rx="4" fill="#d4e9dc"/>
+    <rect x="80" y="22" width="180" height="10" rx="4" fill="#c5e0ce"/>
+    <rect x="80" y="40" width="120" height="8" rx="3" fill="#e2f0e6"/>
+    <rect x="480" y="24" width="80" height="20" rx="10" fill="#e8f5ec" stroke="#b8dcc4"/>
+  </g>
+  <g transform="translate(32,152)">
+    <rect width="576" height="64" rx="8" fill="#fff" stroke="#e2f0e6"/>
+    <rect x="16" y="20" width="48" height="24" rx="4" fill="#e8f5ec"/>
+    <rect x="80" y="22" width="220" height="10" rx="4" fill="#c5e0ce"/>
+    <rect x="80" y="40" width="140" height="8" rx="3" fill="#e2f0e6"/>
+  </g>
+  <g transform="translate(32,232)">
+    <rect width="576" height="64" rx="8" fill="#fff" stroke="#e2f0e6"/>
+    <rect x="16" y="20" width="48" height="24" rx="4" fill="#f5faf7" stroke="#e2f0e6"/>
+    <rect x="80" y="22" width="160" height="10" rx="4" fill="#e2f0e6"/>
+    <rect x="80" y="40" width="100" height="8" rx="3" fill="#eef6f0"/>
+  </g>
+</svg>

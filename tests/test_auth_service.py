@@ -21,6 +21,8 @@ class TestAuthService(unittest.TestCase):
 
     def test_role_permissions_spec(self):
         self.assertIn("config", auth_service.role_permissions("tenant_admin"))
+        self.assertNotIn("platform", auth_service.role_permissions("tenant_admin"))
+        self.assertIn("platform", auth_service.role_permissions("super_admin"))
         self.assertNotIn("config", auth_service.role_permissions("marketing_operator"))
         self.assertNotIn("publish", auth_service.role_permissions("viewer"))
 

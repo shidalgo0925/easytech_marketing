@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-hidden="true">
+  <rect width="640" height="400" fill="#eef6f0"/>
+  <text x="32" y="48" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#1a4a2e">Analítica</text>
+  <rect x="32" y="72" width="180" height="100" rx="8" fill="#fff" stroke="#e2f0e6"/>
+  <text x="48" y="100" font-family="Inter,sans-serif" font-size="11" fill="#6a9275">Alcance</text>
+  <text x="48" y="140" font-family="Inter,sans-serif" font-size="28" font-weight="700" fill="#1a4a2e">24.8K</text>
+  <rect x="228" y="72" width="180" height="100" rx="8" fill="#fff" stroke="#e2f0e6"/>
+  <text x="244" y="100" font-family="Inter,sans-serif" font-size="11" fill="#6a9275">Conversiones</text>
+  <text x="244" y="140" font-family="Inter,sans-serif" font-size="28" font-weight="700" fill="#16a34a">186</text>
+  <rect x="424" y="72" width="184" height="100" rx="8" fill="#fff" stroke="#e2f0e6"/>
+  <text x="440" y="100" font-family="Inter,sans-serif" font-size="11" fill="#6a9275">Interacciones</text>
+  <text x="440" y="140" font-family="Inter,sans-serif" font-size="28" font-weight="700" fill="#1a4a2e">1.2K</text>
+  <rect x="32" y="192" width="576" height="176" rx="8" fill="#fff" stroke="#e2f0e6"/>
+  <polyline points="56,320 120,280 200,300 280,240 360,260 440,200 520,220 584,180" fill="none" stroke="#1a4a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="584" cy="180" r="5" fill="#1a4a2e"/>
+</svg>

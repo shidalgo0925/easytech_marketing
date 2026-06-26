@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-hidden="true">
+  <rect width="640" height="400" fill="#fff"/>
+  <text x="32" y="48" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#1a4a2e">Calendario editorial</text>
+  <g transform="translate(32,72)">
+    <rect width="576" height="48" rx="6" fill="#f5faf7" stroke="#e2f0e6"/>
+    <text x="16" y="30" font-family="Inter,sans-serif" font-size="12" fill="#6a9275">Lun · Mar · Mié · Jue · Vie · Sáb · Dom</text>
+  </g>
+  <g transform="translate(32,136)">
+    <rect width="80" height="72" rx="6" fill="#fff" stroke="#e2f0e6"/>
+    <rect x="96" width="80" height="72" rx="6" fill="#d4e9dc" stroke="#b8dcc4"/>
+    <rect x="192" width="80" height="72" rx="6" fill="#fff" stroke="#e2f0e6"/>
+    <rect x="288" width="80" height="72" rx="6" fill="#fff" stroke="#e2f0e6"/>
+    <rect x="384" width="80" height="72" rx="6" fill="#e8f5ec" stroke="#b8dcc4"/>
+    <rect x="480" width="80" height="72" rx="6" fill="#fff" stroke="#e2f0e6"/>
+    <rect x="12" y="28" width="56" height="8" rx="3" fill="#c5e0ce"/>
+    <rect x="108" y="20" width="56" height="8" rx="3" fill="#1a4a2e" opacity="0.35"/>
+    <rect x="108" y="36" width="40" height="6" rx="2" fill="#1a4a2e" opacity="0.2"/>
+    <rect x="396" y="28" width="56" height="8" rx="3" fill="#1a4a2e" opacity="0.25"/>
+  </g>
+  <rect x="32" y="232" width="576" height="136" rx="8" fill="#f8fcf9" stroke="#e2f0e6"/>
+  <rect x="48" y="256" width="200" height="10" rx="4" fill="#d4e9dc"/>
+  <rect x="48" y="280" width="320" height="8" rx="3" fill="#e2f0e6"/>
+  <rect x="48" y="300" width="280" height="8" rx="3" fill="#e2f0e6"/>
+</svg>

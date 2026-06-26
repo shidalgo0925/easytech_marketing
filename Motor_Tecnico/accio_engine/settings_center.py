@@ -212,7 +212,12 @@ def load_users(tenant_id: str) -> dict[str, Any]:
     return {"users": users, "roles": _load_roles(tenant_id)}
 
 
-def save_users(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+def save_users(
+    tenant_id: str,
+    payload: dict[str, Any],
+    *,
+    actor_is_platform: bool = False,
+) -> dict[str, Any]:
     from Motor_Tecnico.accio_engine import auth_service
 
     roles = payload.get("roles")
@@ -222,9 +227,13 @@ def save_users(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
             rid = (row.get("id") or "").strip()
             if not rid:
                 continue
+            if not actor_is_platform and rid in auth_service.FORBIDDEN_CUSTOM_ROLE_IDS:
+                raise ValueError(f"Rol «{rid}» reservado de plataforma")
             perms = row.get("permissions") or []
             if isinstance(perms, str):
                 perms = [p.strip() for p in perms.split(",") if p.strip()]
+            if not actor_is_platform and "platform" in perms:
+                raise ValueError("Permiso «platform» reservado del super administrador")
             cleaned_roles.append(
                 {
                     "id": rid,
@@ -237,7 +246,11 @@ def save_users(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         roles = _load_roles(tenant_id)
 
     if "users" in payload:
-        auth_service.sync_tenant_users(tenant_id, payload["users"])
+        auth_service.sync_tenant_users(
+            tenant_id,
+            payload["users"],
+            actor_is_platform=actor_is_platform,
+        )
     users = auth_service.list_tenant_users(tenant_id)
     data = {"users": users, "roles": roles, "updated_at": _utc_now()}
     _write_json(_path(tenant_id, "users.json"), data)

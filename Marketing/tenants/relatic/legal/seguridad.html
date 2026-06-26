@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de seguridad | Relatic Panamá</title>
+  <link rel="stylesheet" href="/accio/relatic/legal/legal.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav"><a href="/accio/relatic/legal/">← Marco legal</a></nav>
+    <h1>Política de seguridad de la información</h1>
+    <p class="meta">Relatic Panamá · Vigencia: 26 de junio de 2026</p>
+
+    <p>Relatic implementa medidas de seguridad alineadas con buenas prácticas internacionales (ISO/IEC 27001 como marco de referencia), GDPR Art. 32 y expectativas de leyes estatales de privacidad en EE.UU.</p>
+
+    <h2>1. Objetivo</h2>
+    <p>Proteger la confidencialidad, integridad y disponibilidad de datos personales, académicos y operativos de usuarios, instituciones aliadas y personal Relatic.</p>
+
+    <h2>2. Gobierno y roles</h2>
+    <ul>
+      <li><strong>Responsable de seguridad:</strong> coordinación de controles y respuesta a incidentes.</li>
+      <li><strong>DPO / Privacidad:</strong> <a href="mailto:dpo@relaticpanama.org">dpo@relaticpanama.org</a></li>
+      <li><strong>Reporte de incidentes:</strong> <a href="mailto:security@relaticpanama.org">security@relaticpanama.org</a></li>
+    </ul>
+
+    <h2>3. Controles técnicos</h2>
+    <ul>
+      <li>Cifrado TLS 1.2+ en tránsito para sitios y APIs.</li>
+      <li>Contraseñas almacenadas con funciones hash adaptativas (bcrypt/argon2 o equivalente).</li>
+      <li>Control de acceso basado en roles (RBAC) en plataformas internas (EMAccion, auth).</li>
+      <li>Segmentación de entornos (producción / staging).</li>
+      <li>Copias de seguridad periódicas y pruebas de restauración.</li>
+      <li>Registro de auditoría en operaciones sensibles.</li>
+      <li>Actualización de dependencias y parches de seguridad.</li>
+      <li>Protección perimetral, firewall y limitación de exposición de servicios.</li>
+    </ul>
+
+    <h2>4. Controles organizativos</h2>
+    <ul>
+      <li>Principio de mínimo privilegio y separación super-admin / admin de tenant.</li>
+      <li>Cuentas protegidas de plataforma no editables por administradores de tenant.</li>
+      <li>Acuerdos de confidencialidad con personal y proveedores.</li>
+      <li>Formación en protección de datos y phishing.</li>
+      <li>Gestión de proveedores con evaluación de riesgo y cláusulas de seguridad.</li>
+    </ul>
+
+    <h2>5. Datos académicos e investigación</h2>
+    <p>Manuscritos, borradores y datos de investigación recibidos para servicios editoriales se tratan con acceso restringido, almacenamiento cifrado cuando el proveedor lo soporta, y eliminación o devolución según contrato y plazos acordados.</p>
+
+    <h2>6. Respuesta a incidentes</h2>
+    <ol>
+      <li>Detección y contención.</li>
+      <li>Evaluación de impacto y alcance.</li>
+      <li>Notificación a autoridades dentro de 72 h (GDPR) cuando aplique.</li>
+      <li>Comunicación a usuarios afectados sin dilación indebida si hay alto riesgo.</li>
+      <li>Documentación, lecciones aprendidas y mejora de controles.</li>
+    </ol>
+
+    <h2>7. Continuidad del negocio</h2>
+    <p>Planes de respaldo y recuperación para servicios críticos (sitio, plataforma, email transaccional).</p>
+
+    <h2>8. Evaluación y mejora</h2>
+    <p>Revisiones periódicas de riesgos, pruebas de vulnerabilidad según criticidad y actualización anual de esta política.</p>
+
+    <div class="card">
+      Incidentes: <a href="mailto:security@relaticpanama.org">security@relaticpanama.org</a><br>
+      <a href="/accio/relatic/legal/">Índice legal</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-hidden="true">
+  <rect width="640" height="400" fill="#fff"/>
+  <text x="32" y="48" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#1a4a2e">Generador IA</text>
+  <rect x="32" y="72" width="280" height="296" rx="10" fill="#f5faf7" stroke="#e2f0e6"/>
+  <rect x="48" y="96" width="120" height="10" rx="4" fill="#1a4a2e" opacity="0.2"/>
+  <rect x="48" y="120" width="248" height="80" rx="6" fill="#fff" stroke="#c5e0ce"/>
+  <rect x="48" y="216" width="248" height="36" rx="6" fill="#1a4a2e"/>
+  <text x="172" y="239" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#fff">Generar contenido</text>
+  <rect x="336" y="72" width="272" height="296" rx="10" fill="#f8fcf9" stroke="#e2f0e6"/>
+  <rect x="352" y="96" width="240" height="10" rx="4" fill="#d4e9dc"/>
+  <rect x="352" y="120" width="200" height="8" rx="3" fill="#e2f0e6"/>
+  <rect x="352" y="140" width="220" height="8" rx="3" fill="#e2f0e6"/>
+  <rect x="352" y="160" width="180" height="8" rx="3" fill="#e2f0e6"/>
+  <rect x="352" y="196" width="240" height="10" rx="4" fill="#d4e9dc"/>
+  <rect x="352" y="220" width="210" height="8" rx="3" fill="#e2f0e6"/>
+  <rect x="352" y="240" width="190" height="8" rx="3" fill="#e2f0e6"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-hidden="true">
+  <rect width="640" height="400" fill="#fff"/>
+  <text x="32" y="48" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#1a4a2e">Conectores</text>
+  <g transform="translate(32,80)">
+    <rect width="176" height="72" rx="8" fill="#e8f5ec" stroke="#b8dcc4"/>
+    <text x="88" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#1a4a2e">LinkedIn </text>
+    <rect x="192" width="176" height="72" rx="8" fill="#e8f5ec" stroke="#b8dcc4"/>
+    <text x="280" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#1a4a2e">Facebook </text>
+    <rect x="384" width="176" height="72" rx="8" fill="#f5faf7" stroke="#e2f0e6" stroke-dasharray="5 4"/>
+    <text x="472" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#6a9275">Instagram</text>
+    <rect y="88" width="176" height="72" rx="8" fill="#f5faf7" stroke="#e2f0e6" stroke-dasharray="5 4"/>
+    <text x="88" y="130" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="#6a9275">Google Business</text>
+    <rect x="192" y="88" width="176" height="72" rx="8" fill="#e8f5ec" stroke="#b8dcc4"/>
+    <text x="280" y="130" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#1a4a2e">Odoo CRM </text>
+    <rect x="384" y="88" width="176" height="72" rx="8" fill="#e8f5ec" stroke="#b8dcc4"/>
+    <text x="472" y="130" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#1a4a2e">OpenAI </text>
+  </g>
+</svg>

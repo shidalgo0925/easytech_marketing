@@ -65,6 +65,14 @@
       <button class="nav-item" type="button" data-tab="configuracion">Configuración</button>
     </nav>
 
+    <!-- Barra de progreso de arranque: 5 s con comentarios de estado -->
+    <div id="bootProgress" class="boot-progress" role="status" aria-live="polite">
+      <div class="boot-progress-track" aria-hidden="true">
+        <div id="bootProgressBar" class="boot-progress-bar"></div>
+      </div>
+      <p id="bootProgressComment" class="boot-progress-comment"></p>
+    </div>
+
     <main class="content">
 
       <div id="panel-resumen" class="tab-panel active">
@@ -135,15 +143,17 @@
         <div class="accio-grid">
           <section class="accio-card">
             <div class="accio-card-head">
-              Contexto de negocio
-              <button class="accio-btn-secondary accio-btn-sm" onclick="saveBusinessContext()">Guardar</button>
+              <span class="config-card-title">Contexto de negocio</span>
+              <div class="config-head-actions">
+                <button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveBusinessContext()">Guardar</button>
+              </div>
             </div>
             <div class="accio-card-body accio-form" id="businessContextForm"></div>
           </section>
           <section class="accio-card">
             <div class="accio-card-head">
-              <span>Knowledge Base</span>
-              <span id="knowledgeHeadActions"></span>
+              <span class="config-card-title">Knowledge Base</span>
+              <div class="config-head-actions" id="knowledgeHeadActions"></div>
             </div>
             <div class="accio-card-body accio-table-wrap" id="knowledgeTable"></div>
             <div class="accio-card-body accio-form" id="knowledgeEditor" style="display:none"></div>
@@ -213,12 +223,22 @@
     let lastSettings = null;
     let lastGenerated = null;
     let activeTab = 'resumen';
-    let sessionRole = 'viewer';
-    let sessionGlobalRole = null;
-    let sessionPerms = new Set(['read']);
+    let sessionRole = window.__ACCIO_SESSION_ROLE__ || 'viewer';
+    let sessionGlobalRole = window.__ACCIO_GLOBAL_ROLE__ || null;
+    let sessionPerms = new Set(window.__ACCIO_PERMISSIONS__ || ['read']);
 
     function isPlatformAdmin() {
       return sessionGlobalRole === 'super_admin';
+    }
+
+    /** Crear/suspender tenants — solo super administrador de plataforma. */
+    function canManageTenants() {
+      return isPlatformAdmin();
+    }
+
+    /** Configurar un tenant asignado (productos, landings, usuarios del tenant). */
+    function canAdminTenant() {
+      return can('admin');
     }
 
     async function switchEmpresa(id) {
@@ -234,7 +254,11 @@
     const switchTenant = switchEmpresa;
 
     function can(perm) {
-      return sessionPerms.has(perm) || sessionPerms.has('admin') || sessionRole === 'admin';
+      if (sessionPerms.has(perm)) return true;
+      if (perm === 'platform' && isPlatformAdmin()) return true;
+      if (perm === 'config' && sessionPerms.has('admin')) return true;
+      if (perm === 'admin' && ['admin', 'tenant_admin', 'super_admin'].includes(sessionRole)) return true;
+      return false;
     }
 
     function tenantApi(path) {
@@ -650,16 +674,21 @@
 
     function knowledgeEditorHtml(article, isNew) {
       const a = article || {};
+      const title = isNew ? 'Nuevo artículo' : 'Editar artículo';
       return `
-        <h4>${isNew ? 'Nuevo artículo' : 'Editar artículo'}</h4>
+        <div class="accio-card-head knowledge-editor-head">
+          <span class="config-card-title">${title}</span>
+          <div class="config-head-actions">
+            <button type="button" class="accio-btn-secondary accio-btn-sm" onclick="hideKnowledgeEditor()">Cancelar</button>
+            <button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveKnowledgeArticle()">Guardar</button>
+          </div>
+        </div>
+        <div class="accio-form knowledge-editor-body">
         <label>Slug<input id="kbSlug" value="${esc(a.slug||'')}" ${isNew ? '' : 'readonly'}></label>
         <label>Título<input id="kbTitle" value="${esc(a.title||'')}"></label>
         <label>Producto<input id="kbProduct" value="${esc(a.product||'')}"></label>
         <label>Tags (csv)<input id="kbTags" value="${esc((a.tags||[]).join(', '))}"></label>
         <label>Contenido (Markdown)<textarea id="kbBody" rows="12">${esc(a.body||'')}</textarea></label>
-        <div class="config-crud-bar">
-          <button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveKnowledgeArticle()">Guardar</button>
-          <button type="button" class="accio-btn-secondary accio-btn-sm" onclick="hideKnowledgeEditor()">Cancelar</button>
         </div>`;
     }
 
@@ -796,19 +825,28 @@
       </label>`;
     }
 
-    function configCard(title, body, saveFn, extraFoot, formClass) {
+    function configCard(title, body, saveFn, extraFoot, formClass, headerActions) {
       let showSave = false;
       if (saveFn) {
         const needsAdmin = ['saveUsuarios', 'savePlatformSettings'].includes(saveFn);
         showSave = can(needsAdmin ? 'admin' : 'config');
       }
       const formCls = 'accio-card-body accio-form' + (formClass ? ' ' + formClass : '');
+      const actionParts = [];
+      if (headerActions) actionParts.push(headerActions);
+      if (showSave) {
+        actionParts.push(`<button type="button" class="accio-btn-primary accio-btn-sm" onclick="${saveFn}()">Guardar</button>`);
+      }
+      const actionsHtml = actionParts.length
+        ? `<div class="config-head-actions">${actionParts.join('')}</div>`
+        : '';
       return `<section class="accio-card config-card">
-        <div class="accio-card-head"><span class="config-card-title">${title}</span>
-          ${showSave ? `<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="${saveFn}()">Guardar</button>` : ''}
+        <div class="accio-card-head">
+          <span class="config-card-title">${title}</span>
+          ${actionsHtml}
         </div>
         <div class="${formCls}">${body}</div>
-        ${extraFoot ? `<div class="accio-card-foot">${extraFoot}</div>` : ''}
+        ${extraFoot ? `<div class="accio-card-foot config-crud-bar">${extraFoot}</div>` : ''}
       </section>`;
     }
 
@@ -828,7 +866,9 @@
 
     function userRowHtml(u, roles, isNew) {
       const id = u.id || '';
-      const admin = can('admin');
+      const admin = canAdminTenant();
+      const protectedUser = !!u.platform_protected && !isPlatformAdmin();
+      const readOnly = !admin || protectedUser;
       const roleId = normalizeRoleId(u.role);
       if (isNew) {
         return `<tr data-new="1">
@@ -841,14 +881,15 @@
           ${admin ? `<td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>` : ''}
         </tr>`;
       }
-      return `<tr data-user-id="${esc(id)}">
-        <td class="is-mono">${esc(id)}</td>
-        <td><input class="cfg-user-name" data-id="${esc(id)}" value="${esc(u.name||'')}" ${admin ? '' : 'readonly'}></td>
-        <td><input class="cfg-user-email" data-id="${esc(id)}" value="${esc(u.email||'')}" ${admin ? '' : 'readonly'}></td>
-        <td><select class="cfg-user-role" data-id="${esc(id)}" ${admin ? '' : 'disabled'}>${roles.map(r => `<option value="${r.id}" ${r.id===roleId?'selected':''}>${esc(r.label)}</option>`).join('')}</select></td>
-        <td><input type="checkbox" class="cfg-user-active" data-id="${esc(id)}" ${u.active?'checked':''} ${admin ? '' : 'disabled'}></td>
-        ${admin ? `<td><input type="password" class="cfg-user-pass" data-id="${esc(id)}" placeholder="nueva (opc.)" autocomplete="new-password"></td>` : ''}
-        ${admin ? `<td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>` : ''}
+      const badge = protectedUser ? ' <span class="field-status status-active" title="Super admin plataforma">Protegido</span>' : '';
+      return `<tr data-user-id="${esc(id)}" ${protectedUser ? 'data-platform-protected="1"' : ''}>
+        <td class="is-mono">${esc(id)}${badge}</td>
+        <td><input class="cfg-user-name" data-id="${esc(id)}" value="${esc(u.name||'')}" ${readOnly ? 'readonly' : ''}></td>
+        <td><input class="cfg-user-email" data-id="${esc(id)}" value="${esc(u.email||'')}" ${readOnly ? 'readonly' : ''}></td>
+        <td><select class="cfg-user-role" data-id="${esc(id)}" ${readOnly ? 'disabled' : ''}>${roles.map(r => `<option value="${r.id}" ${r.id===roleId?'selected':''}>${esc(r.label)}</option>`).join('')}</select></td>
+        <td><input type="checkbox" class="cfg-user-active" data-id="${esc(id)}" ${u.active?'checked':''} ${readOnly ? 'disabled' : ''}></td>
+        ${admin && !protectedUser ? `<td><input type="password" class="cfg-user-pass" data-id="${esc(id)}" placeholder="nueva (opc.)" autocomplete="new-password"></td>` : (admin ? '<td class="metric-note">—</td>' : '')}
+        ${admin && !protectedUser ? `<td class="col-actions">${cfgDeleteBtn('removeTableRow(this)')}</td>` : ''}
       </tr>`;
     }
 
@@ -945,13 +986,13 @@
       const contact = (ctx && typeof ctx.contacto === 'object' && ctx.contacto) ? ctx.contacto : {};
       const status = company.status || 'active';
       const b = branding || company.branding || {};
-      const showCode = isNew && isPlatformAdmin();
+      const showCode = isNew && canManageTenants();
       return `
         ${showCode ? '<label>ID tenant (slug)<input id="empTenantId" placeholder="modecosa" autocomplete="off"></label>' : `<input type="hidden" id="empTenantId" value="${esc(empresaEditId)}">`}
         <label>Nombre de la organización<input id="empDisplayName" value="${esc(company.display_name || ctx.empresa || '')}"></label>
         <label>Subdominio (opcional)<input id="empSubdomain" value="${esc(company.subdomain || '')}" placeholder="fisico"></label>
         <label>Registro<select id="empRegistration">${registrationOptions(company.registration)}</select></label>
-        ${isNew ? '' : `<label>Estado<select id="empStatus"><option value="active" ${status==='active'?'selected':''}>Activa</option><option value="disabled" ${status==='disabled'?'selected':''}>Suspendida</option></select></label>`}
+        ${isNew ? '' : (isPlatformAdmin() ? `<label>Estado<select id="empStatus"><option value="active" ${status==='active'?'selected':''}>Activa</option><option value="disabled" ${status==='disabled'?'selected':''}>Suspendida</option></select></label>` : `<input type="hidden" id="empStatus" value="${esc(status)}">`)}
         <label>CRM del tenant<select id="empCrm">${crmOptions(company.crm_target)}</select></label>
         <label>Zona horaria<input id="empTimezone" value="${esc(company.timezone || 'America/Panama')}"></label>
         <label>Idioma / locale<input id="empLocale" value="${esc(company.default_locale || 'es-PA')}"></label>
@@ -977,6 +1018,32 @@
         <label>URL guía / landing<input id="ctxContactGuia" value="${esc(contact.guia || '')}"></label>`;
     }
 
+    function tenantHeadActionsHtml() {
+      if (!canAdminTenant()) return '';
+      if (empresaFormMode === 'create') {
+        if (!canManageTenants()) return '';
+        return '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="cancelEmpresaForm()">Cancelar</button>'
+          + '<button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveEmpresaCompany()">Guardar</button>';
+      }
+      const nuevo = canManageTenants()
+        ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="newEmpresaForm()">+ Nuevo</button>'
+        : '';
+      return nuevo
+        + '<button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveEmpresaCompany()">Guardar</button>';
+    }
+
+    function refreshTenantHeadActions() {
+      const el = document.querySelector('#config-tenant .config-head-actions');
+      if (el) el.innerHTML = tenantHeadActionsHtml();
+    }
+
+    function cancelEmpresaForm() {
+      empresaFormMode = 'edit';
+      empresaEditId = TENANT_ID;
+      if (lastSettings) renderEmpresaSection(lastSettings);
+      else selectEmpresaCompany(TENANT_ID);
+    }
+
     function renderEmpresaSection(data) {
       const torg = tenantOrgBlock(data);
       const companies = torg.companies || [];
@@ -997,8 +1064,11 @@
         branding,
       };
       const platform = isPlatformAdmin();
+      const tenantAdmin = canAdminTenant();
+      const showAllTenants = platform;
+      const showTenantTable = platform || (TENANTS.length > 1 && tenantAdmin);
       const regLabel = v => v === 'closed' ? 'Cerrado' : 'Abierto';
-      const listHtml = platform ? `
+      const listHtml = showTenantTable ? `
             <div class="config-table-wrap">
               <table class="accio-table" id="tenantsTable">
                 <thead><tr><th>ID</th><th>Nombre</th><th>Subdominio</th><th>Registro</th><th>CRM</th><th>Estado</th><th></th></tr></thead>
@@ -1018,21 +1088,20 @@
       document.getElementById('config-tenant').innerHTML = `
         <section class="accio-card config-card">
           <div class="accio-card-head">
-            <span class="config-card-title">${platform ? 'Organizaciones (tenants)' : 'Mi organización (tenant)'}</span>
-            ${platform ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="newEmpresaForm()">+ Nuevo tenant</button>' : ''}
+            <span class="config-card-title">${showAllTenants ? 'Organizaciones (tenants)' : 'Tenant'}</span>
+            <div class="config-head-actions">${tenantHeadActionsHtml()}</div>
           </div>
           <div class="accio-card-body accio-form">
             ${listHtml}
-            <h4 id="empresaFormTitle">${empresaFormMode === 'create' ? 'Nuevo tenant' : (platform ? 'Editar tenant' : company.display_name || 'Mi tenant')}</h4>
+            <h4 id="empresaFormTitle">${empresaFormMode === 'create' ? 'Nuevo tenant' : (platform && showAllTenants ? 'Editar tenant' : company.display_name || 'Mi tenant')}</h4>
             <div id="empresaFormFields" class="config-form-empresa config-form-2col">${empresaFormFieldsHtml(company, ctx, branding)}</div>
             <div class="config-crud-bar">
-              ${can('admin') ? '<button type="button" class="accio-btn-primary accio-btn-sm" onclick="saveEmpresaCompany()">Guardar</button>' : ''}
               ${can('config') ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="uploadEmpresaLogo()">Subir logo</button>' : ''}
-              ${platform && empresaFormMode !== 'create' ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="openEmpresaDashboard()">Abrir dashboard</button>' : ''}
-              ${platform && empresaFormMode === 'edit' && empresaEditId && company.status === 'disabled' ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="enableEmpresaCompany()">Reactivar</button>' : ''}
-              ${platform && empresaFormMode === 'edit' && empresaEditId && empresaEditId !== 'easytech' && company.status !== 'disabled' ? '<button type="button" class="accio-btn-secondary accio-btn-sm cfg-btn-del" onclick="disableEmpresaCompany()">Suspender</button>' : ''}
+              ${showAllTenants && empresaFormMode !== 'create' ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="openEmpresaDashboard()">Abrir dashboard</button>' : ''}
+              ${showAllTenants && empresaFormMode === 'edit' && empresaEditId && company.status === 'disabled' ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="enableEmpresaCompany()">Reactivar</button>' : ''}
+              ${showAllTenants && empresaFormMode === 'edit' && empresaEditId && empresaEditId !== 'easytech' && company.status !== 'disabled' ? '<button type="button" class="accio-btn-secondary accio-btn-sm cfg-btn-del" onclick="disableEmpresaCompany()">Suspender</button>' : ''}
             </div>
-            <p class="metric-note">${platform ? 'Cada tenant es una organización SaaS aislada: usuarios, apps, conectores, cola y campañas propias. EN1 u otros CRM son destinos externos — no son tenants.' : 'Datos de su tenant. Las apps de marketing se gestionan con el selector App del header.'}</p>
+            <p class="metric-note">${platform ? 'Super admin: crear, suspender y editar todos los tenants.' : tenantAdmin ? 'Admin del tenant: configuración solo en tenants asignados.' : 'Solo lectura — requiere rol administrador.'}</p>
           </div>
         </section>`;
     }
@@ -1110,16 +1179,20 @@
     }
 
     function newEmpresaForm() {
-      if (!can('admin')) return toast('Solo administradores', true);
+      if (!canManageTenants()) return toast('Solo super administrador de plataforma', true);
       empresaFormMode = 'create';
       empresaEditId = '';
       document.getElementById('empresaFormTitle').textContent = 'Nuevo tenant';
       document.getElementById('empresaFormFields').innerHTML = empresaFormFieldsHtml({}, {}, {});
       document.querySelectorAll('#tenantsTable tr').forEach(tr => tr.classList.remove('is-selected'));
+      refreshTenantHeadActions();
     }
 
     async function saveEmpresaCompany() {
-      if (!can('admin')) return toast('Solo administradores', true);
+      if (!canAdminTenant()) return toast('Solo administradores', true);
+      if (empresaFormMode === 'create' && !canManageTenants()) {
+        return toast('Solo super administrador puede crear tenants', true);
+      }
       const payload = collectEmpresaPayload();
       if (empresaFormMode === 'create') {
         if (!payload.tenant_id) return toast('ID tenant obligatorio', true);
@@ -1163,7 +1236,7 @@
     }
 
     async function disableEmpresaCompany() {
-      if (!can('admin')) return toast('Solo administradores', true);
+      if (!canManageTenants()) return toast('Solo super administrador de plataforma', true);
       if (!empresaEditId || empresaEditId === 'easytech') return;
       if (!confirm(`¿Suspender el tenant «${empresaEditId}»?`)) return;
       try {
@@ -1203,28 +1276,30 @@
       renderEmpresaSection(data);
 
       const userAdminCols = can('admin') ? '<th>Contraseña</th><th class="col-actions"></th>' : '';
+      const userHeaderActions = can('admin')
+        ? '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addUserRow()">+ Usuario</button>'
+          + '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addRoleRow()">+ Rol</button>'
+        : '';
       document.getElementById('config-usuarios').innerHTML = configCard('Usuarios y roles', `
-        <p class="metric-note">Los usuarios se guardan en el sistema de acceso (login real). Crear, editar o eliminar filas y pulsar Guardar.</p>
+        <p class="metric-note">Los usuarios se guardan en el sistema de acceso (login real). Los super administradores de plataforma aparecen como <strong>Protegido</strong> y no pueden editarse desde un tenant.</p>
         <div class="config-table-wrap">
         <table class="accio-table" id="usersTable"><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th>${userAdminCols}</tr></thead>
         <tbody>${users.map(u => userRowHtml(u, roles, false)).join('')}</tbody></table>
         </div>
-        ${can('admin') ? '<div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addUserRow()">+ Usuario</button></div>' : ''}
         <h4 class="config-form-section">Roles personalizados</h4>
         <div class="config-table-wrap">
         <table class="accio-table" id="rolesTable"><thead><tr><th>ID</th><th>Etiqueta</th><th>Permisos (csv)</th><th class="col-actions"></th></tr></thead>
         <tbody>${roles.map(r => roleRowHtml(r)).join('')}</tbody></table>
         </div>
-        ${can('admin') ? '<div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addRoleRow()">+ Rol</button></div>' : ''}
-      `, 'saveUsuarios');
+      `, 'saveUsuarios', null, null, userHeaderActions);
 
       document.getElementById('config-productos').innerHTML = configCard('Catálogo de productos', `
         <div class="config-table-wrap">
         <table class="accio-table" id="productsTable"><thead><tr><th>Slug</th><th>Nombre</th><th>CTA</th><th>Landing</th><th>Activo</th><th class="col-actions"></th></tr></thead>
         <tbody>${products.map(p => productRowHtml(p)).join('')}</tbody></table>
         </div>
-        <div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addProductRow()">+ Producto</button></div>
-      `, 'saveProductos');
+      `, 'saveProductos', null, null,
+        '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addProductRow()">+ Producto</button>');
 
       const connBody = '<h4>LinkedIn</h4>' + (conn.linkedin||[]).map(f => settingsFieldHtml(f, 'conn')).join('') +
         '<h4>Meta (FB / IG)</h4>' + (conn.meta||[]).map(f => settingsFieldHtml(f, 'conn')).join('') +
@@ -1248,8 +1323,8 @@
         <table class="accio-table" id="landingsTable"><thead><tr><th>Slug</th><th>Ruta</th><th class="col-actions"></th></tr></thead>
         <tbody>${landings.map(l => landingRowHtml(l)).join('')}</tbody></table>
         </div>
-        <div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addLandingRow()">+ Ruta</button></div>
-      `, 'saveLandings', null, 'config-form-2col');
+      `, 'saveLandings', null, 'config-form-2col',
+        '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addLandingRow()">+ Ruta</button>');
 
       document.getElementById('config-publicacion').innerHTML = configCard('Publicación', `
         <label>Canales por defecto (csv)<input id="pubChannels" value="${esc((pub.default_channels||[]).join(', '))}"></label>
@@ -1269,9 +1344,9 @@
         <table class="accio-table"><thead><tr><th>Clave</th><th>Valor</th><th class="col-actions"></th></tr></thead>
         <tbody id="plainVarsBody">${plainRows}</tbody></table>
         </div>
-        <div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addVarRow()">+ Variable</button></div>
         <h4>Secretos</h4>${secretFields || '<p class="metric-note">Sin campos secretos configurados.</p>'}
-      `, 'saveVariables');
+      `, 'saveVariables', null, null,
+        '<button type="button" class="accio-btn-secondary accio-btn-sm" onclick="addVarRow()">+ Variable</button>');
 
       document.getElementById('config-ia').innerHTML = configCard('Configuración IA', `
         <label>Modelo de temas<select id="iaTopic"><option value="rules" ${ia.topic_model==='rules'?'selected':''}>Reglas</option><option value="llm" ${ia.topic_model==='llm'?'selected':''}>LLM</option></select></label>
@@ -1301,7 +1376,6 @@
         <h4>Clave API (integraciones)</h4>
         <p class="metric-note">Solo para scripts y n8n — no es tu contraseña de acceso.</p>
         ${plat.map(f => settingsFieldHtml(f, 'plat')).join('')}
-        ${can('admin') ? '<div class="config-crud-bar"><button type="button" class="accio-btn-secondary accio-btn-sm" onclick="savePlatformSettings()">Guardar clave</button></div>' : ''}
         <h4>Últimos eventos</h4>
         <div class="config-table-wrap">
         <table class="accio-table"><thead><tr><th>Fecha</th><th>Acción</th><th>Namespace</th><th>Usuario</th></tr></thead>
@@ -1312,7 +1386,7 @@
           <td>${esc(a.actor||'—')}</td>
         </tr>`).join('') : '<tr><td colspan="4">Sin eventos recientes</td></tr>'}</tbody></table>
         </div>
-      `);
+      `, 'savePlatformSettings');
     }
 
     function collectSettings(prefix, fields) {
@@ -1410,9 +1484,10 @@
     }
 
     async function saveUsuarios() {
-      if (!can('admin')) return toast('Solo administradores', true);
+      if (!canAdminTenant()) return toast('Solo administradores', true);
       const existingIds = new Set((lastSettings?.usuarios?.users || []).map(u => u.id));
       const users = [...document.querySelectorAll('#usersTable tbody tr')].map(tr => {
+        if (tr.dataset.platformProtected === '1' && !isPlatformAdmin()) return null;
         const isNew = tr.dataset.new === '1';
         const id = isNew
           ? tr.querySelector('.cfg-user-id-new')?.value.trim()
@@ -1427,7 +1502,7 @@
         const pass = tr.querySelector('.cfg-user-pass')?.value;
         if (pass) row.password = pass;
         return row;
-      }).filter(u => u.id);
+      }).filter(u => u && u.id);
       for (const u of users) {
         if (!u.email) return toast(`Email obligatorio para ${u.id}`, true);
         if (!existingIds.has(u.id) && !u.password) {
@@ -1721,22 +1796,77 @@
         const st = await fetch('/accio/auth/status?tenant_id=' + encodeURIComponent(TENANT_ID), { credentials: 'include' });
         const data = await st.json();
         if (!data.authenticated) return;
-        sessionRole = data.role || 'viewer';
-        sessionGlobalRole = data.global_role || null;
+        sessionRole = data.role || sessionRole;
+        sessionGlobalRole = data.global_role ?? sessionGlobalRole;
         sessionPerms = new Set(data.permissions || []);
         const badge = document.getElementById('userBadge');
         const roleLabel = ROLE_LABELS[data.role] || data.role || 'Usuario';
         if (badge) badge.textContent = `${data.name || 'Usuario'} · ${roleLabel}`;
         const pub = document.getElementById('btnPrimary');
         if (pub && !can('publish')) pub.style.display = 'none';
+        if (activeTab === 'configuracion' && lastSettings) renderEmpresaSection(lastSettings);
       } catch (_) { /* ignore */ }
     }
 
-    function bootstrapDashboard() {
+    /**
+     * Línea de progreso de arranque (5 s).
+     * Muestra comentarios de estado mientras el dashboard carga sesión, tenants y datos.
+     */
+    function runBootProgress(durationMs = 10000) {
+      const wrap = document.getElementById('bootProgress');
+      const bar = document.getElementById('bootProgressBar');
+      const comment = document.getElementById('bootProgressComment');
+      if (!wrap || !bar || !comment) return;
+
+      // Comentarios mostrados según % avanzado (duración total: durationMs)
+      const steps = [
+        { at: 0, text: 'Verificando sesión…' },
+        { at: 12, text: 'Cargando tenants disponibles…' },
+        { at: 28, text: 'Sincronizando apps de marketing…' },
+        { at: 45, text: 'Preparando cola y métricas…' },
+        { at: 62, text: 'Aplicando permisos de usuario…' },
+        { at: 78, text: 'Finalizando carga del dashboard…' },
+        { at: 92, text: 'Listo' },
+      ];
+
+      wrap.hidden = false;
+      wrap.classList.remove('is-done');
+      bar.style.width = '0%';
+      comment.textContent = steps[0].text;
+
+      const startedAt = performance.now();
+
+      function frame() {
+        const elapsed = performance.now() - startedAt;
+        const pct = Math.min(100, (elapsed / durationMs) * 100);
+        bar.style.width = pct + '%';
+
+        // Comentario activo = último paso cuyo umbral ya se alcanzó
+        const active = steps.filter(s => pct >= s.at).pop();
+        if (active) comment.textContent = active.text;
+
+        if (elapsed >= durationMs) {
+          wrap.classList.add('is-done');
+          // Ocultar la barra tras una breve pausa al completar los 5 s
+          setTimeout(() => {
+            wrap.hidden = true;
+            wrap.classList.remove('is-done');
+            bar.style.width = '0%';
+          }, 500);
+          return;
+        }
+        requestAnimationFrame(frame);
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    async function bootstrapDashboard() {
+      runBootProgress(5000);
       initTenantSelector();
       initAppSelector();
       updatePrimaryLabel();
-      applySessionBadge();
+      await applySessionBadge();
       loadData();
       setInterval(loadData, 60000);
     }

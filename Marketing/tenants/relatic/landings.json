@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-26",
+  "base_domain": "relaticpanama.org",
+  "website_url": "https://relaticpanama.org/",
+  "default_utm_source": "emaccion",
+  "landings": [
+    {
+      "slug": "home",
+      "path": "/"
+    },
+    {
+      "slug": "servicios",
+      "path": "/servicios"
+    },
+    {
+      "slug": "programas",
+      "path": "/programas"
+    },
+    {
+      "slug": "comunidad",
+      "path": "/comunidad"
+    },
+    {
+      "slug": "legal",
+      "path": "https://emaccion.etsrv.site/accio/relatic/legal/"
+    },
+    {
+      "slug": "privacidad",
+      "path": "https://emaccion.etsrv.site/accio/relatic/legal/privacidad"
+    },
+    {
+      "slug": "terminos",
+      "path": "https://emaccion.etsrv.site/accio/relatic/legal/terminos"
+    }
+  ]
+}

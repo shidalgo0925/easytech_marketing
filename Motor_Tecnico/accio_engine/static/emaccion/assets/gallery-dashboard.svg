@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-hidden="true">
+  <rect width="640" height="400" fill="#eef6f0"/>
+  <rect x="24" y="24" width="592" height="48" rx="8" fill="#fff" stroke="#c5e0ce"/>
+  <text x="40" y="54" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="#1a4a2e">EM+Acción</text>
+  <rect x="24" y="88" width="140" height="288" rx="8" fill="#fff" stroke="#e2f0e6"/>
+  <rect x="180" y="88" width="436" height="288" rx="8" fill="#fff" stroke="#e2f0e6"/>
+  <rect x="40" y="108" width="108" height="12" rx="4" fill="#d4e9dc"/>
+  <rect x="40" y="132" width="88" height="8" rx="3" fill="#e8f5ec"/>
+  <rect x="40" y="152" width="88" height="8" rx="3" fill="#e8f5ec"/>
+  <rect x="200" y="108" width="120" height="64" rx="6" fill="#f5faf7" stroke="#e2f0e6"/>
+  <rect x="336" y="108" width="120" height="64" rx="6" fill="#f5faf7" stroke="#e2f0e6"/>
+  <rect x="472" y="108" width="120" height="64" rx="6" fill="#d4e9dc" stroke="#b8dcc4"/>
+  <rect x="200" y="188" width="392" height="168" rx="6" fill="#f8fcf9" stroke="#e2f0e6"/>
+  <rect x="216" y="208" width="240" height="10" rx="4" fill="#c5e0ce"/>
+  <rect x="216" y="232" width="180" height="10" rx="4" fill="#d4e9dc"/>
+  <rect x="216" y="256" width="320" height="10" rx="4" fill="#e2f0e6"/>
+  <rect x="216" y="280" width="140" height="10" rx="4" fill="#d4e9dc"/>
+</svg>

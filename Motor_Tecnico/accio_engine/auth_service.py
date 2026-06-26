@@ -22,6 +22,9 @@ ROLE_ALIASES = {
     "operator": "marketing_operator",
 }
 
+TENANT_ASSIGNABLE_ROLES = frozenset({"tenant_admin", "marketing_operator", "viewer"})
+FORBIDDEN_CUSTOM_ROLE_IDS = frozenset({"super_admin", "platform"})
+
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -61,6 +64,25 @@ def _ensure_db() -> None:
 def _normalize_role(role: str) -> str:
     role = (role or "viewer").strip()
     return ROLE_ALIASES.get(role, role)
+
+
+def is_platform_user(user_id: str) -> bool:
+    """True si el usuario es super administrador global de la plataforma."""
+    if not user_id:
+        return False
+    _ensure_db()
+    with sqlite3.connect(AUTH_DB) as conn:
+        row = conn.execute("SELECT global_role FROM users WHERE id = ?", (user_id,)).fetchone()
+    return bool(row and row[0] == "super_admin")
+
+
+def _validate_tenant_role(role: str) -> str:
+    role = _normalize_role(role)
+    if role in FORBIDDEN_CUSTOM_ROLE_IDS:
+        raise ValueError(f"Rol «{role}» reservado de plataforma")
+    if role not in TENANT_ASSIGNABLE_ROLES:
+        raise ValueError(f"Rol de tenant no válido: {role}")
+    return role
 
 
 def migrate_from_tenant_json() -> int:
@@ -209,7 +231,7 @@ def allowed_tenants(user_id: str, global_role: str | None = None) -> list[str]:
 def role_permissions(role: str) -> set[str]:
     role = _normalize_role(role)
     if role == "super_admin":
-        return {"read", "publish", "config", "admin"}
+        return {"read", "publish", "config", "admin", "platform"}
     if role == "tenant_admin":
         return {"read", "publish", "config", "admin"}
     if role == "marketing_operator":
@@ -304,7 +326,7 @@ def list_tenant_users(tenant_id: str) -> list[dict[str, Any]]:
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
             """
-            SELECT u.id, u.email, u.name, u.is_active, ut.role
+            SELECT u.id, u.email, u.name, u.is_active, u.global_role, ut.role
             FROM users u
             JOIN user_tenants ut ON u.id = ut.user_id
             WHERE ut.tenant_id = ?
@@ -319,13 +341,16 @@ def list_tenant_users(tenant_id: str) -> list[dict[str, Any]]:
             "name": row["name"],
             "role": _normalize_role(row["role"]),
             "active": bool(row["is_active"]),
+            "platform_protected": row["global_role"] == "super_admin",
         }
         for row in rows
     ]
 
 
-def remove_user_from_tenant(user_id: str, tenant_id: str) -> None:
+def remove_user_from_tenant(user_id: str, tenant_id: str, *, actor_is_platform: bool = False) -> None:
     if not user_id or not tenant_id:
+        return
+    if is_platform_user(user_id) and not actor_is_platform:
         return
     _ensure_db()
     tid = tenant_id.strip().lower()
@@ -338,7 +363,7 @@ def remove_user_from_tenant(user_id: str, tenant_id: str) -> None:
             "SELECT COUNT(*) FROM user_tenants WHERE user_id = ?",
             (user_id,),
         ).fetchone()[0]
-        if remaining == 0:
+        if remaining == 0 and not is_platform_user(user_id):
             conn.execute("UPDATE users SET is_active = 0, updated_at = ? WHERE id = ?", (_utc_now(), user_id))
         conn.commit()
 
@@ -352,6 +377,7 @@ def save_tenant_user(
     role: str,
     active: bool = True,
     password: str | None = None,
+    actor_is_platform: bool = False,
 ) -> dict[str, Any]:
     """Crea o actualiza usuario de una empresa. Password opcional si ya existe."""
     from werkzeug.security import generate_password_hash
@@ -361,7 +387,15 @@ def save_tenant_user(
     uid = (user_id or "").strip()
     email = (email or "").strip().lower()
     name = (name or email.split("@")[0] or uid).strip()
-    role = _normalize_role(role)
+    role = _validate_tenant_role(role)
+    if is_platform_user(uid) and not actor_is_platform:
+        raise ValueError(
+            f"El usuario «{uid}» es super administrador de plataforma y no puede modificarse desde un tenant"
+        )
+    if is_platform_user(uid) and not active and not actor_is_platform:
+        raise ValueError("No se puede desactivar un super administrador de plataforma")
+    if is_platform_user(uid) and password and not actor_is_platform:
+        raise ValueError("No se puede cambiar la contraseña de un super administrador de plataforma")
     if not uid or not email:
         raise ValueError("ID y email son obligatorios")
     now = _utc_now()
@@ -402,16 +436,44 @@ def save_tenant_user(
     return {"id": uid, "email": email, "name": name, "role": role, "active": active}
 
 
-def sync_tenant_users(tenant_id: str, users: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def sync_tenant_users(
+    tenant_id: str,
+    users: list[dict[str, Any]],
+    *,
+    actor_is_platform: bool = False,
+) -> list[dict[str, Any]]:
     """Sincroniza lista completa de usuarios de una empresa (alta, edición, baja)."""
     tid = tenant_id.strip().lower()
     current = {u["id"]: u for u in list_tenant_users(tid)}
-    keep_ids: set[str] = set()
+    protected_ids = {uid for uid in current if is_platform_user(uid)}
+
+    incoming: dict[str, dict[str, Any]] = {}
     for row in users:
         uid = (row.get("id") or "").strip()
-        if not uid:
-            continue
+        if uid:
+            incoming[uid] = row
+
+    if not actor_is_platform:
+        active_admins_in_payload = [
+            u
+            for u in incoming.values()
+            if _normalize_role(u.get("role") or "viewer") == "tenant_admin" and bool(u.get("active", True))
+        ]
+        protected_admins = sum(
+            1
+            for uid in protected_ids
+            if uid in current
+            and _normalize_role(current[uid].get("role") or "viewer") == "tenant_admin"
+            and current[uid].get("active", True)
+        )
+        if len(active_admins_in_payload) + protected_admins < 1:
+            raise ValueError("Debe permanecer al menos un administrador activo en el tenant")
+
+    keep_ids: set[str] = set(protected_ids)
+    for uid, row in incoming.items():
         keep_ids.add(uid)
+        if is_platform_user(uid) and not actor_is_platform:
+            continue
         save_tenant_user(
             tid,
             user_id=uid,
@@ -420,7 +482,10 @@ def sync_tenant_users(tenant_id: str, users: list[dict[str, Any]]) -> list[dict[
             role=row.get("role") or "viewer",
             active=bool(row.get("active", True)),
             password=(row.get("password") or "").strip() or None,
+            actor_is_platform=actor_is_platform,
         )
+
     for uid in set(current) - keep_ids:
-        remove_user_from_tenant(uid, tid)
+        remove_user_from_tenant(uid, tid, actor_is_platform=actor_is_platform)
+
     return list_tenant_users(tid)

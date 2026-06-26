@@ -15,6 +15,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+EMACCION_LANDING_DIR = STATIC_DIR / "emaccion"
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
@@ -103,6 +104,24 @@ def _user_can_access_tenant(tenant_id: str) -> bool:
         tenant_id,
         session.get("global_role"),
     )
+
+
+def _is_platform_admin() -> bool:
+    return session.get("global_role") == "super_admin"
+
+
+def _platform_admin_required():
+    if session.get("auth_method") == "api_key":
+        return None
+    if _is_platform_admin():
+        return None
+    return jsonify({"ok": False, "error": "Requiere super administrador de plataforma"}), 403
+
+
+def _tenant_target_access_required(target_id: str):
+    if not _user_can_access_tenant(target_id):
+        return jsonify({"ok": False, "error": "Sin acceso a este tenant"}), 403
+    return None
 
 
 def _allowed_tenant_rows() -> list[dict[str, str]]:
@@ -476,11 +495,19 @@ def _render_dashboard(tenant_id: str) -> Response:
     html = html.replace('href="/accio/static/em-logomark.svg"', f'href="{icon_url}"', 1)
     html = html.replace('href="/accio/static/accio-design.css"', f'href="{css_url}"', 1)
     branding = tenant_profile.branding_css(tenant_id)
+    session_role = _session_role(tenant_id) if session.get("accio_auth") else None
+    global_role = session.get("global_role")
+    from Motor_Tecnico.accio_engine import auth_service as _auth
+
+    perms = sorted(_auth.role_permissions(session_role or "viewer"))
     inject = (
         f"<style>{CRITICAL_CSS}{branding}</style>"
         f'<script>window.__ACCIO_TENANT__={json.dumps(tenant_id)};'
         f"window.__ACCIO_TENANTS__={tenants_js};window.__ACCIO_ENV__={json.dumps(ACCIO_ENV)};"
-        f"window.__ACCIO_EMPRESA_NAME__={json.dumps(tenant.display_name)};</script>"
+        f"window.__ACCIO_EMPRESA_NAME__={json.dumps(tenant.display_name)};"
+        f"window.__ACCIO_SESSION_ROLE__={json.dumps(session_role)};"
+        f"window.__ACCIO_GLOBAL_ROLE__={json.dumps(global_role)};"
+        f"window.__ACCIO_PERMISSIONS__={json.dumps(perms)};</script>"
     )
     html = html.replace("</head>", inject + "\n</head>", 1)
     html = html.replace(
@@ -642,6 +669,159 @@ def privacy_page():
     return send_from_directory(app.static_folder, "privacidad.html", mimetype="text/html")
 
 
+def _emaccion_landing_file(filename: str):
+    base = EMACCION_LANDING_DIR.resolve()
+    path = (EMACCION_LANDING_DIR / filename).resolve()
+    if not str(path).startswith(str(base)) or not path.is_file():
+        return None
+    return path
+
+
+@app.get("/accio/producto")
+def emaccion_product_redirect():
+    return redirect("/accio/producto/", code=302)
+
+
+@app.get("/accio/producto/")
+def emaccion_product_landing():
+    index = _emaccion_landing_file("index.html")
+    if index is None:
+        return jsonify({"ok": False, "error": "Landing EM+Acción no configurada"}), 404
+    return send_from_directory(EMACCION_LANDING_DIR, "index.html", mimetype="text/html")
+
+
+@app.get("/accio/producto/<path:filename>")
+def emaccion_product_static(filename: str):
+    if filename in ("", "index.html"):
+        return redirect("/accio/producto/", code=302)
+    path = _emaccion_landing_file(filename)
+    if path is None:
+        return jsonify({"ok": False, "error": "Recurso no encontrado"}), 404
+    mimetype = None
+    if filename.endswith(".css"):
+        mimetype = "text/css"
+    elif filename.endswith(".js"):
+        mimetype = "application/javascript"
+    elif filename.endswith(".svg"):
+        mimetype = "image/svg+xml"
+    return send_from_directory(EMACCION_LANDING_DIR, filename, mimetype=mimetype)
+
+
+@app.post("/accio/producto/lead")
+def emaccion_product_lead():
+    import xmlrpc.client
+
+    data = request.get_json(silent=True) or request.form
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    company = (data.get("company") or "").strip()
+    intent = (data.get("intent") or "demo").strip()
+    message = (data.get("message") or "").strip()
+
+    if not name or not email:
+        return jsonify({"ok": False, "error": "Nombre y email son obligatorios"}), 400
+
+    intent_labels = {
+        "demo": "Solicitar demostración",
+        "reunion": "Agendar reunión",
+        "cotizacion": "Solicitar cotización",
+        "prueba": "Iniciar prueba",
+    }
+    intent_label = intent_labels.get(intent, intent)
+    lead_name = company or name
+    description = (
+        f"Lead EM+Acción landing\n"
+        f"Interés: {intent_label}\n"
+        f"Nombre: {name}\n"
+        f"Email: {email}\n"
+        f"Teléfono: {phone}\n"
+        f"Empresa: {company}\n"
+        f"Mensaje: {message}\n"
+        f"Origen: emaccion_producto"
+    )
+
+    try:
+        url = os.getenv("ODOO_URL", "").rstrip("/")
+        db = os.getenv("ODOO_DB", "")
+        user = os.getenv("ODOO_USER", "")
+        password = os.getenv("ODOO_PASSWORD", "")
+        if not all([url, db, user, password]):
+            return jsonify({"ok": False, "error": "CRM no configurado en el servidor"}), 503
+
+        common = xmlrpc.client.ServerProxy(f"{url}/xmlrpc/2/common", allow_none=True)
+        uid = common.authenticate(db, user, password, {})
+        if not uid:
+            return jsonify({"ok": False, "error": "Error de autenticación CRM"}), 503
+        models = xmlrpc.client.ServerProxy(f"{url}/xmlrpc/2/object", allow_none=True)
+
+        existing = models.execute_kw(
+            db, uid, password, "crm.lead", "search", [[("email_from", "=", email)]], {"limit": 1}
+        )
+        if existing:
+            return jsonify({"ok": True, "message": "Ya tenemos su solicitud registrada. Le contactaremos pronto.", "duplicate": True})
+
+        values = {
+            "name": lead_name,
+            "contact_name": name,
+            "email_from": email,
+            "phone": phone,
+            "description": description,
+            "type": "opportunity",
+        }
+        source_id = models.execute_kw(
+            db, uid, password, "utm.source", "search", [[("name", "=", "emaccion_producto")]], {"limit": 1}
+        )
+        if source_id:
+            values["source_id"] = source_id[0]
+        stage_id = models.execute_kw(
+            db, uid, password, "crm.stage", "search", [[("name", "=", "Nuevo - Marketing")]], {"limit": 1}
+        )
+        if stage_id:
+            values["stage_id"] = stage_id[0]
+
+        lead_id = models.execute_kw(db, uid, password, "crm.lead", "create", [values])
+        return jsonify({"ok": True, "lead_id": lead_id, "message": "Solicitud recibida. Le contactaremos pronto."})
+    except Exception as exc:
+        return jsonify({"ok": False, "error": f"No se pudo registrar la solicitud: {exc}"}), 500
+
+
+@app.get("/accio/<tenant_id>/legal/")
+@app.get("/accio/<tenant_id>/legal/<doc>")
+def tenant_legal_page(tenant_id: str, doc: str = ""):
+    tenant, err = _tenant_or_404(tenant_id)
+    if tenant is None:
+        return jsonify({"ok": False, "error": err}), 404
+    legal_dir = tenant.root / "legal"
+    if not legal_dir.is_dir():
+        return jsonify({"ok": False, "error": "Documentos legales no configurados para este tenant"}), 404
+    name = (doc or "index").strip("/").split("/")[-1]
+    if name.endswith(".css"):
+        safe = Path(name).name
+    elif name.endswith(".html"):
+        safe = Path(name).name
+    else:
+        safe = f"{name}.html"
+    if safe != name and not name.endswith(".css"):
+        safe = Path(safe).name
+    path = legal_dir / safe
+    if not path.is_file():
+        return jsonify({"ok": False, "error": f"Documento legal no encontrado: {name}"}), 404
+    mime = "text/css" if safe.endswith(".css") else "text/html"
+    return send_from_directory(legal_dir, safe, mimetype=mime)
+
+
+@app.get("/accio/<tenant_id>/legal/compliance.json")
+def tenant_legal_compliance(tenant_id: str):
+    tenant, err = _tenant_or_404(tenant_id)
+    if tenant is None:
+        return jsonify({"ok": False, "error": err}), 404
+    path = tenant.root / "legal" / "compliance.json"
+    if not path.is_file():
+        return jsonify({"ok": False, "error": "compliance.json no configurado"}), 404
+    return jsonify({"ok": True, **json.loads(path.read_text(encoding="utf-8"))})
+
+
 # --- Settings Fase N ---
 
 
@@ -741,10 +921,14 @@ def settings_empresas_list(tenant_id: str):
     tenant, err = _tenant_or_404(tenant_id)
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
+    companies = tenant_provisioning.list_companies(include_disabled=True)
+    if session.get("auth_method") == "user" and not _is_platform_admin():
+        allowed = {row["id"] for row in _allowed_tenant_rows()}
+        companies = [c for c in companies if c.get("tenant_id") in allowed]
     return jsonify(
         {
             "ok": True,
-            "companies": tenant_provisioning.list_companies(include_disabled=True),
+            "companies": companies,
             "selected_tenant_id": tenant_id,
         }
     )
@@ -756,6 +940,9 @@ def settings_empresas_get(tenant_id: str, target_id: str):
     tenant, err = _tenant_or_404(tenant_id)
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
+    denied = _tenant_target_access_required(target_id)
+    if denied:
+        return denied
     try:
         company = tenant_provisioning.get_company(target_id)
     except TenantNotFoundError as exc:
@@ -769,6 +956,9 @@ def settings_empresas_create(tenant_id: str):
     tenant, err = _tenant_or_404(tenant_id)
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
+    denied = _platform_admin_required()
+    if denied:
+        return denied
     body = request.get_json(silent=True) or {}
     try:
         company = tenant_provisioning.create_company(body)
@@ -793,7 +983,12 @@ def settings_empresas_update(tenant_id: str, target_id: str):
     tenant, err = _tenant_or_404(tenant_id)
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
+    denied = _tenant_target_access_required(target_id)
+    if denied:
+        return denied
     body = request.get_json(silent=True) or {}
+    if session.get("auth_method") == "user" and not _is_platform_admin():
+        body = {k: v for k, v in body.items() if k != "status"}
     try:
         company = tenant_provisioning.update_company(target_id, body)
     except TenantNotFoundError as exc:
@@ -816,6 +1011,9 @@ def settings_empresas_disable(tenant_id: str, target_id: str):
     tenant, err = _tenant_or_404(tenant_id)
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
+    denied = _platform_admin_required()
+    if denied:
+        return denied
     try:
         result = tenant_provisioning.disable_company(target_id)
     except (TenantNotFoundError, ValueError) as exc:
@@ -836,6 +1034,9 @@ def settings_empresas_enable(tenant_id: str, target_id: str):
     tenant, err = _tenant_or_404(tenant_id)
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
+    denied = _platform_admin_required()
+    if denied:
+        return denied
     try:
         result = tenant_provisioning.enable_company(target_id)
     except TenantNotFoundError as exc:
@@ -915,7 +1116,14 @@ def settings_usuarios_save(tenant_id: str):
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
     body = request.get_json(silent=True) or {}
-    data = settings_center.save_users(tenant_id, body)
+    try:
+        data = settings_center.save_users(
+            tenant_id,
+            body,
+            actor_is_platform=_is_platform_admin(),
+        )
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
     return jsonify({"ok": True, "usuarios": data})
 
 

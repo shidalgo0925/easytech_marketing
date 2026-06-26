@@ -8,7 +8,7 @@ from typing import Any
 
 from Motor_Tecnico.accio_engine import auth_service, settings_center
 
-ALL_PERMISSIONS = frozenset({"read", "publish", "config", "admin"})
+ALL_PERMISSIONS = frozenset({"read", "publish", "config", "admin", "platform"})
 
 
 def role_permissions(tenant_id: str) -> dict[str, set[str]]:
@@ -43,6 +43,10 @@ def permission_for_request(method: str, path: str, tenant_id: str) -> str | None
     if rel.startswith("settings/backup") or rel.startswith("settings/usuarios"):
         return "admin"
     if rel.startswith("settings/empresas"):
+        if method != "GET" and (rel.endswith("/disable") or rel.endswith("/enable")):
+            return "platform"
+        if method == "POST" and rel.rstrip("/") == "settings/empresas":
+            return "platform"
         return "admin"
     if rel.startswith("settings/platform") or rel.startswith("settings/logo"):
         return "admin"

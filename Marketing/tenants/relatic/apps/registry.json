@@ -5,11 +5,11 @@
   "apps": [
     {
       "app_id": "default",
-      "name": "Relatic",
+      "name": "Relatic Panamá",
       "slug": "default",
       "status": "active",
       "is_default": true,
-      "description": "Marca principal y contenido general del tenant"
+      "description": "Investigación, formación y publicación científica — relaticpanama.org"
     }
   ]
 }

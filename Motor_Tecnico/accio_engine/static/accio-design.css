@@ -1316,6 +1316,46 @@ input:focus-visible,
   font-size: var(--accio-text-xs);
 }
 
+/* Barra de progreso de arranque del dashboard (5 s) */
+.boot-progress {
+  padding: 0 var(--space-xl);
+  background: var(--accio-bg-surface-1);
+  border-bottom: var(--accio-border-width) solid var(--accio-border-subtle);
+  transition: opacity 0.35s ease, max-height 0.35s ease;
+  max-height: 48px;
+  overflow: hidden;
+}
+.boot-progress.is-done {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-bottom-width: 0;
+}
+.boot-progress[hidden] {
+  display: none !important;
+}
+.boot-progress-track {
+  height: 3px;
+  background: var(--accio-bg-surface-3);
+  border-radius: var(--accio-radius-full);
+  overflow: hidden;
+  margin-top: var(--accio-space-2);
+}
+.boot-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accio-accent), var(--accio-accent-strong, #3d7ea6));
+  border-radius: inherit;
+  transition: width 0.08s linear;
+}
+.boot-progress-comment {
+  margin: var(--accio-space-2) 0 var(--accio-space-3);
+  font-size: var(--accio-text-xs);
+  color: var(--accio-text-secondary);
+  line-height: 1.3;
+}
+
 .toast {
   position: fixed;
   bottom: var(--accio-space-5);
@@ -1477,6 +1517,25 @@ input:focus-visible,
 .config-content .accio-card-head {
   flex-wrap: wrap;
   gap: var(--accio-space-3);
+}
+.config-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--accio-space-2);
+  margin-left: auto;
+}
+.knowledge-editor-head {
+  margin: calc(-1 * var(--accio-space-4)) calc(-1 * var(--accio-space-4)) var(--accio-space-4);
+  border-radius: var(--accio-radius-lg) var(--accio-radius-lg) 0 0;
+}
+.knowledge-editor-body {
+  padding-top: 0;
+}
+.accio-card-foot.config-crud-bar {
+  padding: var(--accio-space-3) var(--accio-space-4);
+  border-top: var(--accio-border-width) solid var(--accio-border);
+  margin-top: 0;
 }
 .config-table-wrap {
   overflow-x: auto;

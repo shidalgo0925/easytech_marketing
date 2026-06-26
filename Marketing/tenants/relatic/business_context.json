@@ -1,44 +1,74 @@
 {
   "version": 1,
-  "updated_at": "2026-06-19",
-  "empresa": "Relatic",
-  "industria": "Transformación Digital",
+  "updated_at": "2026-06-26",
+  "empresa": "Relatic Panamá",
+  "industria": "Investigación, formación y publicación científica",
   "pais": "Panamá",
-  "publico_objetivo": "Clientes Relatic — configurar en dashboard",
+  "publico_objetivo": "Investigadores, académicos, docentes y profesionales que publican, forman equipos o buscan visibilidad científica en Panamá y la región",
   "productos_servicios": [
-    "Odoo ERP + Facturación Electrónica DGI",
-    "EasyNodeOne (EN1) — plataforma todo en uno",
-    "EPOSOne — punto de venta e inventario",
-    "EClassOne — gestión académica",
-    "EThesisOne — tesis universitarias",
-    "EPayRoll — planilla Panamá",
-    "Consultoría TI estratégica",
-    "Desarrollo de software a medida"
+    "Diplomados: investigación aplicada, metodologías de investigación social, políticas educativas y evaluación",
+    "Cursos: redacción científica y publicación en revistas, análisis de datos para investigación, fundamentos de ética en investigación",
+    "Talleres: redacción científica, presentación y defensa de proyectos, visibilidad y difusión de resultados",
+    "Certificaciones: gestión de publicación científica, diseño y evaluación de instrumentos, liderazgo y equipos de investigación",
+    "Publicación de artículos (estructura, redacción y pauta de envío a revistas indexadas)",
+    "Revistas indexadas (estrategia editorial, pertinencia temática e indexación)",
+    "Libros digitales (concepción, edición y difusión de obras académicas o científicas)",
+    "Carteles científicos (diseño y formulación de pósteres para congresos)",
+    "Asesorías metodológicas (proyectos, tesis y convocatorias)",
+    "Postdoctorados (rutas avanzadas de I+D y redes internacionales)",
+    "Comunidad académica (foros, grupos, red regional latinoamericana)",
+    "Eventos y encuentros académicos",
+    "Plataforma de Servicio (exploración del catálogo sin costo; registro gratuito en apps.relatic.org)"
   ],
   "diferenciadores": [
-    "Integración FE + ERP en un solo flujo",
-    "Diagnóstico tecnológico gratuito (30 min)",
-    "Implementación y soporte local en Panamá",
-    "Enfoque en adopción real del equipo, no solo licencias"
+    "Ecosistema integral: formación, publicación y comunidad en un solo lugar",
+    "Exploración del catálogo sin costo; registro gratuito para acceder a la plataforma",
+    "Rigor académico con acompañamiento claro, sin humo comercial",
+    "Red latinoamericana e instituciones aliadas (AIU, REDIPAI, universidades regionales)"
   ],
   "problemas_que_resuelve": [
-    "Procesos manuales y retrabajo entre áreas",
-    "Sistemas desconectados (FE, inventario, contabilidad)",
-    "Falta de indicadores para decidir",
-    "Software comprado que el equipo no usa",
-    "Cumplimiento DGI sin visibilidad operativa"
+    "Dificultad para publicar con estándares académicos y visibilidad indexada",
+    "Formación dispersa sin ruta clara hacia resultados verificables",
+    "Falta de red y espacios de encuentro entre pares investigadores",
+    "Procesos opacos entre interés, inscripción y seguimiento en servicios académicos"
   ],
-  "tono_comunicacion": "Profesional, cercano, educativo. Hablar de problemas reales antes de vender. Panamá primero.",
+  "tono_comunicacion": "Institucional, académico y cercano. Sobrio, claro, orientado a rigor y confianza. Panamá y red regional.",
   "objetivos_comerciales": [
-    "Generar diagnósticos tecnológicos cualificados",
-    "Posicionar a EasyTech como autoridad en digitalización PYME",
-    "Capturar leads vía guías y contenido de valor",
-    "Nutrir pipeline Odoo hacia demo y cierre"
+    "Atraer tráfico cualificado al sitio relaticpanama.org",
+    "Convertir visitantes en registros gratuitos en la Plataforma de Servicio",
+    "Promover programas (diplomados, cursos, talleres, certificaciones) e inscripciones",
+    "Posicionar Relatic Panamá como ecosistema de investigación y publicación"
   ],
-  "cta_principal": "DIAGNÓSTICO",
+  "cta_principal": "EXPLORAR SERVICIOS",
   "contacto": {
-    "email": "easytechservices25@gmail.com",
-    "whatsapp": "+507 6688-4938",
-    "guia": "https://n8n.etsrv.site/guia/"
+    "guia": "https://relaticpanama.org/",
+    "sitio_web": "https://relaticpanama.org/",
+    "privacy": "privacy@relaticpanama.org",
+    "legal": "legal@relaticpanama.org",
+    "dpo": "dpo@relaticpanama.org",
+    "security": "security@relaticpanama.org"
+  },
+  "legal": {
+    "hub_url": "https://emaccion.etsrv.site/accio/relatic/legal/",
+    "privacy_url": "https://emaccion.etsrv.site/accio/relatic/legal/privacidad",
+    "terms_url": "https://emaccion.etsrv.site/accio/relatic/legal/terminos",
+    "security_url": "https://emaccion.etsrv.site/accio/relatic/legal/seguridad",
+    "cookies_url": "https://emaccion.etsrv.site/accio/relatic/legal/cookies",
+    "rights_url": "https://emaccion.etsrv.site/accio/relatic/legal/datos-personales",
+    "acceptable_use_url": "https://emaccion.etsrv.site/accio/relatic/legal/uso-aceptable",
+    "frameworks": [
+      "Ley 81/2019 Panamá",
+      "GDPR / UK GDPR",
+      "CCPA/CPRA",
+      "VCDPA",
+      "CPA Colorado",
+      "CTDPA",
+      "UCPA",
+      "LGPD",
+      "COPPA",
+      "CAN-SPAM",
+      "ePrivacy"
+    ],
+    "updated_at": "2026-06-26"
   }
 }
