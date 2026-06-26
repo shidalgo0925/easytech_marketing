@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CRUD de empresas (tenants) — alta, edición y baja lógica."""
+"""CRUD de tenants (organizaciones SaaS EMAcción — no confundir con Apps de marketing)."""
 
 from __future__ import annotations
 
@@ -101,7 +101,7 @@ def get_company(tenant_id: str) -> dict[str, Any]:
     reg = tenant_mod.load_registry()
     record = next((r for r in reg.get("tenants", []) if r.get("tenant_id") == tid), None)
     if not record:
-        raise TenantNotFoundError(f"Empresa no encontrada: {tid}")
+        raise TenantNotFoundError(f"Tenant no encontrado: {tid}")
     profile = tenant_profile.load_profile(tid)
     context = knowledge_api.load_business_context(tid)
     return {
@@ -195,17 +195,20 @@ def _bootstrap_files(tenant_id: str, record: dict[str, Any], context: dict[str, 
         {"topic_model": "rules", "image_model": "static_flyers", "tone_override": "", "enabled": True, "updated_at": now},
     )
     _write_json(root / "variables.json", {"version": 1, "variables": [], "updated_at": now})
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    marketing_app.bootstrap_registry(tenant_id)
 
 
 def create_company(payload: dict[str, Any]) -> dict[str, Any]:
     tid = validate_tenant_id(payload.get("tenant_id") or "")
     reg = tenant_mod.load_registry()
     if any(r.get("tenant_id") == tid for r in reg.get("tenants", [])):
-        raise ValueError(f"Ya existe una empresa con ID «{tid}»")
+        raise ValueError(f"Ya existe un tenant con ID «{tid}»")
 
     display_name = (payload.get("display_name") or payload.get("empresa") or tid).strip()
     if not display_name:
-        raise ValueError("Nombre de empresa obligatorio")
+        raise ValueError("Nombre del tenant obligatorio")
 
     domains = payload.get("domains") or []
     if isinstance(domains, str):
@@ -236,7 +239,7 @@ def update_company(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     reg = tenant_mod.load_registry()
     record = next((r for r in reg.get("tenants", []) if r.get("tenant_id") == tid), None)
     if not record:
-        raise TenantNotFoundError(f"Empresa no encontrada: {tid}")
+        raise TenantNotFoundError(f"Tenant no encontrado: {tid}")
 
     if "display_name" in payload and payload["display_name"]:
         record["display_name"] = str(payload["display_name"]).strip()
@@ -276,14 +279,14 @@ def update_company(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
 def disable_company(tenant_id: str) -> dict[str, Any]:
     tid = validate_tenant_id(tenant_id)
     if tid in _PROTECTED_TENANTS:
-        raise ValueError(f"No se puede desactivar la empresa protegida «{tid}»")
+        raise ValueError(f"No se puede desactivar el tenant protegido «{tid}»")
     reg = tenant_mod.load_registry()
     record = next((r for r in reg.get("tenants", []) if r.get("tenant_id") == tid), None)
     if not record:
-        raise TenantNotFoundError(f"Empresa no encontrada: {tid}")
+        raise TenantNotFoundError(f"Tenant no encontrado: {tid}")
     active = [r for r in reg.get("tenants", []) if r.get("status") == "active"]
     if len(active) <= 1 and record.get("status") == "active":
-        raise ValueError("Debe quedar al menos una empresa activa")
+        raise ValueError("Debe quedar al menos un tenant activo")
     record["status"] = "disabled"
     _save_registry(reg)
     return {"tenant_id": tid, "status": "disabled"}
@@ -294,7 +297,7 @@ def enable_company(tenant_id: str) -> dict[str, Any]:
     reg = tenant_mod.load_registry()
     record = next((r for r in reg.get("tenants", []) if r.get("tenant_id") == tid), None)
     if not record:
-        raise TenantNotFoundError(f"Empresa no encontrada: {tid}")
+        raise TenantNotFoundError(f"Tenant no encontrado: {tid}")
     record["status"] = "active"
     _save_registry(reg)
     tenant_profile.save_profile(tid, {"status": "active"})
@@ -305,7 +308,7 @@ def delete_company(tenant_id: str, *, purge: bool = False) -> dict[str, Any]:
     """Baja lógica por defecto; purge=True elimina carpeta (solo no protegidos)."""
     tid = validate_tenant_id(tenant_id)
     if tid in _PROTECTED_TENANTS:
-        raise ValueError(f"No se puede eliminar la empresa protegida «{tid}»")
+        raise ValueError(f"No se puede eliminar el tenant protegido «{tid}»")
     if purge:
         result = disable_company(tid)
         root = tenant_mod.TENANTS_ROOT / tid

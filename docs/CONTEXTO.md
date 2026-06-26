@@ -16,7 +16,7 @@ Documento maestro para operadores, programadores y agentes IA.
 
 Debe servir a **EasyTech**, **Relatic** y futuros clientes con **un solo motor** y datos **100% separados** por empresa (`tenant_id` interno).
 
-**Modelo de producto:** una plataforma, muchas **empresas**. La UI dice *Empresa*; `tenant_id` es infraestructura.
+**Modelo de producto:** plataforma SaaS multi-tenant. **Tenant** = empresa cliente; **App** = línea/marca/producto a promocionar dentro del tenant. Ver `docs/EMACCION_TENANT_VS_APP.md`. La UI legacy dice *Empresa* (= tenant); `tenant_id` es infraestructura.
 
 **Regla V2:** No implementar una fase hasta cerrar la anterior (A → B → C → D → … → P).
 

@@ -10,22 +10,26 @@ Documento de continuidad para operadores y agentes. Complementa `docs/CONTEXTO.m
 
 ## 1. Modelo de producto (acordado)
 
-**Una plataforma EM+Acción, muchas empresas** (EasyTech, Relatic, Cliente X…).
+**EMAcción = SaaS multi-tenant.** Documento canónico: `docs/EMACCION_TENANT_VS_APP.md`.
+
+| Nivel | Qué es | Ejemplos | Interno |
+|-------|--------|----------|---------|
+| **Tenant** | Empresa que usa EMAcción | ETS, Modecosa, IIUS, Relatic (cliente) | `tenant_id` |
+| **App** | Línea/marca/producto a promocionar | EN1, EPayRoll, Diplomados | `app_id` |
 
 | Concepto UI | Concepto interno |
 |-------------|------------------|
-| Empresa | `tenant_id` + carpeta `Marketing/tenants/{id}/` |
+| Empresa (selector login) | **Tenant** — `tenant_id` + `Marketing/tenants/{id}/` |
+| App / línea (fase 1 API) | **App** — `Marketing/tenants/{id}/apps/` |
 | Administrador de empresa | `tenant_admin` |
-| Super administrador de plataforma | `super_admin` (`global_role`) |
+| Super administrador | `super_admin` |
 
-Cada empresa tiene **aislado**: usuarios, branding, conectores, credenciales, campañas, knowledge, cola, métricas, CRM destino.
+Cada **tenant** tiene aislado: usuarios, conectores, CRM, configuración.  
+Cada **app** tiene (objetivo): cola, campañas, flyers, knowledge — hoy la app `default` usa la cola del tenant (compat).
 
-**EN1** tiene tres sentidos en el ecosistema:
-1. Producto del catálogo EasyTech (campañas/knowledge)
-2. CRM destino (`crm_target: en1` — p. ej. Relatic)
-3. Referencia arquitectónica SaaS multi-empresa
+**Reglas:** Nunca crear un tenant para representar una App. Todo contenido lleva `tenant_id` + `app_id`.
 
-**Regla:** La UI dice **Empresa**, no “tenant”. `tenant_id` es solo infraestructura.
+**EN1** (`/admin/organizations`): producto SaaS aparte; no duplicar su CRUD. Sync futuro `organization_id` ↔ `tenant_id`.
 
 ---
 

@@ -18,7 +18,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from Motor_Tecnico.accio_engine import audit_service, auth_service, dashboard_data, executor, files_api, knowledge_api, queue_store, rbac, settings_center, tenant_profile, tenant_provisioning, tenant_secrets  # noqa: E402
+from Motor_Tecnico.accio_engine import audit_service, auth_service, dashboard_data, executor, files_api, knowledge_api, marketing_app, queue_store, rbac, settings_center, tenant_profile, tenant_provisioning, tenant_secrets  # noqa: E402
 from Motor_Tecnico.accio_engine.env_loader import load_accio_env  # noqa: E402
 from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, TenantNotFoundError, list_tenants, resolve_tenant  # noqa: E402
 
@@ -1130,6 +1130,59 @@ def connectors_registry(tenant_id: str):
     return jsonify({"ok": True, **load_registry(tenant_id), "runtime": dashboard_data.load_connectors(tenant_id)})
 
 
+@app.get("/accio/<tenant_id>/apps")
+@require_api_key
+def apps_list(tenant_id: str):
+    tenant, err = _tenant_or_404(tenant_id)
+    if tenant is None:
+        return jsonify({"ok": False, "error": err}), 404
+    apps = [a.to_dict() for a in marketing_app.list_apps(tenant_id)]
+    return jsonify(
+        {
+            "ok": True,
+            "tenant_id": tenant_id,
+            "default_app_id": marketing_app.default_app_id(tenant_id),
+            "apps": apps,
+        }
+    )
+
+
+@app.get("/accio/<tenant_id>/apps/<app_id>")
+@require_api_key
+def apps_get(tenant_id: str, app_id: str):
+    tenant, err = _tenant_or_404(tenant_id)
+    if tenant is None:
+        return jsonify({"ok": False, "error": err}), 404
+    try:
+        app = marketing_app.get_app(tenant_id, app_id)
+    except marketing_app.AppNotFoundError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    paths = marketing_app.effective_app_paths(tenant_id, app_id)
+    return jsonify(
+        {
+            "ok": True,
+            "app": app.to_dict(),
+            "paths": {k: str(v) for k, v in paths.items() if isinstance(v, Path)},
+        }
+    )
+
+
+@app.post("/accio/<tenant_id>/apps")
+@require_api_key
+def apps_create(tenant_id: str):
+    tenant, err = _tenant_or_404(tenant_id)
+    if tenant is None:
+        return jsonify({"ok": False, "error": err}), 404
+    body = request.get_json(silent=True) or {}
+    try:
+        app = marketing_app.create_app(tenant_id, body)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except marketing_app.AppNotFoundError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    return jsonify({"ok": True, "app": app.to_dict()}), 201
+
+
 @app.get("/accio/assets/flyers/<path:filename>")
 def flyer_asset(filename: str):
     safe = Path(filename).name
@@ -1204,7 +1257,8 @@ def openapi_spec():
         "paths": {
             "/accio/{tenant_id}/status": {"get": {"summary": "Estado del motor por tenant"}},
             "/accio/{tenant_id}/settings": {"get": {"summary": "Configuración tenant"}},
-            "/accio/{tenant_id}/run/pipeline": {"post": {"summary": "Pipeline por tenant"}},
+            "/accio/{tenant_id}/apps": {"get": {"summary": "Apps de marketing del tenant"}},
+            "/accio/{tenant_id}/apps/{app_id}": {"get": {"summary": "Detalle app"}},
         },
     }
     return jsonify(spec)

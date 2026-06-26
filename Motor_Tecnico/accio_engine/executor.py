@@ -191,10 +191,16 @@ def get_status(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
         lead_rows = max(0, sum(1 for _ in csv_path.open()) - 1)
 
     registry = load_registry(tenant_id)
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    apps = marketing_app.list_apps(tenant_id)
     return {
         "engine": "accio_marketing_engine",
         "version": 3,
         "tenant_id": tenant_id,
+        "default_app_id": marketing_app.default_app_id(tenant_id),
+        "apps_count": len(apps),
+        "apps": [a.to_dict() for a in apps],
         "strategy": registry.get("strategy"),
         "time_panama": datetime.now(PANAMA).isoformat(),
         "content_queue": content_queue,

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-26T21:31:58.762176+00:00",
+  "default_app_id": "default",
+  "apps": [
+    {
+      "app_id": "default",
+      "name": "Relatic",
+      "slug": "default",
+      "status": "active",
+      "is_default": true,
+      "description": "Marca principal y contenido general del tenant"
+    }
+  ]
+}

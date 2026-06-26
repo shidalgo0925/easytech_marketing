@@ -1,47 +1,42 @@
 # Próximos pasos — ARROZCONPOLLO
 
-**Actualizado:** 2026-06-26 (GO #2)  
-**Estado:** push Git OK · legacy tick · n8n importado (inactivo)
+**Actualizado:** 2026-06-27  
+**Estado:** Fase 1 Tenant vs App · push pendiente este commit
 
 ---
 
-## Hecho en esta sesión
+## Hecho
 
-- [x] `PROJECT_STATE.md` creado
-- [x] `doctor.sh` creado y probado
-- [x] `INVENTARIO_DESPLIEGUE.md` actualizado
-- [x] Cron tick corregido (`/accio/easytech/tick`)
-- [x] RBAC API key corregido para automatización
-- [x] `CHANGELOG.md` y `NEXT_STEPS.md` creados
-- [x] **Push** `5661107` → `origin/main`
-- [x] Ruta legacy `POST /accio/tick` (compatibilidad docs antiguos)
-- [x] Workflows n8n importados (inactivos — ver nota abajo)
+- [x] Estabilización ARROZCONPOLLO (doctor, tick, n8n, sessions)
+- [x] `docs/EMACCION_TENANT_VS_APP.md` — arquitectura SaaS
+- [x] Fase 1 App: `marketing_app.py`, registry, API `/accio/{tenant}/apps`
+- [x] 22 posts easytech con `app_id: default`
 
 ---
 
 ## Prioridad alta
 
-1. **Flyer #10 IIUS** — requiere PNG del dueño; subir y ejecutar `scripts/import_flyer.sh 10_iius.png`
-2. **Post LinkedIn #4** — programado 2026-06-30; cron `linkedin_auto_publish.sh` (Mar/Jue 15:00, Vie 20:00) publicará si `scheduled_at` ya pasó
-3. ~~**Push Git**~~ — hecho
-4. **Verificar cron pipeline** — próximo domingo 6:00; revisar `logs/cron.log`
+1. **Flyer #10 IIUS** — PNG del dueño → `scripts/import_flyer.sh 10_iius.png`
+2. **Post LinkedIn #4** — 2026-06-30 vía cron
+3. **Fase 2 Apps** — selector UI dashboard + colas por `app_id`
+4. **Verificar cron pipeline** — domingo 6:00 → `logs/cron.log`
 
 ---
 
 ## Prioridad media
 
-5. **n8n workflows** — importados en n8n (inactivos). **Nota:** cron del VPS ya cubre LinkedIn y pipeline; activar en n8n solo si se quiere reemplazar cron. Panel: https://n8n.etsrv.site
-6. **Tokens Meta** — completar `META_PAGE_ACCESS_TOKEN`, `META_IG_USER_ID`
-7. **Google Business** — completar OAuth refresh token y `GOOGLE_BUSINESS_LOCATION_ID`
-8. **Accio Work Desktop** — conectar MCP (`docs/ACCIO_WORK_ARROZCONPOLLO.md`)
+5. **n8n** — workflows importados inactivos; cron VPS es principal
+6. **Tokens Meta / Google**
+7. **Accio Work Desktop** — MCP
+8. **Sync EN1 organizations** → `tenant_id` (read-only)
 
 ---
 
-## Prioridad baja / fuera de scope
+## Prioridad baja
 
-10. Integración EN1 / Econverso (requiere definición de producto)
-11. Swap en VPS (actualmente 0B)
-12. Fase E matriz editorial 95/5 — ver `docs/ROADMAP.md`
+9. Integración EN1 leads / Econverso
+10. Swap VPS
+11. Fase E editorial 95/5
 
 ---
 

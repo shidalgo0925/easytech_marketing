@@ -40,9 +40,32 @@ Formato basado en fechas. Solo cambios operativos relevantes en el VPS o repo.
 - Push commit `5661107` → `origin/main`
 - Workflows n8n importados (inactivos): LinkedIn automático, pipeline semanal
 
-### Pendiente (requiere dueño)
-- Flyer `10_iius.png` — sin asset fuente en servidor
-- Activar workflows n8n (opcional; cron VPS ya activo)
+---
+
+## 2026-06-27 — Tenant vs App (Fase 1)
+
+### Añadido
+- `docs/EMACCION_TENANT_VS_APP.md` — arquitectura SaaS tenant + app
+- `Motor_Tecnico/accio_engine/marketing_app.py` — modelo App
+- `Marketing/tenants/easytech/apps/registry.json` (9 apps)
+- `Marketing/tenants/relatic/apps/registry.json` (default)
+- API `GET/POST /accio/{tenant}/apps`
+- Tests `tests/test_marketing_app.py`
+
+### Corregido
+- Vocabulario: `tenant_provisioning` documentado como CRUD de **tenants**, no apps
+- Posts en cola easytech: campo `app_id: default` (22 posts)
+
+### Pendiente (Fase 2)
+- Selector de app en dashboard
+- Colas y publishers por `app_id`
+- Sync EN1 organizations
+
+---
+
+### Bitácora de sesiones (2026-06-26)
+
+- Carpeta `docs/sessions/` — ver `docs/sessions/2026-06-26.md`
 
 ---
 

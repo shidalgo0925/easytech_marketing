@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-26T21:31:58.755168+00:00",
+  "default_app_id": "default",
+  "apps": [
+    {
+      "app_id": "default",
+      "name": "Easy Technology Services",
+      "slug": "default",
+      "status": "active",
+      "is_default": true,
+      "description": "Marca principal y contenido general del tenant"
+    },
+    {
+      "app_id": "odoo-fe",
+      "name": "Odoo ERP + Facturación Electrónica DGI",
+      "slug": "odoo-fe",
+      "status": "active",
+      "is_default": false,
+      "description": "",
+      "product_slug": "odoo_erp_facturaci_n_electr_nica_dgi"
+    },
+    {
+      "app_id": "en1",
+      "name": "EasyNodeOne (EN1) — plataforma todo en uno",
+      "slug": "en1",
+      "status": "active",
+      "is_default": false,
+      "description": "",
+      "product_slug": "easynodeone_en1_plataforma_todo_en_uno"
+    },
+    {
+      "app_id": "eposone",
+      "name": "EPOSOne — punto de venta e inventario",
+      "slug": "eposone",
+      "status": "active",
+      "is_default": false,
+      "description": "",
+      "product_slug": "eposone_punto_de_venta_e_inventario"
+    },
+    {
+      "app_id": "eclassone",
+      "name": "EClassOne — gestión académica",
+      "slug": "eclassone",
+      "status": "active",
+      "is_default": false,
+      "description": "",
+      "product_slug": "eclassone_gesti_n_acad_mica"
+    },
+    {
+      "app_id": "ethesisone",
+      "name": "EThesisOne — tesis universitarias",
+      "slug": "ethesisone",
+      "status": "active",
+      "is_default": false,
+      "description": "",
+      "product_slug": "ethesisone_tesis_universitarias"
+    },
+    {
+      "app_id": "epayroll",
+      "name": "EPayRoll — planilla Panamá",
+      "slug": "epayroll",
+      "status": "active",
+      "is_default": false,
+      "description": "",
+      "product_slug": "epayroll_planilla_panam"
+    },
+    {
+      "app_id": "consultoria",
+      "name": "Consultoría TI estratégica",
+      "slug": "consultoria",
+      "status": "active",
+      "is_default": false,
+      "description": "",
+      "product_slug": "consultor_a_ti_estrat_gica"
+    },
+    {
+      "app_id": "desarrollo",
+      "name": "Desarrollo de software a medida",
+      "slug": "desarrollo",
+      "status": "active",
+      "is_default": false,
+      "description": "",
+      "product_slug": "desarrollo_de_software_a_medida"
+    }
+  ]
+}

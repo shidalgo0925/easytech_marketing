@@ -38,6 +38,7 @@ Antes de modificar cualquier cosa, el programador debe:
 5. Esperar GO del dueño.
 6. Ejecutar solo lo aprobado.
 7. Dejar evidencia y actualizar este archivo.
+8. Cerrar sesión con bitácora en `docs/sessions/YYYY-MM-DD.md` (ver plantilla en `docs/sessions/README.md`).
 
 No avanzar directo a implementación.
 
@@ -135,6 +136,7 @@ Crear o actualizar:
 - `/opt/easytech_marketing/docs/INVENTARIO_DESPLIEGUE.md`
 - `/opt/easytech_marketing/docs/CHANGELOG.md`
 - `/opt/easytech_marketing/docs/NEXT_STEPS.md`
+- `/opt/easytech_marketing/docs/sessions/` — bitácora por fecha (`YYYY-MM-DD.md`)
 - `/opt/easytech_marketing/scripts/doctor.sh`
 
 ---
@@ -285,7 +287,9 @@ Luego debe entregar diagnóstico y esperar GO.
 
 ## 12. Última estabilización (2026-06-26)
 
-**GO ejecutado.** Cambios aplicados:
+**GO ejecutado.** Detalle completo: [`docs/sessions/2026-06-26.md`](sessions/2026-06-26.md)
+
+Resumen:
 
 | Item | Resultado |
 |------|-----------|
