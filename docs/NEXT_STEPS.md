@@ -1,7 +1,7 @@
 # Próximos pasos — ARROZCONPOLLO
 
 **Actualizado:** 2026-06-27  
-**Estado:** Fase 2 Apps · listo para commit
+**Estado:** Fase 3 EN1 sync read-only · push pendiente
 
 ---
 
@@ -12,6 +12,7 @@
 - [x] Fase 1 App: `marketing_app.py`, registry, API `/accio/{tenant}/apps`
 - [x] 22 posts easytech con `app_id: default`
 - [x] **Fase 2 Apps** — selector UI dashboard + colas/publishers por `app_id`
+- [x] **Fase 3 EN1** — sync read-only organizations ↔ `tenant_id`
 
 ---
 
@@ -20,6 +21,7 @@
 1. **Flyer #10 IIUS** — PNG del dueño → `scripts/import_flyer.sh 10_iius.png`
 2. **Post LinkedIn #4** — 2026-06-30 vía cron
 3. **Verificar cron pipeline** — domingo 6:00 → `logs/cron.log`
+4. **Configurar EN1 API** — `EN1_API_URL` + key en CRM tenant relatic → sync live
 
 ---
 
@@ -28,7 +30,8 @@
 5. **n8n** — workflows importados inactivos; cron VPS es principal
 6. **Tokens Meta / Google**
 7. **Accio Work Desktop** — MCP
-8. **Sync EN1 organizations** → `tenant_id` (read-only)
+8. **UI mapping EN1** — pantalla dashboard para vincular tenant ↔ org EN1
+9. **Leads EN1** — write path (requiere GO + API EN1)
 
 ---
 

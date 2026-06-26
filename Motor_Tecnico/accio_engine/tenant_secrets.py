@@ -345,15 +345,12 @@ def test_connector(tenant_id: str, connector_id: str) -> dict[str, Any]:
 def test_crm(tenant_id: str) -> dict[str, Any]:
     import xmlrpc.client
 
+    from Motor_Tecnico.accio_engine import en1_organizations
     from Motor_Tecnico.accio_engine.tenant import resolve_tenant
 
     tenant = resolve_tenant(tenant_id)
     if tenant.crm_target == "en1":
-        url = get_secret(tenant_id, "crm", "en1_api_url")
-        key = get_secret(tenant_id, "crm", "en1_api_key")
-        if not url:
-            return {"ok": False, "error": "Falta en1_api_url"}
-        return {"ok": True, "detail": "EN1 URL configurada (health check pendiente de API EN1)"}
+        return en1_organizations.test_en1_connection(tenant_id)
 
     url = get_secret(tenant_id, "crm", "odoo_url") or _env_fallback(tenant_id, "odoo_url")
     db = get_secret(tenant_id, "crm", "odoo_db") or _env_fallback(tenant_id, "odoo_db")

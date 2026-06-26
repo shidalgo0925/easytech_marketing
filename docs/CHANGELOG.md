@@ -56,8 +56,24 @@ Formato basado en fechas. Solo cambios operativos relevantes en el VPS o repo.
 - Vocabulario: `tenant_provisioning` documentado como CRUD de **tenants**, no apps
 - Posts en cola easytech: campo `app_id: default` (22 posts)
 
-### Pendiente (Fase 3)
-- Sync EN1 organizations
+### Pendiente (post Fase 3)
+- UI mapping EN1 en dashboard
+- Leads EN1 (write)
+
+---
+
+## 2026-06-27 — Tenant vs App (Fase 3)
+
+### Añadido
+- `en1_organizations.py` — sync read-only EN1 `saas_organization` ↔ `tenant_id`
+- API `GET /accio/en1/organizations`, `GET /accio/en1/sync`, `POST /accio/{tenant}/settings/en1-mapping`
+- Referencia EN1 Dev (4 orgs) + cache local tras fetch live
+- Tests `tests/test_en1_organizations.py`
+- Campo `en1_organization_id` en registry tenant
+
+### Actualizado
+- `test_crm` EN1 — valida lectura de organizaciones si hay credenciales
+- `.gitignore` — cache EN1 local
 
 ---
 

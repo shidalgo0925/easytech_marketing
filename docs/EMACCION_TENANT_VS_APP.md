@@ -1,6 +1,6 @@
 # Aclaración de arquitectura — Tenant vs Apps en EMAcción
 
-**Estado:** Fase 2 implementada (2026-06-27) · **Pendiente:** sync EN1 organizations
+**Estado:** Fase 3 implementada (2026-06-27) · **Pendiente:** leads EN1, UI mapping dashboard
 **Fecha:** 2026-06-26  
 **Complementa:** `docs/CONTEXTO.md`, `docs/EMACCION_PHASE_M_MULTI_TENANT.md`
 
@@ -283,7 +283,15 @@ Las capturas de EN1 Dev son referencia de producto; la integración API EN1 ↔ 
 | Relatic como tenant | `relatic` en registry | OK si escenario 2; conflict si era App de ETS |
 | Flyers / IIUS | Globales en `Marketing/flyers/` | Sin `tenant_id` / `app_id` |
 
-**Próximo paso técnico (requiere GO):** Fase 3 — sync EN1 organizations → `tenant_id` (read-only).
+**Próximo paso técnico (requiere GO):** leads EN1 → CRM (write) + UI mapping en dashboard.
+
+### Fase 3 implementada (2026-06-27)
+
+- `Motor_Tecnico/accio_engine/en1_organizations.py` — sync **read-only** EN1 ↔ `tenant_id`
+- API: `GET /accio/en1/organizations`, `GET /accio/en1/sync`, `POST /accio/{tenant}/settings/en1-mapping`
+- Campo `en1_organization_id` en `registry.json` (solo lado EMAcción)
+- Referencia EN1 Dev cuando API no configurada; cache local tras fetch live
+- Test CRM EN1 valida lectura de organizaciones cuando hay credenciales
 
 ### Fase 2 implementada (2026-06-27)
 

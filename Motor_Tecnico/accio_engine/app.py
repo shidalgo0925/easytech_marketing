@@ -18,7 +18,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from Motor_Tecnico.accio_engine import audit_service, auth_service, dashboard_data, executor, files_api, knowledge_api, marketing_app, queue_store, rbac, settings_center, tenant_profile, tenant_provisioning, tenant_secrets  # noqa: E402
+from Motor_Tecnico.accio_engine import audit_service, auth_service, dashboard_data, en1_organizations, executor, files_api, knowledge_api, marketing_app, queue_store, rbac, settings_center, tenant_profile, tenant_provisioning, tenant_secrets  # noqa: E402
 from Motor_Tecnico.accio_engine.env_loader import load_accio_env  # noqa: E402
 from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, TenantNotFoundError, list_tenants, resolve_tenant  # noqa: E402
 
@@ -1205,6 +1205,39 @@ def apps_create(tenant_id: str):
     except marketing_app.AppNotFoundError as exc:
         return jsonify({"ok": False, "error": str(exc)}), 400
     return jsonify({"ok": True, "app": app.to_dict()}), 201
+
+
+@app.get("/accio/en1/organizations")
+@require_api_key
+def en1_organizations_list():
+    tenant_id = request.args.get("tenant_id") or DEFAULT_TENANT
+    use_cache = request.args.get("refresh") != "1"
+    return jsonify(en1_organizations.fetch_organizations(tenant_id=tenant_id, use_cache=use_cache))
+
+
+@app.get("/accio/en1/sync")
+@require_api_key
+def en1_sync_report():
+    tenant_id = request.args.get("tenant_id") or None
+    return jsonify(en1_organizations.build_sync_report(tenant_id=tenant_id))
+
+
+@app.post("/accio/<tenant_id>/settings/en1-mapping")
+@require_api_key
+def en1_set_mapping(tenant_id: str):
+    tenant, err = _tenant_or_404(tenant_id)
+    if tenant is None:
+        return jsonify({"ok": False, "error": err}), 404
+    body = request.get_json(silent=True) or {}
+    try:
+        mapping = en1_organizations.set_tenant_mapping(
+            tenant_id,
+            en1_organization_id=body.get("en1_organization_id"),
+            en1_subdomain=body.get("en1_subdomain"),
+        )
+    except TenantNotFoundError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    return jsonify({"ok": True, "mapping": mapping})
 
 
 @app.get("/accio/assets/flyers/<path:filename>")

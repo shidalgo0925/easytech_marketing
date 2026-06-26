@@ -88,6 +88,8 @@ def list_companies(*, include_disabled: bool = False) -> list[dict[str, Any]]:
                 "default_locale": raw.get("default_locale", "es-PA"),
                 "domains": list(raw.get("domains") or []),
                 "created_at": raw.get("created_at"),
+                "en1_organization_id": raw.get("en1_organization_id"),
+                "en1_subdomain": raw.get("en1_subdomain"),
                 "empresa": ctx.get("empresa") or raw.get("display_name", tid),
                 "industria": ctx.get("industria", ""),
                 "pais": ctx.get("pais", ""),
