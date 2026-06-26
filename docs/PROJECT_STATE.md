@@ -308,4 +308,6 @@ Luego debe entregar diagnóstico y esperar GO.
 
 **Conectores OAuth:** LinkedIn/Meta/Google servicios → 200. LinkedIn configured; Meta FB/IG test OK; Google Business pendiente tokens.
 
-**Pendiente:** flyer IIUS (#10), post #4 (2026-06-30), n8n workflows activos, push Git.
+**Pendiente:** flyer IIUS (#10, requiere PNG del dueño), post #4 (2026-06-30 vía cron), tokens Meta/Google.
+
+**n8n (2026-06-26):** workflows importados inactivos; cron del VPS es el scheduler principal.

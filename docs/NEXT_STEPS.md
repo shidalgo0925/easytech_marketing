@@ -1,7 +1,7 @@
 # Próximos pasos — ARROZCONPOLLO
 
-**Actualizado:** 2026-06-26  
-**Estado:** post-estabilización inicial (GO ejecutado)
+**Actualizado:** 2026-06-26 (GO #2)  
+**Estado:** push Git OK · legacy tick · n8n importado (inactivo)
 
 ---
 
@@ -13,25 +13,27 @@
 - [x] Cron tick corregido (`/accio/easytech/tick`)
 - [x] RBAC API key corregido para automatización
 - [x] `CHANGELOG.md` y `NEXT_STEPS.md` creados
+- [x] **Push** `5661107` → `origin/main`
+- [x] Ruta legacy `POST /accio/tick` (compatibilidad docs antiguos)
+- [x] Workflows n8n importados (inactivos — ver nota abajo)
 
 ---
 
 ## Prioridad alta
 
-1. **Flyer #10 IIUS** — crear `Marketing/flyers/10_iius.png`, actualizar `manifest.json`
-2. **Post LinkedIn #4** — programado 2026-06-30; verificar publicación automática o manual con aprobación
-3. **Commitear y push** cambios de estabilización a `origin/main`
-4. **Verificar cron pipeline** — próximo domingo 6:00 (`run_pipeline.sh`); revisar `logs/cron.log`
+1. **Flyer #10 IIUS** — requiere PNG del dueño; subir y ejecutar `scripts/import_flyer.sh 10_iius.png`
+2. **Post LinkedIn #4** — programado 2026-06-30; cron `linkedin_auto_publish.sh` (Mar/Jue 15:00, Vie 20:00) publicará si `scheduled_at` ya pasó
+3. ~~**Push Git**~~ — hecho
+4. **Verificar cron pipeline** — próximo domingo 6:00; revisar `logs/cron.log`
 
 ---
 
 ## Prioridad media
 
-5. **n8n workflows** — importar y activar `docs/n8n-workflow-linkedin.json` y `docs/n8n-workflow-semanal.json`
-6. **Tokens Meta** — completar `META_PAGE_ACCESS_TOKEN`, `META_IG_USER_ID` si publicación FB/IG es objetivo
+5. **n8n workflows** — importados en n8n (inactivos). **Nota:** cron del VPS ya cubre LinkedIn y pipeline; activar en n8n solo si se quiere reemplazar cron. Panel: https://n8n.etsrv.site
+6. **Tokens Meta** — completar `META_PAGE_ACCESS_TOKEN`, `META_IG_USER_ID`
 7. **Google Business** — completar OAuth refresh token y `GOOGLE_BUSINESS_LOCATION_ID`
-8. **Accio Work Desktop** — conectar MCP con URLs de `docs/ACCIO_WORK_ARROZCONPOLLO.md`
-9. **Legacy route `/accio/tick`** — opcional: alias en app.py para compatibilidad con docs antiguos
+8. **Accio Work Desktop** — conectar MCP (`docs/ACCIO_WORK_ARROZCONPOLLO.md`)
 
 ---
 

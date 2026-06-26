@@ -28,6 +28,24 @@ Formato basado en fechas. Solo cambios operativos relevantes en el VPS o repo.
 
 ---
 
+## 2026-06-26 — GO #2 (push + n8n + legacy tick)
+
+### Añadido
+- Ruta legacy `POST /accio/tick` → delega a `/accio/easytech/tick`
+
+### Corregido
+- `docs/n8n-workflow-*.json` — IDs de workflow y nodos para import CLI n8n
+
+### Desplegado
+- Push commit `5661107` → `origin/main`
+- Workflows n8n importados (inactivos): LinkedIn automático, pipeline semanal
+
+### Pendiente (requiere dueño)
+- Flyer `10_iius.png` — sin asset fuente en servidor
+- Activar workflows n8n (opcional; cron VPS ya activo)
+
+---
+
 ## Histórico (commits recientes en Git)
 
 | Fecha | Commit | Resumen |

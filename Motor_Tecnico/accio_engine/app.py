@@ -1461,6 +1461,13 @@ def legacy_publish_meta(tenant_id: str):
     return publish_meta_now(tenant_id)
 
 
+@app.post("/accio/tick")
+@require_api_key
+@_legacy_tenant
+def legacy_tick(tenant_id: str):
+    return tick(tenant_id)
+
+
 @app.post("/accio/config/business-context")
 @require_api_key
 @_legacy_tenant

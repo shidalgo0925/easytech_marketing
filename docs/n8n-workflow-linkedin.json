@@ -1,7 +1,14 @@
 {
+  "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
   "name": "EasyTech - Publicacion LinkedIn Automatica",
+  "active": false,
   "nodes": [
     {
+      "id": "e8f1a2b3-c4d5-6789-ab01-111111111101",
+      "name": "Mar y Jue 8am Panama",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
       "parameters": {
         "rule": {
           "interval": [
@@ -11,22 +18,24 @@
             }
           ]
         }
-      },
-      "name": "Mar y Jue 8am Panama",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [0, 0]
+      }
     },
     {
-      "parameters": {
-        "command": "/opt/easytech_marketing/venv/bin/python3 /opt/easytech_marketing/Motor_Tecnico/linkedin_publisher.py"
-      },
+      "id": "e8f1a2b3-c4d5-6789-ab01-111111111102",
       "name": "Publicar post pendiente",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [240, 0]
+      "position": [240, 0],
+      "parameters": {
+        "command": "/opt/easytech_marketing/venv/bin/python3 /opt/easytech_marketing/Motor_Tecnico/linkedin_publisher.py"
+      }
     },
     {
+      "id": "e8f1a2b3-c4d5-6789-ab01-111111111103",
+      "name": "Se publico?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [480, 0],
       "parameters": {
         "conditions": {
           "string": [
@@ -37,20 +46,17 @@
             }
           ]
         }
-      },
-      "name": "Se publico?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [480, 0]
+      }
     },
     {
-      "parameters": {
-        "command": "echo 'LinkedIn post publicado OK'"
-      },
+      "id": "e8f1a2b3-c4d5-6789-ab01-111111111104",
       "name": "Log exito",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [720, -80]
+      "position": [720, -80],
+      "parameters": {
+        "command": "echo 'LinkedIn post publicado OK'"
+      }
     }
   ],
   "connections": {
@@ -66,5 +72,8 @@
         []
       ]
     }
+  },
+  "settings": {
+    "executionOrder": "v1"
   }
 }

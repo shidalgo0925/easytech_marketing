@@ -1,30 +1,37 @@
 {
+  "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
   "name": "EasyTech - Scraper + Odoo Semanal",
+  "active": false,
   "nodes": [
     {
+      "id": "f9a2b3c4-d5e6-7890-bc12-222222222201",
+      "name": "Cada domingo 6am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
       "parameters": {
         "rule": {
           "interval": [{ "field": "weeks", "triggerAtDay": [0], "triggerAtHour": 6 }]
         }
-      },
-      "name": "Cada domingo 6am",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [0, 0]
+      }
     },
     {
-      "parameters": {
-        "command": "/opt/easytech_marketing/scripts/run_pipeline.sh"
-      },
+      "id": "f9a2b3c4-d5e6-7890-bc12-222222222202",
       "name": "Ejecutar pipeline",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [220, 0]
+      "position": [220, 0],
+      "parameters": {
+        "command": "/opt/easytech_marketing/scripts/run_pipeline.sh"
+      }
     }
   ],
   "connections": {
     "Cada domingo 6am": {
       "main": [[{ "node": "Ejecutar pipeline", "type": "main", "index": 0 }]]
     }
+  },
+  "settings": {
+    "executionOrder": "v1"
   }
 }
