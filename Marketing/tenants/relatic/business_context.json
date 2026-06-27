@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "updated_at": "2026-06-26",
+  "updated_at": "2026-06-27",
   "empresa": "Relatic Panamá",
-  "industria": "Investigación, formación y publicación científica",
+  "industria": "Transformación Digital",
   "pais": "Panamá",
-  "publico_objetivo": "Investigadores, académicos, docentes y profesionales que publican, forman equipos o buscan visibilidad científica en Panamá y la región",
+  "publico_objetivo": "PYMEs en Panamá (retail, servicios, educación, manufactura ligera)",
   "productos_servicios": [
     "Diplomados: investigación aplicada, metodologías de investigación social, políticas educativas y evaluación",
     "Cursos: redacción científica y publicación en revistas, análisis de datos para investigación, fundamentos de ética en investigación",
@@ -32,21 +32,16 @@
     "Falta de red y espacios de encuentro entre pares investigadores",
     "Procesos opacos entre interés, inscripción y seguimiento en servicios académicos"
   ],
-  "tono_comunicacion": "Institucional, académico y cercano. Sobrio, claro, orientado a rigor y confianza. Panamá y red regional.",
+  "tono_comunicacion": "Profesional, cercano, educativo. Hablar de problemas reales antes de vender. Panamá primero.",
   "objetivos_comerciales": [
     "Atraer tráfico cualificado al sitio relaticpanama.org",
     "Convertir visitantes en registros gratuitos en la Plataforma de Servicio",
     "Promover programas (diplomados, cursos, talleres, certificaciones) e inscripciones",
     "Posicionar Relatic Panamá como ecosistema de investigación y publicación"
   ],
-  "cta_principal": "EXPLORAR SERVICIOS",
+  "cta_principal": "DIAGNÓSTICO",
   "contacto": {
-    "guia": "https://relaticpanama.org/",
-    "sitio_web": "https://relaticpanama.org/",
-    "privacy": "privacy@relaticpanama.org",
-    "legal": "legal@relaticpanama.org",
-    "dpo": "dpo@relaticpanama.org",
-    "security": "security@relaticpanama.org"
+    "guia": "https://relaticpanama.org/"
   },
   "legal": {
     "hub_url": "https://emaccion.etsrv.site/accio/relatic/legal/",

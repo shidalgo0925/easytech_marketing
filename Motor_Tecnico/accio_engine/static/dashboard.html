@@ -65,8 +65,8 @@
       <button class="nav-item" type="button" data-tab="configuracion">Configuración</button>
     </nav>
 
-    <!-- Barra de progreso de arranque: 5 s con comentarios de estado -->
-    <div id="bootProgress" class="boot-progress" role="status" aria-live="polite">
+    <!-- Barra de progreso: visible mientras corre un proceso real -->
+    <div id="bootProgress" class="boot-progress" role="status" aria-live="polite" hidden>
       <div class="boot-progress-track" aria-hidden="true">
         <div id="bootProgressBar" class="boot-progress-bar"></div>
       </div>
@@ -372,7 +372,7 @@
     }
 
     function runPrimaryAction() {
-      if (activeTab === 'metricas' || activeTab === 'flyers') return loadData();
+      if (activeTab === 'metricas' || activeTab === 'flyers') return loadData(true);
       if (activeTab === 'conocimiento') return generateTopic(false);
       if (activeTab === 'campanas' || activeTab === 'calendario' || activeTab === 'conectores') return switchTab('resumen');
       return runPublish(false);
@@ -1701,8 +1701,8 @@
       } catch (e) { toast(e.message, true); }
     }
 
-    async function loadData() {
-      try {
+    async function loadData(withProgress = false, awaitKnowledge = false) {
+      const run = async () => {
         const data = await api('/summary');
         lastData = data;
         document.getElementById('clock').textContent = data.time_panama;
@@ -1712,18 +1712,31 @@
         renderMetricas(data);
         renderFlyers(data);
         renderConnectors(data);
-        loadKnowledge();
+        const knowledgeTask = loadKnowledge();
+        if (awaitKnowledge) await knowledgeTask;
         document.getElementById('quickLinks').innerHTML = Object.entries(data.links)
           .map(([k, v]) => `<a href="${v}" target="_blank">${k}</a>`).join(' · ');
+      };
+      if (withProgress) {
+        try {
+          await processProgress.run('Actualizando dashboard…', run);
+        } catch (e) { toast('Error: ' + e.message, true); }
+        return;
+      }
+      try {
+        await run();
       } catch (e) { toast('Error: ' + e.message, true); }
     }
 
     async function runPipeline() {
       try {
-        toast('Ejecutando pipeline…');
-        const r = await fetch(tenantApi('/run/pipeline'), { method: 'POST', headers: authHeaders(), credentials: 'include' });
-        const data = await r.json();
-        toast(data.ok ? 'Pipeline completado' : 'Pipeline falló', !data.ok);
+        await processProgress.run('Ejecutando pipeline…', async () => {
+          const r = await fetch(tenantApi('/run/pipeline'), { method: 'POST', headers: authHeaders(), credentials: 'include' });
+          const data = await r.json();
+          if (!data.ok) throw new Error(data.error || 'Pipeline falló');
+          return data;
+        });
+        toast('Pipeline completado');
         loadData();
       } catch (e) { toast(e.message, true); }
     }
@@ -1731,14 +1744,17 @@
     async function runMetaPublish(force) {
       if (force && !confirm('¿Publicar Meta ahora?')) return;
       try {
-        toast('Publicando Meta…');
-        const r = await fetch(tenantApi('/run/publish-meta'), {
-          method: 'POST', headers: authHeaders(), credentials: 'include',
-          body: JSON.stringify({ force, platform: 'all' }),
+        await processProgress.run('Publicando en Meta…', async () => {
+          const r = await fetch(tenantApi('/run/publish-meta'), {
+            method: 'POST', headers: authHeaders(), credentials: 'include',
+            body: JSON.stringify({ force, platform: 'all' }),
+          });
+          const data = await r.json();
+          const ok = data.ok && data.order?.status === 'completed';
+          if (!ok) throw new Error(data.order?.error || 'Sin post listo');
+          return data;
         });
-        const data = await r.json();
-        const ok = data.ok && data.order?.status === 'completed';
-        toast(ok ? 'Meta OK' : (data.order?.error || 'Sin post listo'), !ok);
+        toast('Meta OK');
         loadData();
       } catch (e) { toast(e.message, true); }
     }
@@ -1746,14 +1762,17 @@
     async function runPublish(force) {
       if (force && !confirm('¿Forzar publicación LinkedIn?')) return;
       try {
-        toast(force ? 'Publicando (forzado)…' : 'Publicando…');
-        const r = await fetch(tenantApi('/run/publish-linkedin'), {
-          method: 'POST', headers: authHeaders(), credentials: 'include',
-          body: JSON.stringify({ force, app_id: APP_ID }),
+        await processProgress.run(force ? 'Publicando en LinkedIn (forzado)…' : 'Publicando en LinkedIn…', async () => {
+          const r = await fetch(tenantApi('/run/publish-linkedin'), {
+            method: 'POST', headers: authHeaders(), credentials: 'include',
+            body: JSON.stringify({ force, app_id: APP_ID }),
+          });
+          const data = await r.json();
+          const ok = data.ok && data.order?.status === 'completed';
+          if (!ok) throw new Error(data.order?.error || 'Sin post listo');
+          return data;
         });
-        const data = await r.json();
-        const ok = data.ok && data.order?.status === 'completed';
-        toast(ok ? 'Publicación OK' : (data.order?.error || 'Sin post listo'), !ok);
+        toast('Publicación OK');
         loadData();
       } catch (e) { toast(e.message, true); }
     }
@@ -1778,8 +1797,9 @@
     const uploadLogo = uploadEmpresaLogo;
 
     async function logoutDashboard() {
-      await fetch('/accio/auth/logout', { method: 'POST', credentials: 'include' });
-      location.href = '/accio/login/';
+      const res = await fetch('/accio/auth/logout', { method: 'POST', credentials: 'include' });
+      const data = await res.json().catch(() => ({}));
+      location.href = data.redirect || '/accio/producto/';
     }
 
     const ROLE_LABELS = {
@@ -1809,66 +1829,110 @@
     }
 
     /**
-     * Línea de progreso de arranque (5 s).
-     * Muestra comentarios de estado mientras el dashboard carga sesión, tenants y datos.
+     * Barra de progreso ligada a procesos reales (no temporizador fijo).
+     * Visible mientras corre arranque, publicación, pipeline o recarga con progreso.
      */
-    function runBootProgress(durationMs = 10000) {
-      const wrap = document.getElementById('bootProgress');
-      const bar = document.getElementById('bootProgressBar');
-      const comment = document.getElementById('bootProgressComment');
-      if (!wrap || !bar || !comment) return;
+    const processProgress = (() => {
+      let active = false;
+      let hideTimer = null;
 
-      // Comentarios mostrados según % avanzado (duración total: durationMs)
-      const steps = [
-        { at: 0, text: 'Verificando sesión…' },
-        { at: 12, text: 'Cargando tenants disponibles…' },
-        { at: 28, text: 'Sincronizando apps de marketing…' },
-        { at: 45, text: 'Preparando cola y métricas…' },
-        { at: 62, text: 'Aplicando permisos de usuario…' },
-        { at: 78, text: 'Finalizando carga del dashboard…' },
-        { at: 92, text: 'Listo' },
-      ];
-
-      wrap.hidden = false;
-      wrap.classList.remove('is-done');
-      bar.style.width = '0%';
-      comment.textContent = steps[0].text;
-
-      const startedAt = performance.now();
-
-      function frame() {
-        const elapsed = performance.now() - startedAt;
-        const pct = Math.min(100, (elapsed / durationMs) * 100);
-        bar.style.width = pct + '%';
-
-        // Comentario activo = último paso cuyo umbral ya se alcanzó
-        const active = steps.filter(s => pct >= s.at).pop();
-        if (active) comment.textContent = active.text;
-
-        if (elapsed >= durationMs) {
-          wrap.classList.add('is-done');
-          // Ocultar la barra tras una breve pausa al completar los 5 s
-          setTimeout(() => {
-            wrap.hidden = true;
-            wrap.classList.remove('is-done');
-            bar.style.width = '0%';
-          }, 500);
-          return;
-        }
-        requestAnimationFrame(frame);
+      function els() {
+        return {
+          wrap: document.getElementById('bootProgress'),
+          bar: document.getElementById('bootProgressBar'),
+          comment: document.getElementById('bootProgressComment'),
+        };
       }
 
-      requestAnimationFrame(frame);
-    }
+      function clearHideTimer() {
+        if (hideTimer) {
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+      }
+
+      function setProgress(pct, text) {
+        const { bar, comment } = els();
+        if (bar) bar.style.width = Math.min(100, Math.max(0, pct)) + '%';
+        if (comment && text) comment.textContent = text;
+      }
+
+      function show() {
+        const { wrap } = els();
+        if (!wrap) return;
+        clearHideTimer();
+        wrap.hidden = false;
+        wrap.classList.remove('is-done');
+        active = true;
+      }
+
+      function hide(delayMs = 400) {
+        const { wrap, bar } = els();
+        if (!wrap) return;
+        clearHideTimer();
+        hideTimer = setTimeout(() => {
+          wrap.classList.add('is-done');
+          hideTimer = setTimeout(() => {
+            wrap.hidden = true;
+            wrap.classList.remove('is-done');
+            if (bar) bar.style.width = '0%';
+            active = false;
+            hideTimer = null;
+          }, 350);
+        }, delayMs);
+      }
+
+      return {
+        isActive: () => active,
+        begin(text, pct = 8) {
+          show();
+          setProgress(pct, text);
+        },
+        update(pct, text) {
+          if (!active) show();
+          setProgress(pct, text);
+        },
+        async runSteps(steps) {
+          show();
+          for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            setProgress((i / steps.length) * 100, step.label);
+            await step.run();
+            setProgress(((i + 1) / steps.length) * 100, step.label);
+          }
+          setProgress(100, 'Listo');
+          hide(500);
+        },
+        async run(label, fn) {
+          show();
+          setProgress(10, label);
+          try {
+            const result = await fn((pct, msg) => setProgress(pct, msg || label));
+            setProgress(100, 'Listo');
+            hide(400);
+            return result;
+          } catch (e) {
+            setProgress(100, 'Error: ' + (e.message || 'operación fallida'));
+            hide(2200);
+            throw e;
+          }
+        },
+      };
+    })();
 
     async function bootstrapDashboard() {
-      runBootProgress(5000);
       initTenantSelector();
-      initAppSelector();
       updatePrimaryLabel();
-      await applySessionBadge();
-      loadData();
-      setInterval(loadData, 60000);
+      try {
+        await processProgress.runSteps([
+          { label: 'Verificando sesión…', run: () => applySessionBadge() },
+          { label: 'Cargando apps de marketing…', run: () => initAppSelector() },
+          { label: 'Preparando cola, métricas y conocimiento…', run: () => loadData(false, true) },
+        ]);
+      } catch (e) {
+        toast('Error al cargar: ' + e.message, true);
+      }
+      setInterval(() => loadData(), 60000);
     }
 
     bootstrapDashboard();

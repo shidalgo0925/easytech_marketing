@@ -87,4 +87,66 @@
       }
     });
   });
+
+  const demoPlayer = document.getElementById('lpDemoPlayer');
+  const demoPlay = document.getElementById('lpDemoPlay');
+  const demoStop = document.getElementById('lpDemoStop');
+  const demoStage = document.getElementById('lpDemoStage');
+  const demoPoster = document.getElementById('lpDemoPoster');
+  const demoProgress = document.getElementById('lpDemoProgress');
+  const demoProgressBar = document.getElementById('lpDemoProgressBar');
+  let demoTimer = null;
+  let demoIndex = 0;
+
+  function showDemoSlide(index) {
+    if (!demoStage) return;
+    const slides = demoStage.querySelectorAll('.lp-demo-slide');
+    slides.forEach((slide, i) => {
+      const active = i === index;
+      slide.classList.toggle('is-active', active);
+      slide.hidden = !active;
+    });
+    if (demoProgress && demoProgressBar) {
+      const pct = Math.round(((index + 1) / slides.length) * 100);
+      demoProgress.setAttribute('aria-valuenow', String(pct));
+      demoProgressBar.style.width = pct + '%';
+    }
+  }
+
+  function stopDemo() {
+    if (demoTimer) {
+      clearInterval(demoTimer);
+      demoTimer = null;
+    }
+    demoIndex = 0;
+    if (demoPlayer) demoPlayer.classList.remove('is-playing');
+    if (demoStage) demoStage.hidden = true;
+    if (demoPoster) demoPoster.hidden = false;
+    if (demoStop) demoStop.hidden = true;
+    if (demoProgressBar) demoProgressBar.style.width = '0%';
+    if (demoProgress) demoProgress.setAttribute('aria-valuenow', '0');
+  }
+
+  function startDemo() {
+    if (!demoPlayer || !demoStage) return;
+    demoPlayer.classList.add('is-playing');
+    demoStage.hidden = false;
+    if (demoPoster) demoPoster.hidden = true;
+    if (demoStop) demoStop.hidden = false;
+    demoIndex = 0;
+    showDemoSlide(demoIndex);
+    demoTimer = setInterval(() => {
+      demoIndex += 1;
+      const total = demoStage.querySelectorAll('.lp-demo-slide').length;
+      if (demoIndex >= total) {
+        stopDemo();
+        return;
+      }
+      showDemoSlide(demoIndex);
+    }, 4500);
+  }
+
+  if (demoPlay) demoPlay.addEventListener('click', startDemo);
+  if (demoPoster) demoPoster.addEventListener('click', startDemo);
+  if (demoStop) demoStop.addEventListener('click', stopDemo);
 })();

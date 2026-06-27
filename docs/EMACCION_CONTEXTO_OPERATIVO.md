@@ -59,21 +59,25 @@ Tablas: `users`, `user_tenants` (rol por empresa).
 
 ---
 
-## 3. Landing de producto (2026-06-27)
+## 3. Landing de producto (SaaS enterprise v2 — 2026-06-27)
 
-Página SaaS de conversión — **no** es landing por tenant.
+Página comercial oficial — **no** landing por tenant. Spec: `docs/LANDING_EMACCION_SPEC_v1.md` (v2 SaaS).
 
 | Campo | Valor |
 |-------|-------|
 | **URL** | https://emaccion.etsrv.site/accio/producto/ |
-| **Archivos** | `Motor_Tecnico/accio_engine/static/emaccion/` |
-| **Leads** | `POST /accio/producto/lead` → Odoo (`emaccion_producto`) |
-| **CTA prueba** | `/accio/login/` |
-| **WhatsApp** | +507 6688-4938 |
+| **Estilo** | SaaS empresarial premium (referencia Twilio/HubSpot, marca EasyTech) |
+| **Nav** | Plataforma · Soluciones · Integraciones · Casos · Precios · Recursos · Contacto |
+| **Hero** | Foto real + iframe dashboard + conectores |
+| **Video** | Demo interactivo 5 pasos (`#video`) — MP4 pendiente |
+| **Precios** | Starter $49 · Business $149 · Enterprise $499+ · Founders $99 |
+| **Fotos** | `assets/photos/` |
+| **Previews** | `previews/*.html` (UI real) |
+| **Leads** | `POST /accio/producto/lead` → Odoo |
 
-Secciones: hero, funcionalidades, integraciones (activas vs Próximamente), casos de uso, galería, planes, FAQ, contacto.
+**Logout** → `/accio/producto/`
 
-**Nota:** `emaccion.etsrv.site/` (raíz) aún redirige al dashboard — cambio nginx pendiente si se aprueba.
+**Pendiente:** video MP4, PNG capturas autenticadas, nginx raíz → producto.
 
 ---
 

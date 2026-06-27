@@ -1,16 +1,21 @@
 {
   "tenant_id": "relatic",
   "display_name": "Relatic Panamá",
-  "timezone": "America/Panama",
-  "subdomain": "relatic",
+  "status": "active",
+  "crm_target": "en1",
+  "default_locale": "es-PA",
   "domains": [
     "relaticpanama.org"
   ],
-  "website": "https://relaticpanama.org/",
+  "subdomain": "relatic",
+  "registration": "open",
+  "timezone": "America/Panama",
   "created_at": "2026-06-26T00:00:00Z",
   "branding": {
     "primary_color": "#1a2f4d",
     "accent_color": "#3d7ea6",
     "logo_url": "/accio/static/em-logomark.svg"
-  }
+  },
+  "website": "https://relaticpanama.org/",
+  "updated_at": "2026-06-27T18:41:34.874029+00:00"
 }

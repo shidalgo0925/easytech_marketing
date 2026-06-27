@@ -76,8 +76,9 @@
     }
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await fetch('/accio/auth/logout', { method: 'POST', credentials: 'include' });
-      location.href = '/accio/login/';
+      const res = await fetch('/accio/auth/logout', { method: 'POST', credentials: 'include' });
+      const data = await res.json().catch(() => ({}));
+      location.href = data.redirect || '/accio/producto/';
     });
 
     loadTenants();

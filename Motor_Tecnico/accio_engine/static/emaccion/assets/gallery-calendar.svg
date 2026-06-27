@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-hidden="true">
   <rect width="640" height="400" fill="#fff"/>
   <text x="32" y="48" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#1a4a2e">Calendario editorial</text>
   <g transform="translate(32,72)">
     <rect width="576" height="48" rx="6" fill="#f5faf7" stroke="#e2f0e6"/>
-    <text x="16" y="30" font-family="Inter,sans-serif" font-size="12" fill="#6a9275">Lun · Mar · Mié · Jue · Vie · Sáb · Dom</text>
+    <text x="16" y="30" font-family="Inter,sans-serif" font-size="12" fill="#6a9275">Lun &#183; Mar &#183; Mi&#233; &#183; Jue &#183; Vie &#183; S&#225;b &#183; Dom</text>
   </g>
   <g transform="translate(32,136)">
     <rect width="80" height="72" rx="6" fill="#fff" stroke="#e2f0e6"/>

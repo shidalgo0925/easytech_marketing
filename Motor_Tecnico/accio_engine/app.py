@@ -406,7 +406,7 @@ def auth_empresas_enter(tenant_id: str):
 @app.post("/accio/auth/logout")
 def auth_logout():
     session.clear()
-    return jsonify({"ok": True})
+    return jsonify({"ok": True, "redirect": "/accio/producto/"})
 
 
 def _establish_user_session(user: dict, tenant_id: str) -> None:
@@ -704,6 +704,14 @@ def emaccion_product_static(filename: str):
         mimetype = "application/javascript"
     elif filename.endswith(".svg"):
         mimetype = "image/svg+xml"
+    elif filename.endswith(".png"):
+        mimetype = "image/png"
+    elif filename.endswith(".webp"):
+        mimetype = "image/webp"
+    elif filename.endswith(".jpg") or filename.endswith(".jpeg"):
+        mimetype = "image/jpeg"
+    elif filename.endswith(".html"):
+        mimetype = "text/html"
     return send_from_directory(EMACCION_LANDING_DIR, filename, mimetype=mimetype)
 
 

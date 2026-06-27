@@ -1316,7 +1316,7 @@ input:focus-visible,
   font-size: var(--accio-text-xs);
 }
 
-/* Barra de progreso de arranque del dashboard (5 s) */
+/* Barra de progreso del dashboard — ligada a procesos reales */
 .boot-progress {
   padding: 0 var(--space-xl);
   background: var(--accio-bg-surface-1);
