@@ -1,8 +1,8 @@
 # EM+Acción — Contexto operativo (snapshot)
 
-**Fecha:** 2026-06-26  
+**Fecha:** 2026-06-27  
 **Repo:** `/opt/easytech_marketing` · **Servicio:** `easytech-accio-engine` (:8092)  
-**Dashboard PROD:** https://emaccion.etsrv.site/accio/dashboard/easytech/
+**Commit ref:** `7495180` · **Bitácora:** `docs/sessions/2026-06-27.md`
 
 Documento de continuidad para operadores y agentes. Complementa `docs/CONTEXTO.md` y `docs/EMACCION_V2_ESTADO.md`.
 
@@ -10,26 +10,26 @@ Documento de continuidad para operadores y agentes. Complementa `docs/CONTEXTO.m
 
 ## 1. Modelo de producto (acordado)
 
-**EMAcción = SaaS multi-tenant.** Documento canónico: `docs/EMACCION_TENANT_VS_APP.md`.
+**EM+Acción = SaaS multi-tenant.** Documento canónico: `docs/EMACCION_TENANT_VS_APP.md`.
 
 | Nivel | Qué es | Ejemplos | Interno |
 |-------|--------|----------|---------|
-| **Tenant** | Empresa que usa EMAcción | ETS, Modecosa, IIUS, Relatic (cliente) | `tenant_id` |
+| **Tenant** | Empresa que usa EM+Acción | ETS, Modecosa, IIUS, Relatic | `tenant_id` |
 | **App** | Línea/marca/producto a promocionar | EN1, EPayRoll, Diplomados | `app_id` |
 
 | Concepto UI | Concepto interno |
 |-------------|------------------|
 | Empresa (selector login) | **Tenant** — `tenant_id` + `Marketing/tenants/{id}/` |
-| App / línea (fase 1 API) | **App** — `Marketing/tenants/{id}/apps/` |
-| Administrador de empresa | `tenant_admin` |
-| Super administrador | `super_admin` |
+| App / línea | **App** — `Marketing/tenants/{id}/apps/` |
+| Administrador del tenant | `tenant_admin` |
+| Super administrador plataforma | `super_admin` |
 
 Cada **tenant** tiene aislado: usuarios, conectores, CRM, configuración.  
 Cada **app** tiene (objetivo): cola, campañas, flyers, knowledge — hoy la app `default` usa la cola del tenant (compat).
 
 **Reglas:** Nunca crear un tenant para representar una App. Todo contenido lleva `tenant_id` + `app_id`.
 
-**EN1** (`/admin/organizations`): producto SaaS aparte; no duplicar su CRUD. Sync futuro `organization_id` ↔ `tenant_id`.
+**EN1** (`/admin/organizations`): producto SaaS aparte; referencia en `Marketing/tenants/.en1/reference_organizations.json`. Sync futuro `organization_id` ↔ `tenant_id`.
 
 ---
 
@@ -44,20 +44,40 @@ GET /accio/login/          → Login plataforma (email + contraseña)
 
 | Ruta | Uso |
 |------|-----|
+| `/accio/producto/` | **Landing producto EM+Acción** (pública) |
 | `/accio/login/` | Login sin empresa en URL |
 | `/accio/empresas/` | Selector de empresa |
 | `/accio/dashboard/` | Redirige a empresa en sesión o easytech si tiene acceso |
 | `/accio/dashboard/{tenant_id}/` | Dashboard operativo |
+| `/accio/{tenant_id}/legal/` | Documentos legales por tenant |
 | `/accio/login/{tenant_id}/` | Login legacy por empresa (compat) |
 
 **Auth:** SQLite `Marketing/tenants/.secrets/auth.db`  
 Tablas: `users`, `user_tenants` (rol por empresa).
 
-**Usuario de prueba:** `shidalgo@easytech.services` · rol `tenant_admin` · solo empresa `easytech`.
+**Usuario operador:** `shidalgo@easytech.services` · rol global `super_admin` · acceso a todos los tenants.
 
 ---
 
-## 3. Dashboard — pestañas
+## 3. Landing de producto (2026-06-27)
+
+Página SaaS de conversión — **no** es landing por tenant.
+
+| Campo | Valor |
+|-------|-------|
+| **URL** | https://emaccion.etsrv.site/accio/producto/ |
+| **Archivos** | `Motor_Tecnico/accio_engine/static/emaccion/` |
+| **Leads** | `POST /accio/producto/lead` → Odoo (`emaccion_producto`) |
+| **CTA prueba** | `/accio/login/` |
+| **WhatsApp** | +507 6688-4938 |
+
+Secciones: hero, funcionalidades, integraciones (activas vs Próximamente), casos de uso, galería, planes, FAQ, contacto.
+
+**Nota:** `emaccion.etsrv.site/` (raíz) aún redirige al dashboard — cambio nginx pendiente si se aprueba.
+
+---
+
+## 4. Dashboard — pestañas
 
 | Pestaña | Contenido |
 |---------|-----------|
@@ -70,19 +90,17 @@ Tablas: `users`, `user_tenants` (rol por empresa).
 | Conectores | Estado multicanal |
 | Configuración | Centro de configuración (13 sub-secciones) |
 
-Header: **Empresa:** selector + nombre comercial. Banner en Resumen: “Empresa activa”.
+Header: selector **Empresa** + nombre comercial. Barra de progreso al arrancar (~5 s).
 
 ---
 
-## 4. Configuration Center — CRUD (2026-06-26)
-
-Sub-nav en **Configuración**:
+## 5. Configuration Center — CRUD
 
 | Sección | CRUD | Backend |
 |---------|------|---------|
 | Información general | Empresa + branding + contexto IA | `tenant_provisioning`, `knowledge_api` |
-| Usuarios | + fila, editar, eliminar, Guardar → **auth.db** | `settings_center.save_users` → `auth_service.sync_tenant_users` |
-| Roles | + rol, permisos csv | `users.json` (definición roles) |
+| Usuarios | + fila, editar, eliminar → **auth.db** | `auth_service.sync_tenant_users` |
+| Roles | + rol, permisos csv | `users.json` |
 | Productos | + producto, eliminar fila | `products.json` |
 | CRM | Campos cifrados | `tenant_secrets.db` |
 | Conectores | Campos + Probar | `tenant_secrets.db` |
@@ -94,86 +112,80 @@ Sub-nav en **Configuración**:
 | Backups | Ejecutar script | `scripts/backup_secrets.sh` |
 | Seguridad | API key + auditoría | `tenant_secrets` + `audit.log` |
 
-**Empresas (solo `super_admin`):** listar, crear, editar, suspender, **reactivar** (`POST .../empresas/{id}/enable`).
+**Empresas (solo `super_admin`):** crear, editar, suspender, reactivar.
 
-**Knowledge (pestaña Conocimiento):** CRUD artículos Markdown (`POST/DELETE /accio/{tenant}/knowledge`).
+### Matriz de roles
 
-### Roles canónicos
+| Rol | Alcance | Configuración |
+|-----|---------|---------------|
+| `super_admin` | Toda la plataforma | Todos los tenants + crear/suspender orgs |
+| `tenant_admin` | Tenants asignados | Productos, landings, usuarios, conectores |
+| `marketing_operator` | Tenant asignado | Publicar; sin Configuración |
+| `viewer` | Tenant asignado | Solo lectura |
 
-| ID | Permisos |
-|----|----------|
-| `tenant_admin` | read, publish, config, admin |
-| `marketing_operator` | read, publish |
-| `viewer` | read |
-
-Alias legacy: `admin` → `tenant_admin`, `operator` → `marketing_operator`.
-
----
-
-## 5. Datos por empresa (easytech)
-
-| Recurso | Ubicación | Estado jun 2026 |
-|---------|-----------|-----------------|
-| Cola posts | `Marketing/tenants/easytech/content_queue.json` | ~22 posts, 8 LI pendientes |
-| Registry | `Marketing/tenants/registry.json` | easytech + relatic |
-| Contexto IA | `tenants/easytech/business_context.json` | Easy Technology Services |
-| Auth | `Marketing/tenants/.secrets/auth.db` | shidalgo, admin → easytech |
-| Relatic | `tenants/relatic/` | Vacío (aislado, sin cola) |
+`super_admin` no puede editarse/borrarse desde UI de tenant.
 
 ---
 
-## 6. Archivos clave en código
+## 6. Tenants activos (jun 2026)
+
+| tenant_id | display_name | Dominio | Estado datos |
+|-----------|--------------|---------|--------------|
+| `easytech` | Easy Technology Services | easytech.services | Cola ~22 posts, KB, conectores LI+FB |
+| `relatic` | Relatic Panamá | relaticpanama.org | Contexto, 25 productos, landings, legal |
+
+### Relatic — archivos clave
+
+| Recurso | Ubicación |
+|---------|-----------|
+| Contexto comercial | `Marketing/tenants/relatic/business_context.json` |
+| Catálogo marketing | `Marketing/tenants/relatic/products.json` |
+| Rutas sitio | `Marketing/tenants/relatic/landings.json` |
+| Legal (HTML) | `Marketing/tenants/relatic/legal/` |
+| Hub legal | https://emaccion.etsrv.site/accio/relatic/legal/ |
+
+Sitio referencia: https://relaticpanama.org/
+
+---
+
+## 7. Archivos clave en código
 
 | Archivo | Rol |
 |---------|-----|
-| `Motor_Tecnico/accio_engine/app.py` | Rutas HTTP, sesión, dashboard |
-| `Motor_Tecnico/accio_engine/auth_service.py` | Login, RBAC, sync usuarios |
-| `Motor_Tecnico/accio_engine/tenant_provisioning.py` | CRUD empresas |
-| `Motor_Tecnico/accio_engine/settings_center.py` | Vista configuración |
+| `Motor_Tecnico/accio_engine/app.py` | Rutas HTTP, landing, legal, leads |
+| `Motor_Tecnico/accio_engine/auth_service.py` | Login, RBAC, protección super_admin |
+| `Motor_Tecnico/accio_engine/static/emaccion/` | Landing producto |
 | `Motor_Tecnico/accio_engine/static/dashboard.html` | UI principal |
-| `Motor_Tecnico/accio_engine/static/empresas.html` | Selector empresa |
-| `Motor_Tecnico/accio_engine/static/login.html` | Login plataforma |
-| `Motor_Tecnico/accio_engine/knowledge_api.py` | KB + artículos |
+| `Motor_Tecnico/accio_engine/static/accio-design.css` | Design system |
+| `Marketing/tenants/registry.json` | Registry tenants |
 
-**Tests:** `venv/bin/python3 -m unittest tests/test_*.py -v` (25 tests, jun 2026)
-
-**Reiniciar:** `sudo systemctl restart easytech-accio-engine`
+**Reiniciar tras cambios:** `sudo systemctl restart easytech-accio-engine`
 
 ---
 
-## 7. Incidentes resueltos (sesión 2026-06-26)
-
-| Problema | Causa | Fix |
-|---------|-------|-----|
-| Dashboard vacío (sin KPIs/cola) | `switchTenant` declarado dos veces en `dashboard.html` → SyntaxError, JS no ejecutaba | Eliminar declaración duplicada |
-| Sesión sin empresa activa | Login plataforma sin `_enter_empresa_session` | Fijar empresa al abrir dashboard + redirects |
-| Usuarios UI no afectaban login | Guardado solo en `users.json`, login usa `auth.db` | `sync_tenant_users` en guardar |
-| Confusión pestaña Empresa vs datos | Pestaña operativa renombrada a **Configuración** | Header mantiene selector Empresa |
-
----
-
-## 8. Pendiente (no implementado)
+## 8. Pendiente
 
 | Ítem | Prioridad |
 |------|-----------|
-| Wizard onboarding 7 pasos (crear empresa) | Alta |
-| Cron/publicadores recorriendo **todas** las empresas activas | Alta |
-| `en1_sync` — lead → EN1 CRM | Media |
-| Menú Oportunidades / Leads (spec §14) | Media |
-| Opportunity Engine (Fase E plan V2) | Roadmap |
-| Deprecar `dashboard_client.json` / API key en HTML | Seguridad |
-| Instagram `META_IG_USER_ID` | Conectores |
+| Flyer #10 IIUS (PNG dueño) | Alta |
+| Home nginx → `/accio/producto/` | Media (requiere GO) |
+| Capturas reales dashboard en landing | Media |
+| Legal Relatic — revisión abogado | Media |
+| Instagram / Google Business conectores | Media |
+| Cron/publicadores multi-tenant | Alta |
+| Wizard onboarding 7 pasos | Alta |
 
 ---
 
 ## 9. Reglas para agentes
 
-1. **No commitear** sin pedido explícito del usuario.
-2. **No mezclar datos** entre empresas.
-3. Tras cambios en `app.py` / estáticos → reiniciar `easytech-accio-engine`.
-4. UI: decir **Empresa**, no tenant.
-5. Probar con sesión real: datos easytech en Resumen, no solo HTML 200.
-6. Documentación maestra: `docs/CONTEXTO.md` · estado fases: `docs/EMACCION_V2_ESTADO.md`.
+1. **Diagnóstico → plan → GO → ejecutar.** No implementar sin GO explícito.
+2. **No commitear** sin pedido del usuario.
+3. **No mezclar datos** entre tenants.
+4. Tras cambios en `app.py` / estáticos → reiniciar servicio.
+5. UI: decir **Empresa**, no tenant (salvo docs técnicos).
+6. URL pública plataforma: **`emaccion.etsrv.site`** (no `n8n.etsrv.site` para la app).
+7. Marca: **EM+Acción** (no “EMAccion Command Center”).
 
 ---
 
@@ -181,9 +193,14 @@ Alias legacy: `admin` → `tenant_admin`, `operator` → `marketing_operator`.
 
 | Recurso | URL |
 |---------|-----|
+| **Landing producto** | https://emaccion.etsrv.site/accio/producto/ |
 | Dashboard easytech | https://emaccion.etsrv.site/accio/dashboard/easytech/ |
+| Dashboard relatic | https://emaccion.etsrv.site/accio/dashboard/relatic/ |
 | Login | https://emaccion.etsrv.site/accio/login/ |
+| Legal Relatic | https://emaccion.etsrv.site/accio/relatic/legal/ |
 | Health | https://emaccion.etsrv.site/accio/health |
-| Proxy alternativo | https://n8n.etsrv.site/accio/ (mismo motor) |
 | Odoo CRM | https://easydb.etsrv.site |
-| Guía leads | https://n8n.etsrv.site/guia/ |
+| Guía leads (legacy) | https://n8n.etsrv.site/guia/ |
+| OAuth / n8n proxy | https://n8n.etsrv.site/accio/ |
+
+**Contacto:** info@easytech.services · WhatsApp +507 6688-4938

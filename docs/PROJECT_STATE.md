@@ -58,8 +58,9 @@ Servicio systemd conocido:
 
 Dashboard conocido:
 
-- https://n8n.etsrv.site/accio/
-- https://n8n.etsrv.site/accio/dashboard
+- https://emaccion.etsrv.site/accio/dashboard/easytech/ (**URL pública PROD**)
+- https://emaccion.etsrv.site/accio/producto/ (landing producto EM+Acción)
+- https://n8n.etsrv.site/accio/ (proxy alternativo / OAuth)
 
 Endpoints conocidos:
 
@@ -285,33 +286,18 @@ Luego debe entregar diagnóstico y esperar GO.
 
 ---
 
-## 12. Última estabilización (2026-06-26)
+## 12. Última estabilización
 
-**GO ejecutado.** Detalle completo: [`docs/sessions/2026-06-26.md`](sessions/2026-06-26.md)
+**2026-06-26:** estabilización inicial — ver [`docs/sessions/2026-06-26.md`](sessions/2026-06-26.md)
 
-Resumen:
+**2026-06-27 (commit `7495180`):** landing producto, tenant Relatic, RBAC — ver [`docs/sessions/2026-06-27.md`](sessions/2026-06-27.md)
 
 | Item | Resultado |
 |------|-----------|
 | Motor Accio | `easytech-accio-engine` activo en :8092, multi-tenant |
-| Dashboard | https://n8n.etsrv.site/accio/dashboard/easytech/ |
-| Cron tick | Corregido → `/accio/easytech/tick` — OK |
-| API key RBAC | Bearer key con permisos de automatización |
-| Docs vivos | `INVENTARIO`, `CHANGELOG`, `NEXT_STEPS` actualizados |
-| Git | Repo activo en `main` |
+| Landing producto | https://emaccion.etsrv.site/accio/producto/ |
+| Dashboard PROD | https://emaccion.etsrv.site/accio/dashboard/easytech/ |
+| Tenants | `easytech`, `relatic` en `registry.json` |
+| Git | `main` @ `7495180` en origin |
 
-**Auditoría endpoints (2026-06-26):**
-
-| Endpoint | HTTP |
-|----------|------|
-| `/accio/health` | 200 |
-| `/accio/status` | 200 |
-| `/accio/easytech/tasks` | 200 |
-| `/accio/files/tree` | 200 |
-| `/accio/easytech/tick` | 200 |
-
-**Conectores OAuth:** LinkedIn/Meta/Google servicios → 200. LinkedIn configured; Meta FB/IG test OK; Google Business pendiente tokens.
-
-**Pendiente:** flyer IIUS (#10, requiere PNG del dueño), post #4 (2026-06-30 vía cron), tokens Meta/Google.
-
-**n8n (2026-06-26):** workflows importados inactivos; cron del VPS es el scheduler principal.
+**Pendiente:** flyer IIUS (#10), home nginx → landing, conectores IG/Google.

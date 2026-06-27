@@ -21,4 +21,4 @@ Cada sesión debe documentar:
 | Fecha | Archivo | Resumen |
 |-------|---------|---------|
 | 2026-06-26 | [2026-06-26.md](2026-06-26.md) | Estabilización ARROZCONPOLLO |
-| 2026-06-27 | *(este commit)* | Tenant vs App Fase 1 |
+| 2026-06-27 | [2026-06-27.md](2026-06-27.md) | Landing producto, Relatic, RBAC |
