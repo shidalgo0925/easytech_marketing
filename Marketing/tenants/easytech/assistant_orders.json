@@ -1,0 +1,246 @@
+{
+  "version": 1,
+  "orders": [
+    {
+      "id": "aiord_1e445605519a",
+      "tenant_id": "easytech",
+      "app_id": "default",
+      "action_type": "create_posts",
+      "title": "Crear 1 publicación(es) — default",
+      "channel": "linkedin",
+      "count": 1,
+      "preview": [
+        {
+          "id": "linkedin_20260627_quiero_crear_una_publicacion_para_este_a",
+          "platform": "linkedin",
+          "status": "pending_approval",
+          "content_type": "valor",
+          "content_type_v2": "educacion",
+          "topic_framework": {
+            "problem": "Las PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.",
+            "explanation": "EasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.",
+            "solution": [
+              "Diagnóstico tecnológico gratuito (30 min, sin compromiso)",
+              "Implementación Odoo + Facturación Electrónica",
+              "Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll",
+              "Consultoría y desarrollo a medida"
+            ],
+            "recommendation": "Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap."
+          },
+          "scheduled_at": "2026-06-27T13:00:00-05:00",
+          "flyer": "flyers/11_diagnostico_gratuito.png",
+          "flyer_num": 11,
+          "utm": "linkedin_generated",
+          "text": "quiero crear una publicacion para este apps EMAccion,, comentame 🇵🇦\n\nLas PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.\n\nEasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.\n\nQué funciona en la práctica:\n✅ Diagnóstico tecnológico gratuito (30 min, sin compromiso)\n✅ Implementación Odoo + Facturación Electrónica\n✅ Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll\n✅ Consultoría y desarrollo a medida\n\n💡 Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap.\n\n¿Te resuena? Comenta o escríbeme DIAGNÓSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía: https://n8n.etsrv.site/guia/\n\n#Panama #PYME #EasyTech #TransformacionDigital #ContenidoDeValor",
+          "first_comment": "Guía técnica y diagnóstico sin costo 👇\nhttps://n8n.etsrv.site/guia/",
+          "app_id": "default"
+        }
+      ],
+      "payload": {
+        "posts": [
+          {
+            "id": "linkedin_20260627_quiero_crear_una_publicacion_para_este_a",
+            "platform": "linkedin",
+            "status": "pending_approval",
+            "content_type": "valor",
+            "content_type_v2": "educacion",
+            "topic_framework": {
+              "problem": "Las PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.",
+              "explanation": "EasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.",
+              "solution": [
+                "Diagnóstico tecnológico gratuito (30 min, sin compromiso)",
+                "Implementación Odoo + Facturación Electrónica",
+                "Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll",
+                "Consultoría y desarrollo a medida"
+              ],
+              "recommendation": "Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap."
+            },
+            "scheduled_at": "2026-06-27T13:00:00-05:00",
+            "flyer": "flyers/11_diagnostico_gratuito.png",
+            "flyer_num": 11,
+            "utm": "linkedin_generated",
+            "text": "quiero crear una publicacion para este apps EMAccion,, comentame 🇵🇦\n\nLas PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.\n\nEasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.\n\nQué funciona en la práctica:\n✅ Diagnóstico tecnológico gratuito (30 min, sin compromiso)\n✅ Implementación Odoo + Facturación Electrónica\n✅ Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll\n✅ Consultoría y desarrollo a medida\n\n💡 Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap.\n\n¿Te resuena? Comenta o escríbeme DIAGNÓSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía: https://n8n.etsrv.site/guia/\n\n#Panama #PYME #EasyTech #TransformacionDigital #ContenidoDeValor",
+            "first_comment": "Guía técnica y diagnóstico sin costo 👇\nhttps://n8n.etsrv.site/guia/",
+            "app_id": "default"
+          }
+        ]
+      },
+      "prompt": "quiero crear una publicacion para este apps EMAccion,, comentame",
+      "user": "Shidalgo",
+      "suggested_at": "2026-06-27T22:05:21.251792+00:00",
+      "status": "approved",
+      "created_at": "2026-06-27T22:05:21.251799+00:00",
+      "resolved_at": "2026-06-27T22:05:34.356652+00:00",
+      "result": {
+        "created": [
+          {
+            "id": "linkedin_20260627_quiero_crear_una_publicacion_para_este_a",
+            "platform": "linkedin",
+            "status": "pending_approval",
+            "scheduled_at": "2026-06-27T13:00:00-05:00",
+            "flyer": "flyers/11_diagnostico_gratuito.png",
+            "utm": "linkedin_generated",
+            "text": "quiero crear una publicacion para este apps EMAccion,, comentame 🇵🇦\n\nLas PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.\n\nEasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.\n\nQué funciona en la práctica:\n✅ Diagnóstico tecnológico gratuito (30 min, sin compromiso)\n✅ Implementación Odoo + Facturación Electrónica\n✅ Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll\n✅ Consultoría y desarrollo a medida\n\n💡 Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap.\n\n¿Te resuena? Comenta o escríbeme DIAGNÓSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía: https://n8n.etsrv.site/guia/\n\n#Panama #PYME #EasyTech #TransformacionDigital #ContenidoDeValor",
+            "first_comment": "Guía técnica y diagnóstico sin costo 👇\nhttps://n8n.etsrv.site/guia/",
+            "content_type": "valor",
+            "content_type_v2": "educacion",
+            "topic_framework": {
+              "problem": "Las PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.",
+              "explanation": "EasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.",
+              "solution": [
+                "Diagnóstico tecnológico gratuito (30 min, sin compromiso)",
+                "Implementación Odoo + Facturación Electrónica",
+                "Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll",
+                "Consultoría y desarrollo a medida"
+              ],
+              "recommendation": "Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap."
+            },
+            "flyer_num": 11,
+            "app_id": "default"
+          }
+        ],
+        "auto_publish": false
+      }
+    },
+    {
+      "id": "aiord_5cab463addec",
+      "tenant_id": "easytech",
+      "app_id": "en1",
+      "action_type": "create_posts",
+      "title": "Crear 1 publicación(es) — en1",
+      "channel": "linkedin",
+      "count": 1,
+      "preview": [
+        {
+          "id": "linkedin_20260627_crea_1_publicaciones_sobre_en1_para_link",
+          "platform": "linkedin",
+          "status": "pending_approval",
+          "content_type": "valor",
+          "content_type_v2": "educacion",
+          "topic_framework": {
+            "problem": "El equipo abre CRM en un tab, inventario en otro, reportes \"cuando contabilidad los arma\". Decisiones lentas y datos que no cuadran.",
+            "explanation": "EN1 es una plataforma en la nube que une ventas, inventario, facturación y reportes para operaciones de servicios en Panamá — sin 5 licencias desconectadas.",
+            "solution": [
+              "CRM y pipeline comercial integrado",
+              "Inventario y compras en tiempo real",
+              "Facturación y reportes ejecutivos",
+              "Acceso web desde cualquier dispositivo"
+            ],
+            "recommendation": "Si más de 2 áreas críticas dependen de Excel, prioriza integración antes de otro módulo nuevo."
+          },
+          "scheduled_at": "2026-06-27T13:00:00-05:00",
+          "flyer": "flyers/05_en1_plataforma.png",
+          "flyer_num": 5,
+          "utm": "linkedin_generated",
+          "text": "Crea 1 publicaciones sobre EN1 para LinkedIn 🇵🇦\n\nEl equipo abre CRM en un tab, inventario en otro, reportes \"cuando contabilidad los arma\". Decisiones lentas y datos que no cuadran.\n\nEN1 es una plataforma en la nube que une ventas, inventario, facturación y reportes para operaciones de servicios en Panamá — sin 5 licencias desconectadas.\n\nQué funciona en la práctica:\n✅ CRM y pipeline comercial integrado\n✅ Inventario y compras en tiempo real\n✅ Facturación y reportes ejecutivos\n✅ Acceso web desde cualquier dispositivo\n\n💡 Si más de 2 áreas críticas dependen de Excel, prioriza integración antes de otro módulo nuevo.\n\n¿Te resuena? Comenta o escríbeme DIAGNÓSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía: https://n8n.etsrv.site/guia/\n\n#Panama #PYME #EasyTech #TransformacionDigital #EN1 #EasyNodeOne #ERP #ContenidoDeValor",
+          "first_comment": "Guía técnica y diagnóstico sin costo 👇\nhttps://n8n.etsrv.site/guia/",
+          "app_id": "en1"
+        }
+      ],
+      "payload": {
+        "posts": [
+          {
+            "id": "linkedin_20260627_crea_1_publicaciones_sobre_en1_para_link",
+            "platform": "linkedin",
+            "status": "pending_approval",
+            "content_type": "valor",
+            "content_type_v2": "educacion",
+            "topic_framework": {
+              "problem": "El equipo abre CRM en un tab, inventario en otro, reportes \"cuando contabilidad los arma\". Decisiones lentas y datos que no cuadran.",
+              "explanation": "EN1 es una plataforma en la nube que une ventas, inventario, facturación y reportes para operaciones de servicios en Panamá — sin 5 licencias desconectadas.",
+              "solution": [
+                "CRM y pipeline comercial integrado",
+                "Inventario y compras en tiempo real",
+                "Facturación y reportes ejecutivos",
+                "Acceso web desde cualquier dispositivo"
+              ],
+              "recommendation": "Si más de 2 áreas críticas dependen de Excel, prioriza integración antes de otro módulo nuevo."
+            },
+            "scheduled_at": "2026-06-27T13:00:00-05:00",
+            "flyer": "flyers/05_en1_plataforma.png",
+            "flyer_num": 5,
+            "utm": "linkedin_generated",
+            "text": "Crea 1 publicaciones sobre EN1 para LinkedIn 🇵🇦\n\nEl equipo abre CRM en un tab, inventario en otro, reportes \"cuando contabilidad los arma\". Decisiones lentas y datos que no cuadran.\n\nEN1 es una plataforma en la nube que une ventas, inventario, facturación y reportes para operaciones de servicios en Panamá — sin 5 licencias desconectadas.\n\nQué funciona en la práctica:\n✅ CRM y pipeline comercial integrado\n✅ Inventario y compras en tiempo real\n✅ Facturación y reportes ejecutivos\n✅ Acceso web desde cualquier dispositivo\n\n💡 Si más de 2 áreas críticas dependen de Excel, prioriza integración antes de otro módulo nuevo.\n\n¿Te resuena? Comenta o escríbeme DIAGNÓSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía: https://n8n.etsrv.site/guia/\n\n#Panama #PYME #EasyTech #TransformacionDigital #EN1 #EasyNodeOne #ERP #ContenidoDeValor",
+            "first_comment": "Guía técnica y diagnóstico sin costo 👇\nhttps://n8n.etsrv.site/guia/",
+            "app_id": "en1"
+          }
+        ]
+      },
+      "prompt": "Crea 1 publicaciones sobre EN1 para LinkedIn",
+      "user": "Shidalgo",
+      "suggested_at": "2026-06-27T22:12:19.713523+00:00",
+      "status": "pending_approval",
+      "created_at": "2026-06-27T22:12:19.713533+00:00"
+    },
+    {
+      "id": "aiord_12bdb21670ba",
+      "tenant_id": "easytech",
+      "app_id": "default",
+      "action_type": "create_posts",
+      "title": "Crear 1 publicación(es) — default",
+      "channel": "linkedin",
+      "count": 1,
+      "preview": [
+        {
+          "id": "linkedin_20260627_em_acci_n_plataforma_marketing",
+          "platform": "linkedin",
+          "status": "pending_approval",
+          "content_type": "valor",
+          "content_type_v2": "educacion",
+          "topic_framework": {
+            "problem": "Las PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.",
+            "explanation": "EasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.",
+            "solution": [
+              "Diagnóstico tecnológico gratuito (30 min, sin compromiso)",
+              "Implementación Odoo + Facturación Electrónica",
+              "Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll",
+              "Consultoría y desarrollo a medida"
+            ],
+            "recommendation": "Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap."
+          },
+          "scheduled_at": "2026-06-27T13:00:00-05:00",
+          "flyer": "flyers/11_diagnostico_gratuito.png",
+          "flyer_num": 11,
+          "utm": "linkedin_generated",
+          "text": "EM+Acción plataforma marketing 🇵🇦\n\nLas PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.\n\nEasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.\n\nQué funciona en la práctica:\n✅ Diagnóstico tecnológico gratuito (30 min, sin compromiso)\n✅ Implementación Odoo + Facturación Electrónica\n✅ Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll\n✅ Consultoría y desarrollo a medida\n\n💡 Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap.\n\n¿Te resuena? Comenta o escríbeme DIAGNÓSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía: https://n8n.etsrv.site/guia/\n\n#Panama #PYME #EasyTech #TransformacionDigital #ContenidoDeValor",
+          "first_comment": "Guía técnica y diagnóstico sin costo 👇\nhttps://n8n.etsrv.site/guia/",
+          "app_id": "default"
+        }
+      ],
+      "payload": {
+        "posts": [
+          {
+            "id": "linkedin_20260627_em_acci_n_plataforma_marketing",
+            "platform": "linkedin",
+            "status": "pending_approval",
+            "content_type": "valor",
+            "content_type_v2": "educacion",
+            "topic_framework": {
+              "problem": "Las PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.",
+              "explanation": "EasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.",
+              "solution": [
+                "Diagnóstico tecnológico gratuito (30 min, sin compromiso)",
+                "Implementación Odoo + Facturación Electrónica",
+                "Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll",
+                "Consultoría y desarrollo a medida"
+              ],
+              "recommendation": "Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap."
+            },
+            "scheduled_at": "2026-06-27T13:00:00-05:00",
+            "flyer": "flyers/11_diagnostico_gratuito.png",
+            "flyer_num": 11,
+            "utm": "linkedin_generated",
+            "text": "EM+Acción plataforma marketing 🇵🇦\n\nLas PYMEs en Panamá invierten en tecnología sin un mapa claro: compran licencias, cumplen trámites (como FE) pero la operación sigue fragmentada en Excel y WhatsApp.\n\nEasyTech Services acompaña a empresas panameñas en transformación digital con enfoque práctico: integrar ventas, inventario, contabilidad y cumplimiento DGI en flujos que el equipo realmente usa.\n\nQué funciona en la práctica:\n✅ Diagnóstico tecnológico gratuito (30 min, sin compromiso)\n✅ Implementación Odoo + Facturación Electrónica\n✅ Plataformas sectoriales: EN1, EPOSOne, EClassOne, EPayRoll\n✅ Consultoría y desarrollo a medida\n\n💡 Antes de comprar otro software, identifica qué proceso duele más hoy y qué reporte necesitas ver cada lunes. Eso define el 80% del roadmap.\n\n¿Te resuena? Comenta o escríbeme DIAGNÓSTICO.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n📄 Guía: https://n8n.etsrv.site/guia/\n\n#Panama #PYME #EasyTech #TransformacionDigital #ContenidoDeValor",
+            "first_comment": "Guía técnica y diagnóstico sin costo 👇\nhttps://n8n.etsrv.site/guia/",
+            "app_id": "default"
+          }
+        ]
+      },
+      "prompt": "Genera 1 publicacion EM+Accion LinkedIn",
+      "user": "dashboard",
+      "suggested_at": "2026-06-27T22:13:45.553987+00:00",
+      "status": "pending_approval",
+      "created_at": "2026-06-27T22:13:45.553993+00:00"
+    }
+  ]
+}

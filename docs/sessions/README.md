@@ -22,3 +22,4 @@ Cada sesión debe documentar:
 |-------|---------|---------|
 | 2026-06-26 | [2026-06-26.md](2026-06-26.md) | Estabilización ARROZCONPOLLO |
 | 2026-06-27 | [2026-06-27.md](2026-06-27.md) | Landing producto, Relatic, RBAC |
+| 2026-06-29 | [2026-06-29-vs1-ux.md](2026-06-29-vs1-ux.md) | VS1 implementado + revisión UX P1/P2/P4 |

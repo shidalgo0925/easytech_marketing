@@ -56,7 +56,9 @@
 
     <nav class="navbar" id="tabs" aria-label="Secciones del dashboard">
       <button class="nav-item active" type="button" data-tab="resumen">Resumen</button>
+      <button class="nav-item" type="button" data-tab="plan" data-href-plan="1">Plan</button>
       <button class="nav-item" type="button" data-tab="campanas">Campañas</button>
+      <button class="nav-item" type="button" data-tab="publicaciones">Publicaciones</button>
       <button class="nav-item" type="button" data-tab="calendario">Calendario</button>
       <button class="nav-item" type="button" data-tab="metricas">Métricas</button>
       <button class="nav-item" type="button" data-tab="flyers">Flyers</button>
@@ -73,6 +75,7 @@
       <p id="bootProgressComment" class="boot-progress-comment"></p>
     </div>
 
+    <div class="dashboard-workspace">
     <main class="content">
 
       <div id="panel-resumen" class="tab-panel active">
@@ -101,12 +104,163 @@
         </div>
       </div>
 
+      <div id="panel-plan" class="tab-panel">
+        <header class="plan-workspace-header">
+          <div>
+            <h2 class="plan-workspace-title">Plan de Marketing</h2>
+            <p class="plan-workspace-sub">Estrategia declarativa · contexto unificado · propuestas IA</p>
+          </div>
+          <nav class="plan-subnav" aria-label="Secciones del plan">
+            <button type="button" class="plan-subnav-item active" data-plan-view="workspace" onclick="switchPlanView('workspace')">Workspace</button>
+            <button type="button" class="plan-subnav-item" data-plan-view="create" onclick="switchPlanView('create')">Crear</button>
+            <button type="button" class="plan-subnav-item" data-plan-view="context" onclick="switchPlanView('context')">Contexto</button>
+            <button type="button" class="plan-subnav-item" data-plan-view="planner" onclick="switchPlanView('planner')">Planner IA</button>
+          </nav>
+        </header>
+
+        <div id="plan-view-workspace" class="plan-view active">
+          <div class="plan-status-banner" id="planStatusBanner">
+            <span class="plan-status-dot" id="planStatusDot"></span>
+            <span id="planStatusText">Sin plan activo en esta app</span>
+          </div>
+          <div class="panels-grid accio-grid">
+            <section class="accio-card panel-full">
+              <div class="accio-card-head">Plan activo</div>
+              <div class="accio-card-body" id="planActiveCard"><div class="empty">Sin plan activo</div></div>
+            </section>
+            <section class="accio-card panel-full">
+              <div class="accio-card-head">Planes en workspace</div>
+              <div class="accio-card-body accio-table-wrap" id="planSessionList"><div class="empty">Crea un plan para verlo aquí</div></div>
+            </section>
+          </div>
+        </div>
+
+        <div id="plan-view-create" class="plan-view" hidden>
+          <section class="accio-card panel-full">
+            <div class="accio-card-head">Nuevo plan · borrador</div>
+            <div class="accio-card-body">
+              <form id="planCreateForm" class="accio-form plan-create-form" onsubmit="return createMarketingPlan(event)">
+                <div class="plan-form-grid">
+                  <label class="plan-form-span2">Nombre del plan<input name="nombre" required placeholder="Plan Q3 2026 — EN1"></label>
+                  <label class="plan-form-span2">Objetivo general<textarea name="objetivo_general" rows="3" required placeholder="Incrementar leads cualificados en segmento PYME…"></textarea></label>
+                  <label>Estrategia
+                    <select name="strategy_type">
+                      <option value="lead_generation">Generación de leads</option>
+                      <option value="brand_awareness">Awareness de marca</option>
+                      <option value="retention">Retención</option>
+                      <option value="launch">Lanzamiento</option>
+                    </select>
+                  </label>
+                  <label>Prioridad
+                    <select name="prioridad">
+                      <option value="alta">Alta</option>
+                      <option value="media" selected>Media</option>
+                      <option value="baja">Baja</option>
+                    </select>
+                  </label>
+                  <label class="plan-form-span2">North star metric<input name="north_star_metric" required placeholder="Leads cualificados / mes"></label>
+                  <label>Periodo inicio<input name="periodo_inicio" type="date" required></label>
+                  <label>Periodo fin<input name="periodo_fin" type="date" required></label>
+                  <label>Presupuesto (USD)<input name="budget_amount" type="number" min="0" step="0.01" value="5000"></label>
+                  <label>Moneda<input name="budget_currency" value="USD" readonly></label>
+                  <label class="plan-form-span2">Brief de marketing<textarea name="marketing_brief" rows="4" placeholder="Contexto, restricciones, mensajes clave…"></textarea></label>
+                  <label class="plan-form-span2">Criterios de éxito<textarea name="success_criteria" rows="2" placeholder="100 leads, 20 reuniones (uno por línea)"></textarea></label>
+                  <label class="plan-form-span2">Público objetivo<textarea name="publico_objetivo" rows="2" placeholder="Gerentes PYME, Contadores (uno por línea)"></textarea></label>
+                </div>
+                <div class="plan-form-actions">
+                  <button type="button" class="btn-ghost" onclick="switchPlanView('workspace')">Cancelar</button>
+                  <button type="submit" class="btn-primary">Crear plan en borrador</button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+
+        <div id="plan-view-context" class="plan-view" hidden>
+          <section class="accio-card panel-full">
+            <div class="accio-card-head">Context Builder · contexto operativo</div>
+            <div class="accio-card-body">
+              <p class="plan-context-intro">Vista ejecutiva del contexto que alimenta al Planner: negocio, app, conocimiento y plan activo.</p>
+              <button type="button" class="btn-ghost" onclick="loadMarketingContext(true)">Actualizar contexto</button>
+              <div id="planContextBoard" class="plan-context-board"><div class="empty">Cargando contexto…</div></div>
+            </div>
+          </section>
+        </div>
+
+        <div id="plan-view-planner" class="plan-view" hidden>
+          <section class="accio-card panel-full">
+            <div class="accio-card-head">Planner IA · primera propuesta estratégica</div>
+            <div class="accio-card-body">
+              <button type="button" class="btn-primary" onclick="loadPlannerProposals()">Generar propuestas</button>
+              <div id="planPlannerOutput" class="plan-planner-output"><div class="empty">Activa un plan y genera propuestas para ver el resumen ejecutivo.</div></div>
+            </div>
+          </section>
+        </div>
+
+        <div id="planR2Modal" class="plan-r2-modal" hidden role="dialog" aria-modal="true" aria-labelledby="planR2Title">
+          <div class="plan-r2-backdrop" onclick="closePlanR2Modal()"></div>
+          <div class="plan-r2-dialog accio-card">
+            <div class="accio-card-head" id="planR2Title">Resolver plan activo (R2)</div>
+            <div class="accio-card-body">
+              <p>Ya existe un plan activo en esta app. Para activar el nuevo plan, elige cómo resolver el conflicto:</p>
+              <ul class="plan-r2-options">
+                <li><strong>Finalizar anterior</strong> — cierra el plan activo como finalizado.</li>
+                <li><strong>Pausar anterior</strong> — deja el plan activo en pausa.</li>
+              </ul>
+              <div class="plan-form-actions">
+                <button type="button" class="btn-ghost" onclick="resolvePlanR2('pause_previous')">Pausar anterior</button>
+                <button type="button" class="btn-primary" onclick="resolvePlanR2('finalize_previous')">Finalizar anterior</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="panel-campanas" class="tab-panel">
         <div class="accio-kpi-grid" id="campStats"></div>
         <section class="accio-card">
           <div class="accio-card-head">Campañas por producto</div>
           <div class="accio-card-body accio-table-wrap" id="campaignsTable"></div>
         </section>
+      </div>
+
+      <div id="panel-publicaciones" class="tab-panel">
+        <div class="publications-toolbar" id="pubFilters">
+          <select id="pubFilterStatus" aria-label="Estado" onchange="loadPublications()">
+            <option value="">Todos los estados</option>
+            <option value="draft">Borrador</option>
+            <option value="pending_approval">Pend. aprobación</option>
+            <option value="approved">Aprobado</option>
+            <option value="scheduled">Programado</option>
+            <option value="pending">Programado (legacy)</option>
+            <option value="published">Publicado</option>
+            <option value="failed">Fallido</option>
+            <option value="archived">Archivado</option>
+          </select>
+          <select id="pubFilterChannel" aria-label="Canal" onchange="loadPublications()">
+            <option value="">Todos los canales</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="google_business">Google Business</option>
+            <option value="youtube">YouTube</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+          <label><input type="checkbox" id="pubAllApps" onchange="loadPublications()"> Todas las apps</label>
+          <button type="button" class="btn-ghost" onclick="loadPublications()">Actualizar</button>
+        </div>
+        <div class="publications-split">
+          <section class="accio-card">
+            <div class="accio-card-head">Historial · <span id="pubCount">—</span></div>
+            <div class="accio-card-body accio-table-wrap" id="publicationsList"></div>
+          </section>
+          <section class="accio-card pub-detail" id="publicationDetail">
+            <div class="accio-card-head">Detalle</div>
+            <div class="accio-card-body" id="publicationDetailBody">
+              <div class="empty">Selecciona una publicación</div>
+            </div>
+          </section>
+        </div>
       </div>
 
       <div id="panel-calendario" class="tab-panel">
@@ -211,6 +365,21 @@
 
       <div class="accio-links" id="quickLinks"></div>
     </main>
+
+    <aside class="assistant-panel" id="assistantPanel" aria-label="Asistente EM+Acción">
+      <div class="assistant-panel-head"><i class="ti ti-sparkles"></i> Asistente EM+Acción <span id="assistantModelBadge" class="badge badge-gray assistant-badge-click" style="margin-left:6px;font-weight:normal" title="Configurar OpenAI API Key" onclick="openAssistantApiKeyConfig()" role="button" tabindex="0"></span></div>
+      <div class="assistant-setup-hint hidden" id="assistantSetupHint">
+        Chat conversacional requiere <strong>OpenAI API Key</strong> (<code>sk-…</code>), distinta de ACCIO_API_KEY.
+        <button type="button" class="btn-ghost btn-sm" onclick="openAssistantApiKeyConfig()">Configurar ahora</button>
+      </div>
+      <div class="assistant-messages" id="assistantMessages"></div>
+      <div class="assistant-orders" id="assistantOrders"></div>
+      <div class="assistant-input-row">
+        <textarea id="assistantInput" placeholder="Ej: Crea 3 publicaciones sobre EN1 para LinkedIn…" rows="2"></textarea>
+        <button type="button" class="btn-primary" onclick="sendAssistantMessage()"><i class="ti ti-send"></i></button>
+      </div>
+    </aside>
+    </div>
   </div>
 
   <script>
@@ -223,6 +392,9 @@
     let lastSettings = null;
     let lastGenerated = null;
     let activeTab = 'resumen';
+    let selectedPublicationId = null;
+    let lastPublications = [];
+    let assistantMessages = [];
     let sessionRole = window.__ACCIO_SESSION_ROLE__ || 'viewer';
     let sessionGlobalRole = window.__ACCIO_GLOBAL_ROLE__ || null;
     let sessionPerms = new Set(window.__ACCIO_PERMISSIONS__ || ['read']);
@@ -330,10 +502,30 @@
     }
 
     function statusClass(s) {
-      if (s === 'completed' || s === 'published') return 'badge badge-green';
+      if (s === 'completed' || s === 'published' || s === 'approved') return 'badge badge-green';
       if (s === 'failed') return 'badge badge-danger';
       if (s === 'running') return 'badge badge-blue';
+      if (s === 'draft' || s === 'archived' || s === 'pending_approval') return 'badge badge-gray';
+      if (s === 'scheduled' || s === 'pending') return 'badge badge-amber';
       return 'badge badge-amber';
+    }
+
+    function editorialLabel(s) {
+      const labels = {
+        draft: 'Borrador',
+        pending_approval: 'Pend. aprobación',
+        approved: 'Aprobado',
+        scheduled: 'Programado',
+        published: 'Publicado',
+        failed: 'Fallido',
+        archived: 'Archivado',
+        pending: 'Programado',
+      };
+      return labels[s] || s;
+    }
+
+    function isPublishableStatus(s) {
+      return ['pending', 'scheduled', 'approved'].includes(s);
     }
 
     function tableWrap(html) {
@@ -360,7 +552,9 @@
       const btn = document.getElementById('btnPrimary');
       const labels = {
         resumen: 'Publicar siguiente',
+        plan: 'Actualizar plan',
         campanas: 'Ver cola',
+        publicaciones: 'Filtrar publicaciones',
         calendario: 'Publicar siguiente',
         metricas: 'Actualizar métricas',
         flyers: 'Actualizar assets',
@@ -372,6 +566,7 @@
     }
 
     function runPrimaryAction() {
+      if (activeTab === 'plan') return loadMarketingPlans(true);
       if (activeTab === 'metricas' || activeTab === 'flyers') return loadData(true);
       if (activeTab === 'conocimiento') return generateTopic(false);
       if (activeTab === 'campanas' || activeTab === 'calendario' || activeTab === 'conectores') return switchTab('resumen');
@@ -380,10 +575,17 @@
 
     document.getElementById('tabs').addEventListener('click', e => {
       const tab = e.target.closest('.navbar .nav-item');
+      if (tab && tab.dataset.hrefPlan) {
+        location.href = `/accio/plan/${TENANT_ID}/`;
+        return;
+      }
       if (tab) {
         switchTab(tab.dataset.tab);
         if (tab.dataset.tab === 'conocimiento' && !lastKnowledge) loadKnowledge();
         if (tab.dataset.tab === 'configuracion' && !lastSettings) loadSettings();
+        if (tab.dataset.tab === 'publicaciones') loadPublications();
+        if (tab.dataset.tab === 'plan') { loadMarketingPlans(); switchPlanView('workspace'); }
+        loadAssistantOrders();
       }
     });
 
@@ -443,11 +645,12 @@
       const posts = data.pending_posts;
       document.getElementById('postsTable').innerHTML = posts.length ? `
         <div class="tbl-head tbl-queue">
-          <span>Canal</span><span>ID</span><span>Programado</span><span>Vista previa</span>
+          <span>Canal</span><span>ID</span><span>Estado</span><span>Programado</span><span>Vista previa</span>
         </div>
         ${posts.map(p => `<div class="tbl-row tbl-queue">
           <span>${platformBadge(p.platform)}</span>
           <span class="is-mono">${p.id}</span>
+          <span class="${statusClass(p.status)}">${p.status_label || editorialLabel(p.status)}</span>
           <span class="is-mono">${(p.scheduled_at||'').slice(0,16)}</span>
           <span class="tbl-muted">${p.preview}</span>
         </div>`).join('')}
@@ -487,7 +690,7 @@
       document.getElementById('campStats').innerHTML = [
         kpi('Total campañas', camps.length),
         kpi('Publicadas', camps.filter(c => c.status === 'published').length),
-        kpi('Programadas', camps.filter(c => c.status === 'pending').length, true),
+        kpi('Programadas', camps.filter(c => isPublishableStatus(c.status)).length, true),
       ].join('');
       document.getElementById('campaignsTable').innerHTML = camps.length ? `
         <table class="accio-table"><thead><tr>
@@ -495,13 +698,337 @@
         </tr></thead><tbody>${camps.map(c => `<tr>
           <td>${c.product}</td>
           <td>#${c.flyer_num || '—'}</td>
-          <td class="${statusClass(c.status)}">${c.status}</td>
+          <td class="${statusClass(c.status)}">${c.status_label || editorialLabel(c.status)}</td>
           <td class="is-mono">${(c.status==='published' ? c.published_at : c.scheduled_at || '').slice(0,16) || '—'}</td>
           <td class="is-mono">${c.utm || '—'}</td>
           <td>${c.cta}</td>
         </tr>`).join('')}</tbody></table>
       ` : '<div class="empty">Sin campañas</div>';
     }
+
+    async function loadPublications() {
+      const status = document.getElementById('pubFilterStatus')?.value || '';
+      const channel = document.getElementById('pubFilterChannel')?.value || '';
+      const allApps = document.getElementById('pubAllApps')?.checked;
+      let url = tenantApi('/dashboard/api/publications?limit=200');
+      if (status) url += '&status=' + encodeURIComponent(status);
+      if (channel) url += '&platform=' + encodeURIComponent(channel);
+      if (allApps) url += '&all_apps=1';
+      else if (APP_ID && APP_ID !== 'default') url += '&app_id=' + encodeURIComponent(APP_ID);
+      try {
+        const r = await fetch(url, { credentials: 'include', headers: authHeaders() });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || r.statusText);
+        lastPublications = data.publications || [];
+        document.getElementById('pubCount').textContent = data.total + ' total';
+        renderPublicationsList(lastPublications);
+        if (selectedPublicationId) selectPublication(selectedPublicationId);
+      } catch (e) { toast(e.message, true); }
+    }
+
+    function renderPublicationsList(items) {
+      const el = document.getElementById('publicationsList');
+      if (!items.length) {
+        el.innerHTML = '<div class="empty">Sin publicaciones</div>';
+        return;
+      }
+      el.innerHTML = `<table class="accio-table"><thead><tr>
+        <th>App</th><th>Canal</th><th>ID</th><th>Estado</th><th>Programada</th><th>Publicada</th>
+      </tr></thead><tbody>${items.map(p => `<tr class="pub-row ${p.id===selectedPublicationId?'selected':''}" data-pid="${esc(p.id)}" onclick="selectPublication(${JSON.stringify(p.id)})">
+        <td>${esc(p.app_name||p.app_id)}</td>
+        <td>${platformBadge(p.platform)}</td>
+        <td class="is-mono">${esc(p.id)}</td>
+        <td><span class="${statusClass(p.status)}">${esc(p.status_label||editorialLabel(p.status))}</span></td>
+        <td class="is-mono">${(p.scheduled_at||'').slice(0,16)}</td>
+        <td class="is-mono">${(p.published_at||'').slice(0,16)||'—'}</td>
+      </tr>`).join('')}</tbody></table>`;
+    }
+
+    async function selectPublication(postId) {
+      selectedPublicationId = postId;
+      renderPublicationsList(lastPublications);
+      try {
+        const allApps = document.getElementById('pubAllApps')?.checked;
+        let url = tenantApi('/publications/' + encodeURIComponent(postId));
+        if (allApps) url += '?all_apps=1';
+        const r = await fetch(url, { credentials: 'include', headers: authHeaders() });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error');
+        renderPublicationDetail(data.publication);
+      } catch (e) { toast(e.message, true); }
+    }
+
+    function renderPublicationDetail(p) {
+      const el = document.getElementById('publicationDetailBody');
+      const img = p.flyer_url ? `<img src="${p.flyer_url}" alt="Flyer" style="max-width:180px;border-radius:8px;margin-bottom:12px">` : '';
+      const log = (p.publish_log||[]).length ? `<details><summary>Log publicación (${p.publish_log.length})</summary><pre>${esc(JSON.stringify(p.publish_log,null,2))}</pre></details>` : '';
+      el.innerHTML = `
+        <div class="topic-meta" style="margin-bottom:8px">
+          ${platformBadge(p.platform)}
+          <span class="${statusClass(p.status)}">${esc(p.status_label)}</span>
+          ${p.is_reference ? '<span class="badge badge-blue">Referencia</span>' : ''}
+        </div>
+        <p class="tbl-muted"><strong>App:</strong> ${esc(p.app_name)} · <strong>Campaña:</strong> ${esc(p.campaign_id||'—')}</p>
+        <p class="tbl-muted is-mono">${esc(p.id)}</p>
+        ${img}
+        <pre>${esc(p.text||'')}</pre>
+        <p class="tbl-muted">Autor: ${esc(p.author||'—')} · Aprobador: ${esc(p.approver||'—')}</p>
+        <p class="tbl-muted">Resultado: ${esc(p.connector_result||'—')}</p>
+        ${p.public_url ? `<p><a href="${esc(p.public_url)}" target="_blank">Ver post público</a></p>` : ''}
+        ${p.errors ? `<p class="badge badge-danger">${esc(p.errors)}</p>` : ''}
+        ${log}
+        <div class="pub-detail-actions">
+          <button type="button" class="btn-ghost" onclick="dupPublication(${JSON.stringify(p.id)},'facebook')">Duplicar FB</button>
+          <button type="button" class="btn-ghost" onclick="dupPublication(${JSON.stringify(p.id)},'instagram')">Duplicar IG</button>
+          <button type="button" class="btn-ghost" onclick="archivePublication(${JSON.stringify(p.id)})">Archivar</button>
+          <button type="button" class="btn-ghost" onclick="markPubReference(${JSON.stringify(p.id)},true)">Referencia</button>
+          <button type="button" class="btn-ghost" onclick="askAssistantAboutPub()">Regenerar con IA</button>
+        </div>`;
+    }
+
+    async function dupPublication(id, platform) {
+      try {
+        const r = await fetch(tenantApi('/publications/' + encodeURIComponent(id) + '/duplicate'), {
+          method: 'POST', headers: authHeaders(), body: JSON.stringify({ platform }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error);
+        toast('Duplicado: ' + data.post.id);
+        loadPublications();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function archivePublication(id) {
+      try {
+        const r = await fetch(tenantApi('/publications/' + encodeURIComponent(id) + '/archive'), {
+          method: 'POST', headers: authHeaders(),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error);
+        toast('Archivado');
+        loadPublications();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function markPubReference(id, value) {
+      try {
+        const r = await fetch(tenantApi('/publications/' + encodeURIComponent(id) + '/reference'), {
+          method: 'POST', headers: authHeaders(), body: JSON.stringify({ value }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error);
+        toast('Marcado como referencia');
+        selectPublication(id);
+      } catch (e) { toast(e.message, true); }
+    }
+
+    function askAssistantAboutPub() {
+      document.getElementById('assistantInput').value = 'Reescribe este post con tono más ejecutivo';
+      sendAssistantMessage();
+    }
+
+    function openAssistantApiKeyConfig() {
+      switchTab('configuracion');
+      showConfigSection('variables');
+      if (!lastSettings) loadSettings();
+      toast('Pega tu OpenAI API Key en «Secretos» y guarda Variables');
+      setTimeout(() => {
+        const el = document.getElementById('varsec_openai_api_key');
+        if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      }, 400);
+    }
+
+    function appendAssistantMsg(role, text) {
+      assistantMessages.push({ role, text });
+      const box = document.getElementById('assistantMessages');
+      box.innerHTML = assistantMessages.map(m =>
+        `<div class="assistant-msg ${m.role}">${esc(m.text)}</div>`
+      ).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function parseApiResponse(res) {
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+      if (ct.includes('application/json')) {
+        return res.json();
+      }
+      const text = await res.text();
+      if (text.trim().startsWith('<!')) {
+        if (res.status === 404) {
+          throw new Error('Endpoint no disponible (404). Reinicie el servicio: sudo systemctl restart easytech-accio-engine');
+        }
+        throw new Error('Respuesta HTML inesperada del servidor (' + res.status + '). ¿Sesión expirada?');
+      }
+      try { return JSON.parse(text); } catch (_) {
+        throw new Error('Respuesta no JSON del servidor (' + res.status + ')');
+      }
+    }
+
+    function mergeAssistantOrders(data) {
+      const byId = new Map();
+      for (const o of [...(data.orders || []), ...(data.pending_orders || [])]) {
+        if (o && o.id) byId.set(o.id, o);
+      }
+      return [...byId.values()];
+    }
+
+    function renderAssistantOrders(orders) {
+      const el = document.getElementById('assistantOrders');
+      el.classList.toggle('has-pending', orders.length > 0);
+      if (!orders.length) {
+        el.innerHTML = '<div class="assistant-orders-title">Borradores pendientes</div><div class="tbl-muted" style="font-size:12px">Sin borradores — pide «Genera 1 publicación…»</div>';
+        return;
+      }
+      el.innerHTML = '<div class="assistant-orders-title">Borradores pendientes — Aprobar o Rechazar</div>' + orders.map(o => {
+        const preview = (o.preview||[])[0];
+        const snippet = preview ? (preview.text||'').slice(0, 280) : '';
+        const pid = preview ? preview.id : '';
+        return `<div class="assistant-order-card">
+          <strong>${esc(o.title)}</strong><br>
+          <span class="tbl-muted">${esc(o.app_id)} · ${esc(o.channel)} · ×${o.count||1}${pid ? ' · ID: '+esc(pid) : ''}</span>
+          ${snippet ? `<pre style="margin:6px 0;font-size:11px;max-height:120px;overflow:auto;white-space:pre-wrap">${esc(snippet)}</pre>` : ''}
+          <div class="assistant-order-actions">
+            <button type="button" class="btn-primary" onclick="approveAssistantOrder(${JSON.stringify(o.id)})">Aprobar → cola</button>
+            <button type="button" class="btn-ghost" onclick="rejectAssistantOrder(${JSON.stringify(o.id)})">Rechazar</button>
+            ${pid ? `<button type="button" class="btn-ghost" onclick="goToPublicationsAfterApprove()">Ver en Publicaciones</button>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function goToPublicationsAfterApprove() {
+      switchTab('publicaciones');
+      loadPublications();
+    }
+
+    async function sendAssistantMessage() {
+      const input = document.getElementById('assistantInput');
+      const prompt = (input.value || '').trim();
+      if (!prompt) return;
+      input.value = '';
+      appendAssistantMsg('user', prompt);
+      const history = assistantMessages.slice(0, -1).map(m => ({ role: m.role === 'bot' ? 'assistant' : 'user', content: m.text }));
+      try {
+        const r = await fetch(tenantApi('/assistant/chat'), {
+          method: 'POST',
+          credentials: 'include',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            prompt,
+            view: activeTab,
+            selected_post_id: selectedPublicationId,
+            history,
+          }),
+        });
+        const data = await parseApiResponse(r);
+        if (!r.ok) throw new Error(data.error || 'Error IA');
+        appendAssistantMsg('bot', data.response || '—');
+        const badge = document.getElementById('assistantModelBadge');
+        if (badge) {
+          badge.textContent = data.llm ? (data.model || 'IA') : (data.error_code === 'ASSISTANT_DISABLED' ? 'IA off' : 'sin OpenAI Key');
+          badge.className = 'badge ' + (data.llm ? 'badge-green' : 'badge-amber');
+        }
+        renderAssistantOrders(mergeAssistantOrders(data));
+        if (data.mode === 'executable') {
+          toast('Borrador abajo ↑ — pulsa Aprobar para encolar');
+        }
+      } catch (e) {
+        appendAssistantMsg('bot', 'Error: ' + e.message);
+        toast(e.message, true);
+      }
+    }
+
+    async function loadAssistantStatus() {
+      const badge = document.getElementById('assistantModelBadge');
+      const hint = document.getElementById('assistantSetupHint');
+      if (!badge) return;
+      try {
+        const r = await fetch(tenantApi('/assistant/status'), { credentials: 'include', headers: authHeaders() });
+        const data = await parseApiResponse(r);
+        if (!data.ok) return;
+        if (data.llm_available) {
+          badge.textContent = data.model || 'IA';
+          badge.className = 'badge badge-green assistant-badge-click';
+          badge.title = 'IA activa (' + (data.model || 'OpenAI') + ')';
+          if (hint) hint.classList.add('hidden');
+        } else if (!data.assistant_enabled) {
+          badge.textContent = 'IA off';
+          badge.className = 'badge badge-amber assistant-badge-click';
+          badge.title = 'Asistente desactivado';
+          if (hint) {
+            hint.classList.remove('hidden');
+            hint.innerHTML = 'Asistente desactivado. <button type="button" class="btn-ghost btn-sm" onclick="switchTab(\'configuracion\'); showConfigSection(\'ia\')">Configuración → IA</button>';
+          }
+        } else if (data.has_openai_key) {
+          badge.textContent = 'IA desactivada';
+          badge.className = 'badge badge-amber assistant-badge-click';
+          badge.title = 'Activa IA en Configuración → IA';
+          if (hint) { hint.classList.remove('hidden'); hint.innerHTML = 'IA desactivada. <button type="button" class="btn-ghost btn-sm" onclick="switchTab(\'configuracion\'); showConfigSection(\'ia\')">Activar en Configuración → IA</button>'; }
+        } else {
+          badge.textContent = 'sin OpenAI Key';
+          badge.className = 'badge badge-amber assistant-badge-click';
+          badge.title = 'Clic para configurar OpenAI API Key (sk-…)';
+          if (hint) hint.classList.remove('hidden');
+          if (!assistantMessages.length) {
+            appendAssistantMsg('bot', 'Hola. Soy el Asistente EM+Acción.\n\nPara chat conversacional (como ChatGPT) necesitas la OpenAI API Key (sk-…), distinta de ACCIO_API_KEY.\n\nClic en «sin OpenAI Key» → Variables → OpenAI API Key.\n\nSin clave uso modo básico: «Genera 1 publicación para LinkedIn», «Revisa la cola», «Dame ideas para EN1».');
+          }
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    async function loadAssistantHistory() {
+      try {
+        const r = await fetch(tenantApi('/assistant/history?limit=15'), { credentials: 'include', headers: authHeaders() });
+        const data = await parseApiResponse(r);
+        if (!data.ok || !data.history?.length) return;
+        assistantMessages = [];
+        const chronological = [...data.history].reverse();
+        for (const row of chronological.slice(-8)) {
+          if (row.prompt) appendAssistantMsg('user', row.prompt);
+          if (row.response) appendAssistantMsg('bot', row.response);
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    async function loadAssistantOrders() {
+      try {
+        const r = await fetch(tenantApi('/assistant/orders'), { credentials: 'include', headers: authHeaders() });
+        const data = await parseApiResponse(r);
+        if (data.ok) renderAssistantOrders(data.orders || []);
+      } catch (_) { /* ignore */ }
+    }
+
+    async function approveAssistantOrder(id) {
+      try {
+        const r = await fetch(tenantApi('/assistant/orders/' + encodeURIComponent(id) + '/approve'), {
+          method: 'POST', credentials: 'include', headers: authHeaders(),
+        });
+        const data = await parseApiResponse(r);
+        if (!r.ok) throw new Error(data.error);
+        const created = data.result?.created || [];
+        toast('Encolado: ' + (created.map(p => p.id).join(', ') || 'OK') + ' — ve a Publicaciones');
+        loadAssistantOrders();
+        loadData();
+        if (activeTab === 'publicaciones') loadPublications();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function rejectAssistantOrder(id) {
+      try {
+        const r = await fetch(tenantApi('/assistant/orders/' + encodeURIComponent(id) + '/reject'), {
+          method: 'POST', headers: authHeaders(),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error);
+        toast('Orden rechazada');
+        loadAssistantOrders();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    document.getElementById('assistantInput')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAssistantMessage(); }
+    });
 
     function renderCalendario(data) {
       const weeks = data.calendar?.weeks || [];
@@ -517,7 +1044,7 @@
               <span class="cal-dot ${p.status==='published'?'published':'pending'}"></span>
               <span class="cal-date">${p.date || '—'}</span>
               <span>Flyer #${p.flyer} · ${p.topic}</span>
-              <span class="${statusClass(p.status)}" style="margin-left:auto">${p.status}</span>
+              <span class="${statusClass(p.status)}" style="margin-left:auto">${p.status_label || editorialLabel(p.status)}</span>
             </div>`).join('')}</div>
         </div>`).join('') + (data.calendar.note ? `<div class="metric-note">${data.calendar.note}</div>` : '');
     }
@@ -1595,6 +2122,7 @@
         plain: collectPlainVars(),
         secrets,
       }, 'Variables guardadas');
+      loadAssistantStatus();
     }
 
     async function saveIa() {
@@ -1712,6 +2240,7 @@
         renderMetricas(data);
         renderFlyers(data);
         renderConnectors(data);
+        loadAssistantOrders();
         const knowledgeTask = loadKnowledge();
         if (awaitKnowledge) await knowledgeTask;
         document.getElementById('quickLinks').innerHTML = Object.entries(data.links)
@@ -1920,6 +2449,295 @@
       };
     })();
 
+    function v1ApiBase() {
+      return `/api/v1/tenants/${encodeURIComponent(TENANT_ID)}/apps/${encodeURIComponent(APP_ID)}`;
+    }
+
+    function planSessionKey() {
+      return `emaccion_plan_ids_${TENANT_ID}_${APP_ID}`;
+    }
+
+    function planIdsInSession() {
+      try {
+        const raw = localStorage.getItem(planSessionKey());
+        const list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list.filter(Boolean) : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function rememberPlanId(id) {
+      const ids = planIdsInSession();
+      if (!ids.includes(id)) {
+        ids.unshift(id);
+        localStorage.setItem(planSessionKey(), JSON.stringify(ids.slice(0, 20)));
+      }
+    }
+
+    async function v1Api(path, opts = {}) {
+      const res = await fetch(v1ApiBase() + path, {
+        ...opts,
+        credentials: 'include',
+        headers: { ...authHeaders(), ...(opts.headers || {}) },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        const next = encodeURIComponent(location.pathname + location.search);
+        location.href = `/accio/login/?next=${next}`;
+        throw new Error('Sesión expirada');
+      }
+      if (!res.ok) {
+        const msg = data.error?.message || data.error || res.statusText;
+        throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      }
+      return data;
+    }
+
+    let planR2PendingId = null;
+
+    function switchPlanView(name) {
+      document.querySelectorAll('.plan-subnav-item').forEach(b => b.classList.toggle('active', b.dataset.planView === name));
+      document.querySelectorAll('.plan-view').forEach(v => {
+        const show = v.id === 'plan-view-' + name;
+        v.classList.toggle('active', show);
+        v.hidden = !show;
+      });
+      if (name === 'context') loadMarketingContext();
+      if (name === 'planner') loadPlannerProposals(false);
+    }
+
+    function updatePlanStatusBanner(active) {
+      const dot = document.getElementById('planStatusDot');
+      const text = document.getElementById('planStatusText');
+      if (!dot || !text) return;
+      if (active) {
+        dot.className = 'plan-status-dot is-active';
+        text.textContent = `Plan activo: ${active.nombre}`;
+      } else {
+        dot.className = 'plan-status-dot';
+        text.textContent = 'Sin plan activo en esta app';
+      }
+    }
+
+    function renderPlanCard(plan) {
+      if (!plan) return '<div class="plan-empty-state"><i class="ti ti-target"></i><p>Sin plan activo</p><span class="muted">Crea y activa un plan para operar el ciclo estratégico.</span></div>';
+      return `<div class="plan-active-card">
+        <div class="plan-active-head">
+          <h3>${esc(plan.nombre)}</h3>
+          <span class="accio-badge accio-badge--green">${esc(plan.estado)}</span>
+        </div>
+        <p class="plan-active-objective">${esc(plan.objetivo_general || '')}</p>
+        <div class="plan-active-meta">
+          <div><span class="muted">North star</span><strong>${esc(plan.north_star_metric || '—')}</strong></div>
+          <div><span class="muted">Periodo</span><strong>${esc(plan.periodo?.inicio || '')} → ${esc(plan.periodo?.fin || '')}</strong></div>
+          <div><span class="muted">Presupuesto</span><strong>${esc(plan.budget?.currency || 'USD')} ${esc(plan.budget?.amount || '0')}</strong></div>
+          <div><span class="muted">Estrategia</span><strong>${esc(plan.strategy_type || '—')}</strong></div>
+        </div>
+      </div>`;
+    }
+
+    function parseLines(raw) {
+      return String(raw || '').split('\n').map(s => s.trim()).filter(Boolean);
+    }
+
+    function renderContextBoard(data) {
+      const biz = data.business_context || {};
+      const app = data.app_profile || {};
+      const kb = data.knowledge_base || [];
+      const plan = data.marketing_plan_active;
+      const company = biz.company || biz.name || biz.display_name || TENANT_ID;
+      return `
+        <div class="plan-context-grid">
+          <article class="plan-context-card">
+            <h4><i class="ti ti-building"></i> Negocio</h4>
+            <p class="plan-context-lead">${esc(company)}</p>
+            <ul class="plan-context-list">
+              <li><span>Sector</span><strong>${esc(biz.industry || biz.sector || 'Servicios TI')}</strong></li>
+              <li><span>CTA</span><strong>${esc(biz.cta || 'DIAGNÓSTICO')}</strong></li>
+            </ul>
+          </article>
+          <article class="plan-context-card">
+            <h4><i class="ti ti-apps"></i> App / línea</h4>
+            <p class="plan-context-lead">${esc(app.name || app.app_id || APP_ID)}</p>
+            <ul class="plan-context-list">
+              <li><span>Tono</span><strong>${esc(app.tone || 'Profesional')}</strong></li>
+              <li><span>Audiencia</span><strong>${esc(app.target_audience || 'PYME')}</strong></li>
+            </ul>
+          </article>
+          <article class="plan-context-card">
+            <h4><i class="ti ti-books"></i> Conocimiento</h4>
+            <p class="plan-context-lead">${kb.length} fuente${kb.length === 1 ? '' : 's'} activa${kb.length === 1 ? '' : 's'}</p>
+            <ul class="plan-context-tags">${kb.slice(0, 6).map(k => `<li>${esc(k.title || k.id)}</li>`).join('') || '<li class="muted">Sin artículos</li>'}</ul>
+          </article>
+          <article class="plan-context-card plan-context-card--highlight">
+            <h4><i class="ti ti-flag"></i> Plan activo</h4>
+            ${plan ? `<p class="plan-context-lead">${esc(plan.nombre)}</p>
+              <ul class="plan-context-list">
+                <li><span>Objetivo</span><strong>${esc((plan.objetivo_general || '').slice(0, 80))}…</strong></li>
+                <li><span>North star</span><strong>${esc(plan.north_star_metric || '—')}</strong></li>
+              </ul>` : '<p class="muted">Ningún plan activo — el Planner usará contexto parcial.</p>'}
+          </article>
+        </div>`;
+    }
+
+    async function loadMarketingContext(withToast = false) {
+      const el = document.getElementById('planContextBoard');
+      if (!el) return;
+      el.innerHTML = '<div class="empty">Cargando contexto…</div>';
+      try {
+        const resp = await v1Api('/marketing-context');
+        el.innerHTML = renderContextBoard(resp.data || {});
+        if (withToast) toast('Contexto actualizado');
+      } catch (e) {
+        el.innerHTML = '<div class="empty">No se pudo cargar el contexto</div>';
+        toast(e.message, true);
+      }
+    }
+
+    function priorityClass(p) {
+      const v = String(p || 'media').toLowerCase();
+      if (v === 'alta') return 'plan-priority plan-priority--alta';
+      if (v === 'baja') return 'plan-priority plan-priority--baja';
+      return 'plan-priority plan-priority--media';
+    }
+
+    function renderPlannerOutput(data) {
+      if (!data) return '<div class="empty">Sin datos del planner</div>';
+      const proposals = data.proposals || [];
+      return `
+        <section class="plan-exec-summary">
+          <h4>Resumen ejecutivo</h4>
+          <p>${esc(data.executive_summary || '—')}</p>
+        </section>
+        <div class="plan-proposals-grid">
+          ${proposals.map((p, i) => `<article class="plan-proposal-card">
+            <header>
+              <span class="plan-proposal-num">${i + 1}</span>
+              <span class="${priorityClass(p.priority)}">${esc(p.priority || 'media')}</span>
+            </header>
+            <h3>${esc(p.title)}</h3>
+            <p>${esc(p.summary)}</p>
+            <div class="plan-proposal-channel"><i class="ti ti-speakerphone"></i> ${esc(p.channel_hint || '—')}</div>
+            <div class="plan-proposal-actions">
+              <strong>Acciones</strong>
+              <ul>${(p.actions || []).map(a => `<li>${esc(a)}</li>`).join('') || '<li class="muted">—</li>'}</ul>
+            </div>
+            <footer class="muted">${esc(p.rationale || '')}</footer>
+          </article>`).join('')}
+        </div>`;
+    }
+
+    function openPlanR2Modal(planId) {
+      planR2PendingId = planId;
+      document.getElementById('planR2Modal').hidden = false;
+    }
+
+    function closePlanR2Modal() {
+      planR2PendingId = null;
+      document.getElementById('planR2Modal').hidden = true;
+    }
+
+    async function resolvePlanR2(resolution) {
+      const planId = planR2PendingId;
+      closePlanR2Modal();
+      if (planId) await activateMarketingPlan(planId, resolution, true);
+    }
+
+    async function loadMarketingPlans(withToast = false) {
+      try {
+        const activeResp = await v1Api('/marketing-plans/active');
+        const active = activeResp.data;
+        document.getElementById('planActiveCard').innerHTML = renderPlanCard(active);
+        updatePlanStatusBanner(active);
+
+        const ids = planIdsInSession();
+        const rows = [];
+        for (const id of ids) {
+          try {
+            const resp = await v1Api('/marketing-plans/' + encodeURIComponent(id));
+            rows.push(resp.data);
+          } catch (_) { /* plan removed */ }
+        }
+        const listEl = document.getElementById('planSessionList');
+        if (!rows.length) {
+          listEl.innerHTML = '<div class="empty">Crea un plan para verlo aquí</div>';
+        } else {
+          listEl.innerHTML = `<table class="accio-table"><thead><tr><th>Plan</th><th>Estado</th><th></th></tr></thead><tbody>${
+            rows.map(p => `<tr>
+              <td>${esc(p.nombre)}<div class="muted is-mono">${esc(p.id)}</div></td>
+              <td><span class="accio-badge">${esc(p.estado)}</span></td>
+              <td>${p.estado === 'borrador' ? `<button type="button" class="btn-ghost" onclick="activateMarketingPlan('${esc(p.id)}')">Activar</button>` : ''}</td>
+            </tr>`).join('')
+          }</tbody></table>`;
+        }
+        if (withToast) toast('Plan actualizado');
+      } catch (e) {
+        toast(e.message, true);
+      }
+    }
+
+    async function createMarketingPlan(ev) {
+      ev.preventDefault();
+      const form = ev.target;
+      const fd = new FormData(form);
+      const body = {
+        nombre: fd.get('nombre'),
+        objetivo_general: fd.get('objetivo_general'),
+        strategy_type: fd.get('strategy_type'),
+        north_star_metric: fd.get('north_star_metric'),
+        success_criteria: parseLines(fd.get('success_criteria')),
+        publico_objetivo: parseLines(fd.get('publico_objetivo')),
+        marketing_brief: String(fd.get('marketing_brief') || fd.get('objetivo_general') || ''),
+        periodo: { inicio: fd.get('periodo_inicio'), fin: fd.get('periodo_fin') },
+        budget: { amount: String(fd.get('budget_amount') || '0'), currency: String(fd.get('budget_currency') || 'USD') },
+        prioridad: fd.get('prioridad') || 'media',
+      };
+      try {
+        const resp = await v1Api('/marketing-plans', { method: 'POST', body: JSON.stringify(body) });
+        rememberPlanId(resp.data.id);
+        toast('Plan creado: ' + resp.data.nombre);
+        form.reset();
+        switchPlanView('workspace');
+        await loadMarketingPlans();
+      } catch (e) {
+        toast(e.message, true);
+      }
+      return false;
+    }
+
+    async function activateMarketingPlan(planId, resolution, skipR2Prompt) {
+      try {
+        const body = resolution ? { resolution } : {};
+        await v1Api('/marketing-plans/' + encodeURIComponent(planId) + '/activate', {
+          method: 'POST',
+          body: JSON.stringify(body),
+        });
+        toast('Plan activado');
+        await loadMarketingPlans();
+      } catch (e) {
+        if (!skipR2Prompt && e.message && e.message.includes('ActivePlanResolutionRequired')) {
+          openPlanR2Modal(planId);
+          return;
+        }
+        toast(e.message, true);
+      }
+    }
+
+    async function loadPlannerProposals(showToast = true) {
+      const el = document.getElementById('planPlannerOutput');
+      if (!el) return;
+      el.innerHTML = '<div class="empty">Generando propuestas…</div>';
+      try {
+        const resp = await v1Api('/planner/proposals', { method: 'POST', body: '{}' });
+        el.innerHTML = renderPlannerOutput(resp.data);
+        if (showToast) toast('Propuestas listas (' + (resp.data?.mode || 'ok') + ')');
+      } catch (e) {
+        el.innerHTML = '<div class="empty">Error al generar propuestas</div>';
+        toast(e.message, true);
+      }
+    }
+
     async function bootstrapDashboard() {
       initTenantSelector();
       updatePrimaryLabel();
@@ -1928,6 +2746,10 @@
           { label: 'Verificando sesión…', run: () => applySessionBadge() },
           { label: 'Cargando apps de marketing…', run: () => initAppSelector() },
           { label: 'Preparando cola, métricas y conocimiento…', run: () => loadData(false, true) },
+          { label: 'Asistente IA…', run: async () => {
+            await loadAssistantHistory();
+            await Promise.all([loadAssistantStatus(), loadAssistantOrders()]);
+          }},
         ]);
       } catch (e) {
         toast('Error al cargar: ' + e.message, true);

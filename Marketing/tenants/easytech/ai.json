@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "topic_model": "llm",
+  "image_model": "static_flyers",
+  "tone_override": "Profesional, cercano, B2B Panamá. EM+Acción como centro de mando de marketing.",
+  "enabled": true,
+  "updated_at": "2026-06-28T00:00:00+00:00"
+}

@@ -207,6 +207,71 @@ def resolve_app(tenant_id: str, app_id: str | None = None) -> MarketingApp:
     return get_app(tenant_id, aid)
 
 
+def _empty_app_files(app: MarketingApp | dict[str, Any]) -> dict[str, dict[str, Any]]:
+    name = app.name if isinstance(app, MarketingApp) else app.get("name", "")
+    app_id = app.app_id if isinstance(app, MarketingApp) else app.get("app_id", "")
+    desc = app.description if isinstance(app, MarketingApp) else app.get("description", "")
+    return {
+        "profile.json": {
+            "app_id": app_id,
+            "name": name,
+            "description": desc,
+            "tone": app.tone if isinstance(app, MarketingApp) else app.get("tone", ""),
+            "target_audience": app.target_audience if isinstance(app, MarketingApp) else app.get("target_audience", ""),
+            "updated_at": _utc_now(),
+        },
+        "branding.json": {
+            "app_id": app_id,
+            "logo_url": app.logo_url if isinstance(app, MarketingApp) else app.get("logo_url", ""),
+            "brand_colors": app.brand_colors if isinstance(app, MarketingApp) else (app.get("brand_colors") or {}),
+            "updated_at": _utc_now(),
+        },
+        "content_queue.json": {"posts": []},
+        "campaigns.json": {"campaigns": []},
+        "calendar.json": {"weeks": [], "timezone": "America/Panama"},
+    }
+
+
+def provision_app_directory(tenant_id: str, app_id: str | None = None) -> dict[str, Path]:
+    """Crea estructura profile/branding/knowledge/assets/metrics/cola por app (idempotente)."""
+    aid = normalize_app_id(app_id or default_app_id(tenant_id))
+    try:
+        app = get_app(tenant_id, aid)
+    except AppNotFoundError:
+        app = _app_from_record(tenant_id, _default_app_record(tenant_id))
+
+    paths = effective_app_paths(tenant_id, aid)
+    root = paths["app_root"]
+    root.mkdir(parents=True, exist_ok=True)
+
+    for fname, payload in _empty_app_files(app).items():
+        target = root / fname
+        if not target.is_file():
+            _write_json(target, payload)
+
+    for subdir in ("knowledge", "assets", "metrics"):
+        (root / subdir).mkdir(parents=True, exist_ok=True)
+
+    if aid != DEFAULT_APP_ID and aid != default_app_id(tenant_id):
+        knowledge_seed = root / "knowledge" / f"{aid}.md"
+        if not knowledge_seed.is_file():
+            knowledge_seed.write_text(
+                f"# {app.name}\n\nContenido de conocimiento para la app `{aid}`.\n",
+                encoding="utf-8",
+            )
+
+    return paths
+
+
+def provision_all_apps(tenant_id: str) -> list[str]:
+    bootstrap_registry(tenant_id)
+    provisioned: list[str] = []
+    for app in list_apps(tenant_id, active_only=False):
+        provision_app_directory(tenant_id, app.app_id)
+        provisioned.append(app.app_id)
+    return provisioned
+
+
 def create_app(tenant_id: str, payload: dict[str, Any]) -> MarketingApp:
     aid = normalize_app_id(payload.get("app_id") or payload.get("slug") or "")
     reg = load_registry(tenant_id)
@@ -230,16 +295,7 @@ def create_app(tenant_id: str, payload: dict[str, Any]) -> MarketingApp:
     reg.setdefault("apps", []).append(record)
     reg["updated_at"] = _utc_now()
     _write_json(registry_path(tenant_id), reg)
-    app_dir = apps_root(tenant_id) / aid
-    app_dir.mkdir(parents=True, exist_ok=True)
-    for fname, empty in (
-        ("content_queue.json", {"posts": []}),
-        ("campaigns.json", {"campaigns": []}),
-        ("calendar.json", {"weeks": []}),
-    ):
-        p = app_dir / fname
-        if not p.is_file():
-            _write_json(p, empty)
+    provision_app_directory(tenant_id, aid)
     return get_app(tenant_id, aid)
 
 
@@ -248,7 +304,17 @@ def effective_app_paths(tenant_id: str, app_id: str | None = None) -> dict[str, 
     aid = normalize_app_id(app_id or default_app_id(tenant_id))
     base = effective_paths(resolve_tenant(tenant_id))
     if aid == DEFAULT_APP_ID or aid == default_app_id(tenant_id):
-        return {**base, "app_id": aid, "app_root": resolve_tenant(tenant_id).root}
+        tenant_root = resolve_tenant(tenant_id).root
+        return {
+            **base,
+            "app_id": aid,
+            "app_root": tenant_root,
+            "profile": tenant_root / "profile.json",
+            "branding": tenant_root / "branding.json",
+            "knowledge_dir": tenant_root / "knowledge",
+            "assets_dir": tenant_root / "assets",
+            "metrics_dir": tenant_root / "metrics",
+        }
     root = apps_root(tenant_id) / aid
     root.mkdir(parents=True, exist_ok=True)
     return {
@@ -257,7 +323,11 @@ def effective_app_paths(tenant_id: str, app_id: str | None = None) -> dict[str, 
         "content_queue": root / "content_queue.json",
         "calendar": root / "calendar.json",
         "campaigns": root / "campaigns.json",
+        "profile": root / "profile.json",
+        "branding": root / "branding.json",
         "knowledge_dir": root / "knowledge",
+        "assets_dir": root / "assets",
+        "metrics_dir": root / "metrics",
         "flyers_dir": root / "flyers",
     }
 

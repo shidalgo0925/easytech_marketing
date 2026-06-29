@@ -27,6 +27,8 @@ from Motor_Tecnico.publisher_tenant import (
     resolve_flyer_path,
 )
 
+from Motor_Tecnico.accio_engine.editorial import is_publishable
+
 PANAMA = ZoneInfo("America/Panama")
 GRAPH = "https://graph.facebook.com/v21.0"
 PUBLIC_BASE = os.getenv("PUBLIC_SITE_URL", "https://n8n.etsrv.site").rstrip("/")
@@ -67,7 +69,7 @@ def pick_next_post(queue: dict, platform: str, force: bool = False) -> dict | No
     for post in queue.get("posts", []):
         if post.get("platform") != platform:
             continue
-        if post.get("status") != "pending":
+        if not is_publishable(post.get("status")):
             continue
         scheduled = parse_scheduled(post["scheduled_at"])
         if force or scheduled <= now:
@@ -184,6 +186,19 @@ def publish_platform(
         },
         tenant_id,
     )
+    try:
+        from Motor_Tecnico.accio_engine import metrics_store
+
+        metrics_store.record_event(
+            tenant_id,
+            "published",
+            app_id=aid,
+            channel=platform,
+            post_id=post["id"],
+            meta={"remote_post_id": remote_id},
+        )
+    except Exception:
+        pass
     print("Listo. Cola actualizada.")
     return True
 

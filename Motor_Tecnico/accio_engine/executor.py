@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from Motor_Tecnico.accio_engine.editorial import is_publishable, normalize_status
 from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, effective_paths, resolve_tenant
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -54,13 +55,17 @@ def publish_channel(
     tenant_id: str = DEFAULT_TENANT,
     app_id: str | None = None,
 ) -> dict[str, Any]:
-    args = [f"--connector={connector_id}", *_tenant_args(tenant_id, app_id)]
+    from Motor_Tecnico.accio_engine import marketing_app
+
+    aid = marketing_app.normalize_app_id(app_id or marketing_app.default_app_id(tenant_id))
+    args = [f"--connector={connector_id}", f"--tenant-id={tenant_id}", f"--app-id={aid}"]
     if force:
         args.append("--force")
     if dry_run:
         args.append("--dry-run")
     result = _run_script("channel_publisher.py", *args)
     result["tenant_id"] = tenant_id
+    result["app_id"] = aid
     return result
 
 
@@ -77,6 +82,7 @@ def publish_linkedin(
         args.append("--dry-run")
     result = _run_script("linkedin_publisher.py", *args)
     result["tenant_id"] = tenant_id
+    result["app_id"] = _resolve_app_id(tenant_id, app_id)
     return result
 
 
@@ -94,6 +100,7 @@ def publish_meta(
         args.append("--dry-run")
     result = _run_script("meta_publisher.py", *args)
     result["tenant_id"] = tenant_id
+    result["app_id"] = _resolve_app_id(tenant_id, app_id)
     return result
 
 
@@ -142,7 +149,7 @@ def enqueue_post(
     entry = {
         "id": post["id"],
         "platform": post["platform"],
-        "status": post.get("status", "pending"),
+        "status": post.get("status", "scheduled"),
         "scheduled_at": post["scheduled_at"],
         "flyer": post.get("flyer", ""),
         "utm": post.get("utm", ""),
@@ -177,6 +184,37 @@ def enqueue_posts(posts: list[dict[str, Any]], tenant_id: str = DEFAULT_TENANT) 
     return {"created": created, "errors": errors, "count": len(created)}
 
 
+def update_post_status(
+    post_id: str,
+    new_status: str,
+    tenant_id: str = DEFAULT_TENANT,
+    app_id: str | None = None,
+) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine import marketing_app
+    from Motor_Tecnico.accio_engine.editorial import apply_status
+
+    aid = _resolve_app_id(tenant_id, app_id)
+    queue = load_content_queue(tenant_id, aid)
+    for post in queue.get("posts", []):
+        if post.get("id") != post_id:
+            continue
+        if marketing_app.normalize_app_id(post.get("app_id") or aid) != aid:
+            raise ValueError(f"Post {post_id} no pertenece a app {aid}")
+        apply_status(post, new_status)
+        save_content_queue(queue, tenant_id, aid)
+        return post
+    raise ValueError(f"Post no encontrado: {post_id}")
+
+
+def editorial_counts(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, int]:
+    queue = load_content_queue_for_app(tenant_id, app_id)
+    counts: dict[str, int] = {}
+    for post in queue.get("posts", []):
+        st = normalize_status(post.get("status"))
+        counts[st] = counts.get(st, 0) + 1
+    return counts
+
+
 def set_calendar(calendar: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
     path = _paths(tenant_id)["calendar"]
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -189,12 +227,14 @@ def set_calendar(calendar: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> d
 
 
 def _platform_queue_stats(posts: list[dict[str, Any]], platform: str) -> dict[str, Any]:
-    pending = [p for p in posts if p.get("platform") == platform and p.get("status") == "pending"]
-    published = [p for p in posts if p.get("platform") == platform and p.get("status") == "published"]
+    pending = [p for p in posts if p.get("platform") == platform and is_publishable(p.get("status"))]
+    published = [p for p in posts if p.get("platform") == platform and normalize_status(p.get("status")) == "published"]
+    failed = [p for p in posts if p.get("platform") == platform and normalize_status(p.get("status")) == "failed"]
     pending.sort(key=lambda p: p.get("scheduled_at") or "")
     return {
         "pending": len(pending),
         "published": len(published),
+        "failed": len(failed),
         "next_pending": pending[0]["id"] if pending else None,
     }
 
@@ -208,7 +248,7 @@ def get_status(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> di
     paths = _paths(tenant_id)
     queue = load_content_queue_for_app(tenant_id, aid)
     posts = queue.get("posts", [])
-    views = all_connector_views(tenant_id)
+    views = all_connector_views(tenant_id, aid)
 
     content_queue: dict[str, Any] = {"tenant_id": tenant_id, "app_id": aid}
     for view in views:
@@ -251,6 +291,7 @@ def get_status(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> di
         "connectors": views,
         "prospection_csv_rows": lead_rows,
         "orders_pending": len(queue_store.list_orders(status="pending", tenant_id=tenant_id)),
+        "editorial": editorial_counts(tenant_id, aid),
         "state": queue_store.load_state(tenant_id),
         "paths": {k: str(v) for k, v in paths.items()},
     }

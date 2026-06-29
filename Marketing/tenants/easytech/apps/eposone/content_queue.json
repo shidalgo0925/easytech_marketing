@@ -1,0 +1,29 @@
+{
+  "posts": [
+    {
+      "id": "linkedin_08_retail_inventario",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-15T13:00:00-05:00",
+      "content_type": "valor",
+      "flyer": "flyers/08_eposone.png",
+      "flyer_num": 8,
+      "utm": "linkedin_post8",
+      "text": "Retail en Panamá: vendes bien, pero ¿tu inventario miente? 🛒\n\nSeñales de alerta:\n\n• Cierre de caja cuadra, pero hay faltantes en bodega\n• Compras se hacen \"a ojo\" porque el sistema va tarde\n• Devoluciones no actualizan stock el mismo día\n• Sin internet, la tienda \"opera a ciegas\"\n\nEl costo no es solo el producto perdido — es decidir con data vieja.\n\nTip: POS + inventario en tiempo real (y offline) no es lujo en retail PA — es supervivencia operativa.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#Retail #Panamá #PYME #Inventario #EPOSOne #EasyTech",
+      "first_comment": "¿Tu POS habla con inventario en tiempo real? Sí / No / Parcialmente",
+      "app_id": "eposone"
+    },
+    {
+      "id": "instagram_02_retail_tip",
+      "platform": "instagram",
+      "status": "pending",
+      "scheduled_at": "2026-07-12T13:00:00-05:00",
+      "content_type": "valor",
+      "flyer": "flyers/08_eposone.png",
+      "flyer_num": 8,
+      "utm": "instagram_post2",
+      "text": "Retail: caja cuadra pero bodega no 🛒\n\nSeñal #1 de POS desconectado del inventario real.\n\nTip en imagen → comenta SÍ/NO si te pasa.\n\n#Panama #Retail #PYME #EasyTech #Inventario",
+      "app_id": "eposone"
+    }
+  ]
+}

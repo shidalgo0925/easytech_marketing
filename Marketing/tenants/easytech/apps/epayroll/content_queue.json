@@ -1,0 +1,30 @@
+{
+  "posts": [
+    {
+      "id": "linkedin_06_planilla_consejo",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-08T13:00:00-05:00",
+      "content_type": "valor",
+      "flyer": "flyers/09_epayroll.png",
+      "flyer_num": 9,
+      "utm": "linkedin_post6",
+      "text": "Consejo de quincena para RRHH en Panamá 💼\n\nAntes de cerrar planilla, verifica que estos 5 datos cuadren:\n\n1. Horas extra vs marcación real\n2. Vacaciones pendientes vs política interna\n3. Deducciones vs último memo de CSS\n4. Comisiones vs reporte de ventas (misma fuente)\n5. Provisiones vs contabilidad del mes anterior\n\nSi uno falla, el error casi nunca es \"la fórmula de Excel\" — es data desconectada entre áreas.\n\nAutomatizar planilla no es solo calcular faster: es una sola fuente de verdad.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#Planilla #RRHH #Panamá #PYME #EasyTech #EPayRoll",
+      "first_comment": "¿Cuál punto te ha dado más dolores de cabeza? Comenta el número.",
+      "app_id": "epayroll"
+    },
+    {
+      "id": "facebook_02_planilla_tip",
+      "platform": "facebook",
+      "status": "pending",
+      "scheduled_at": "2026-07-09T13:00:00-05:00",
+      "content_type": "valor",
+      "flyer": "flyers/09_epayroll.png",
+      "flyer_num": 9,
+      "utm": "facebook_post2",
+      "text": "Consejo RRHH quincena en Panamá: antes de cerrar planilla, cruza horas extra, vacaciones, CSS y comisiones con la misma fuente de ventas.\n\nSi no cuadra, el problema suele ser data desconectada — no la fórmula.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938",
+      "first_comment": null,
+      "app_id": "epayroll"
+    }
+  ]
+}

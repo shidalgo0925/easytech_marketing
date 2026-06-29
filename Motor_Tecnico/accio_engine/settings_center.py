@@ -166,7 +166,7 @@ def load_ai_config(tenant_id: str) -> dict[str, Any]:
     return _read_json(
         _path(tenant_id, "ai.json"),
         {
-            "topic_model": "rules",
+            "topic_model": "llm",
             "image_model": "static_flyers",
             "tone_override": "",
             "enabled": True,

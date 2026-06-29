@@ -1,0 +1,30 @@
+{
+  "posts": [
+    {
+      "id": "linkedin_11_en1_demo",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-24T13:00:00-05:00",
+      "content_type": "venta",
+      "flyer": "flyers/05_en1_plataforma.png",
+      "flyer_num": 5,
+      "utm": "linkedin_post11",
+      "text": "¿Cuántos sistemas abres antes del primer café? ☕\n\nCRM aquí. Inventario allá. Reportes \"cuando contabilidad los arma\".\n\nEasyNodeOne (EN1) une ventas, inventario, facturación y reportes en una plataforma en la nube — pensada para operaciones de servicios en Panamá.\n\nEn demo de 30 min te mostramos TU flujo, no slides genéricos.\n\n🚀 Comenta EN1 o DEMO por DM.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EN1 #EasyNodeOne #Panamá #ERP #PYME #EasyTech #TransformacionDigital",
+      "first_comment": "¿Quieres ver EN1 con tu caso? Escribe EN1 y te escribimos.",
+      "app_id": "en1"
+    },
+    {
+      "id": "facebook_04_en1",
+      "platform": "facebook",
+      "status": "pending",
+      "scheduled_at": "2026-07-25T13:00:00-05:00",
+      "content_type": "venta",
+      "flyer": "flyers/05_en1_plataforma.png",
+      "flyer_num": 5,
+      "utm": "facebook_post4",
+      "text": "¿CRM en un lado e inventario en otro?\n\nEN1 integra ventas, stock y reportes en una plataforma.\n\nComenta EN1 o DEMO.\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938",
+      "first_comment": null,
+      "app_id": "en1"
+    }
+  ]
+}

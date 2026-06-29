@@ -194,6 +194,9 @@ def delete_article(slug: str, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]
     if file_path.is_file():
         file_path.unlink()
     return {"slug": slug, "deleted": True}
+
+
+def _contact_block(ctx: dict[str, Any]) -> str:
     contact = ctx.get("contacto") or {}
     email = contact.get("email", "easytechservices25@gmail.com")
     wa = contact.get("whatsapp", "+507 6688-4938")

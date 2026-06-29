@@ -21,6 +21,7 @@ if str(BASE_DIR) not in sys.path:
 
 from Motor_Tecnico.accio_engine import audit_service, auth_service, dashboard_data, executor, files_api, knowledge_api, marketing_app, queue_store, rbac, settings_center, tenant_profile, tenant_provisioning, tenant_secrets  # noqa: E402
 from Motor_Tecnico.accio_engine.env_loader import load_accio_env  # noqa: E402
+from Motor_Tecnico.accio_engine.marketing_plan_api import register_marketing_plan_api  # noqa: E402
 from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, TenantNotFoundError, list_tenants, resolve_tenant  # noqa: E402
 
 ACCIO_ENV = load_accio_env(BASE_DIR)
@@ -47,6 +48,8 @@ DASHBOARD_ASSETS = {
     "palette-preview.html",
     "login.html",
     "empresas.html",
+    "plan_slice.css",
+    "plan_slice.js",
 }
 
 CRITICAL_CSS = """
@@ -525,6 +528,42 @@ def _render_dashboard(tenant_id: str) -> Response:
     )
 
 
+def _render_plan_slice(tenant_id: str) -> Response:
+    tenant, err = _tenant_or_404(tenant_id)
+    if tenant is None:
+        return jsonify({"ok": False, "error": err}), 404
+    html_path = Path(app.static_folder) / "plan_slice.html"
+    html = html_path.read_text(encoding="utf-8")
+    css_design = _static_asset_url("accio-design.css")
+    css_slice = _static_asset_url("plan_slice.css")
+    js_slice = _static_asset_url("plan_slice.js")
+    icon_url = _static_asset_url("em-logomark.svg")
+    html = html.replace('href="/accio/static/em-logomark.svg"', f'href="{icon_url}"', 1)
+    html = html.replace('href="/accio/static/accio-design.css"', f'href="{css_design}"', 1)
+    html = html.replace('href="/accio/static/plan_slice.css"', f'href="{css_slice}"', 1)
+    html = html.replace('src="/accio/static/plan_slice.js"', f'src="{js_slice}"', 1)
+    tenants_js = json.dumps(_allowed_tenant_rows(), ensure_ascii=False)
+    user_name = session.get("user_name") or session.get("user_id") or "Administrador"
+    app_id = _requested_app_id(tenant_id)
+    inject = (
+        f"<script>window.__ACCIO_TENANT__={json.dumps(tenant_id)};"
+        f"window.__ACCIO_TENANTS__={tenants_js};"
+        f"window.__ACCIO_EMPRESA_NAME__={json.dumps(tenant.display_name)};"
+        f"window.__ACCIO_USER_NAME__={json.dumps(str(user_name))};"
+        f"window.__ACCIO_APP__={json.dumps(app_id)};</script>"
+    )
+    html = html.replace("</head>", inject + "\n</head>", 1)
+    return Response(
+        html,
+        mimetype="text/html",
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "CDN-Cache-Control": "no-store",
+        },
+    )
+
+
 @app.get("/accio/login")
 def login_redirect_root():
     if session.get("accio_auth"):
@@ -648,6 +687,18 @@ def dashboard_page(tenant_id: str):
     if err:
         return jsonify({"ok": False, "error": err}), 403
     return _render_dashboard(tenant_id)
+
+
+@app.get("/accio/plan/<tenant_id>/", strict_slashes=False)
+def plan_slice_page(tenant_id: str):
+    if not session.get("accio_auth"):
+        return redirect(_dashboard_login_url(tenant_id), code=302)
+    if not _user_can_access_tenant(tenant_id):
+        return jsonify({"ok": False, "error": "Sin acceso a este tenant"}), 403
+    err = _enter_empresa_session(tenant_id)
+    if err:
+        return jsonify({"ok": False, "error": err}), 403
+    return _render_plan_slice(tenant_id)
 
 
 @app.get("/accio/dashboard/<path:asset>")
@@ -789,6 +840,34 @@ def emaccion_product_lead():
             values["stage_id"] = stage_id[0]
 
         lead_id = models.execute_kw(db, uid, password, "crm.lead", "create", [values])
+        try:
+            from Motor_Tecnico.accio_engine import leads_store, metrics_store
+
+            local = leads_store.record_lead(
+                "easytech",
+                app_id="default",
+                campaign_id="",
+                source="emaccion_producto",
+                medium="landing",
+                channel="web",
+                landing_url=request.referrer or "https://emaccion.etsrv.site/accio/producto/",
+                utm={},
+                status="new",
+                crm_destination="odoo",
+                crm_lead_id=lead_id,
+                contact={"name": name, "email": email, "phone": phone, "company": company},
+                meta={"intent": intent, "intent_label": intent_label},
+            )
+            metrics_store.record_event(
+                "easytech",
+                "lead_created",
+                app_id="default",
+                channel="web",
+                lead_id=local["id"],
+                meta={"crm_lead_id": lead_id, "source": "emaccion_producto"},
+            )
+        except Exception:
+            pass
         return jsonify({"ok": True, "lead_id": lead_id, "message": "Solicitud recibida. Le contactaremos pronto."})
     except Exception as exc:
         return jsonify({"ok": False, "error": f"No se pudo registrar la solicitud: {exc}"}), 500
@@ -1239,6 +1318,35 @@ def dashboard_calendar(tenant_id: str):
     return jsonify({"ok": True, "app_id": app_id, **dashboard_data.load_calendar_view(tenant_id, app_id)})
 
 
+@app.get("/accio/<tenant_id>/dashboard/api/publications")
+@require_api_key
+def dashboard_publications(tenant_id: str):
+    from Motor_Tecnico.accio_engine import publications_api
+
+    app_id = request.args.get("app_id") or _requested_app_id(tenant_id)
+    status = request.args.get("status")
+    platform = request.args.get("platform") or request.args.get("channel")
+    campaign_id = request.args.get("campaign_id")
+    limit = min(int(request.args.get("limit", 100)), 500)
+    offset = max(int(request.args.get("offset", 0)), 0)
+    if request.args.get("all_apps") == "1":
+        app_id = None
+    return jsonify(
+        {
+            "ok": True,
+            **publications_api.list_publications(
+                tenant_id,
+                app_id=app_id,
+                status=status,
+                platform=platform,
+                campaign_id=campaign_id,
+                limit=limit,
+                offset=offset,
+            ),
+        }
+    )
+
+
 @app.get("/accio/<tenant_id>/dashboard/api/metrics")
 @require_api_key
 def dashboard_metrics(tenant_id: str):
@@ -1380,12 +1488,14 @@ def apps_list(tenant_id: str):
     if tenant is None:
         return jsonify({"ok": False, "error": err}), 404
     apps = [a.to_dict() for a in marketing_app.list_apps(tenant_id)]
+    provisioned = marketing_app.provision_all_apps(tenant_id)
     return jsonify(
         {
             "ok": True,
             "tenant_id": tenant_id,
             "default_app_id": marketing_app.default_app_id(tenant_id),
             "apps": apps,
+            "provisioned": provisioned,
         }
     )
 
@@ -1595,10 +1705,12 @@ def publish_linkedin_now(tenant_id: str):
 def publish_meta_now(tenant_id: str):
     body = request.get_json(silent=True) or {}
     platform = (body.get("platform") or "all").strip().lower()
+    app_id = _requested_app_id(tenant_id)
     params = {
         "platform": platform,
         "force": bool(body.get("force")),
         "dry_run": bool(body.get("dry_run")),
+        "app_id": app_id,
     }
     action = "publish_meta"
     if platform == "facebook":
@@ -1617,10 +1729,12 @@ def publish_channel_now(tenant_id: str):
     connector = (body.get("connector") or body.get("platform") or "").strip()
     if not connector:
         return jsonify({"ok": False, "error": "Campo connector o platform requerido"}), 400
+    app_id = _requested_app_id(tenant_id)
     params = {
         "connector": connector,
         "force": bool(body.get("force")),
         "dry_run": bool(body.get("dry_run")),
+        "app_id": app_id,
     }
     order = queue_store.create_order("publish_channel", params, "api", tenant_id)
     order = _run_order(order, tenant_id)
@@ -1631,16 +1745,238 @@ def publish_channel_now(tenant_id: str):
 @require_api_key
 def content_queue_add(tenant_id: str):
     body = request.get_json(silent=True) or {}
+    app_id = _requested_app_id(tenant_id)
     if "posts" in body:
         result = executor.enqueue_posts(body["posts"], tenant_id)
         return jsonify({"ok": len(result["errors"]) == 0, **result})
     if "post" in body:
         try:
-            post = executor.enqueue_post(body["post"], tenant_id)
+            post = executor.enqueue_post(body["post"], tenant_id, app_id=app_id)
             return jsonify({"ok": True, "post": post}), 201
         except ValueError as exc:
             return jsonify({"ok": False, "error": str(exc)}), 400
     return jsonify({"ok": False, "error": "Enviar post o posts"}), 400
+
+
+@app.patch("/accio/<tenant_id>/content/queue/<post_id>")
+@require_api_key
+def content_queue_patch_status(tenant_id: str, post_id: str):
+    body = request.get_json(silent=True) or {}
+    new_status = (body.get("status") or "").strip()
+    if not new_status:
+        return jsonify({"ok": False, "error": "Campo status requerido"}), 400
+    app_id = _requested_app_id(tenant_id)
+    try:
+        post = executor.update_post_status(post_id, new_status, tenant_id, app_id)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    return jsonify({"ok": True, "app_id": app_id, "post": post})
+
+
+@app.post("/accio/<tenant_id>/content/queue/migrate")
+@require_api_key
+def content_queue_migrate(tenant_id: str):
+    from Motor_Tecnico.accio_engine import queue_migration
+
+    body = request.get_json(silent=True) or {}
+    dry_run = bool(body.get("dry_run"))
+    result = queue_migration.migrate_default_queue_to_apps(tenant_id, dry_run=dry_run)
+    return jsonify(result)
+
+
+@app.get("/accio/<tenant_id>/publications/<post_id>")
+@require_api_key
+def publication_detail(tenant_id: str, post_id: str):
+    from Motor_Tecnico.accio_engine import publications_api
+
+    app_id = request.args.get("app_id") or _requested_app_id(tenant_id)
+    row = publications_api.find_publication(tenant_id, post_id, app_id if request.args.get("all_apps") != "1" else None)
+    if not row:
+        return jsonify({"ok": False, "error": "Publicación no encontrada"}), 404
+    return jsonify({"ok": True, "publication": row})
+
+
+@app.post("/accio/<tenant_id>/publications/<post_id>/duplicate")
+@require_api_key
+def publication_duplicate(tenant_id: str, post_id: str):
+    from Motor_Tecnico.accio_engine import publications_api
+
+    body = request.get_json(silent=True) or {}
+    app_id = _requested_app_id(tenant_id)
+    try:
+        post = publications_api.duplicate_publication(
+            tenant_id,
+            post_id,
+            app_id=app_id,
+            platform=body.get("platform"),
+            author=session.get("user_name") or session.get("user_id") or "dashboard",
+        )
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    return jsonify({"ok": True, "post": post})
+
+
+@app.post("/accio/<tenant_id>/publications/<post_id>/archive")
+@require_api_key
+def publication_archive(tenant_id: str, post_id: str):
+    app_id = _requested_app_id(tenant_id)
+    try:
+        post = executor.update_post_status(post_id, "archived", tenant_id, app_id)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    return jsonify({"ok": True, "post": post})
+
+
+@app.post("/accio/<tenant_id>/publications/<post_id>/reference")
+@require_api_key
+def publication_reference(tenant_id: str, post_id: str):
+    from Motor_Tecnico.accio_engine import publications_api
+
+    body = request.get_json(silent=True) or {}
+    app_id = _requested_app_id(tenant_id)
+    try:
+        post = publications_api.mark_reference(tenant_id, post_id, value=bool(body.get("value", True)), app_id=app_id)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    return jsonify({"ok": True, "post": post})
+
+
+@app.patch("/accio/<tenant_id>/publications/<post_id>")
+@require_api_key
+def publication_patch(tenant_id: str, post_id: str):
+    from Motor_Tecnico.accio_engine import publications_api
+
+    body = request.get_json(silent=True) or {}
+    app_id = _requested_app_id(tenant_id)
+    if body.get("scheduled_at"):
+        try:
+            post = publications_api.reschedule_publication(tenant_id, post_id, body["scheduled_at"], app_id)
+        except ValueError as exc:
+            return jsonify({"ok": False, "error": str(exc)}), 400
+        return jsonify({"ok": True, "post": post})
+    if body.get("status"):
+        try:
+            post = executor.update_post_status(post_id, body["status"], tenant_id, app_id)
+        except ValueError as exc:
+            return jsonify({"ok": False, "error": str(exc)}), 400
+        return jsonify({"ok": True, "post": post})
+    return jsonify({"ok": False, "error": "Enviar scheduled_at o status"}), 400
+
+
+@app.get("/accio/<tenant_id>/assistant/context")
+@require_api_key
+def assistant_context(tenant_id: str):
+    from Motor_Tecnico.accio_engine import assistant_llm, assistant_service
+
+    app_id = _requested_app_id(tenant_id)
+    ctx = assistant_service.build_context(tenant_id, app_id)
+    return jsonify(
+        {
+            "ok": True,
+            "tenant_id": tenant_id,
+            "app_id": app_id,
+            "apps_count": len(ctx.get("apps_catalog") or []),
+            "context": assistant_llm.compact_context(ctx),
+        }
+    )
+
+
+@app.get("/accio/<tenant_id>/assistant/status")
+@require_api_key
+def assistant_status(tenant_id: str):
+    from Motor_Tecnico.accio_engine import assistant_llm, settings_center
+
+    ai_cfg = settings_center.load_ai_config(tenant_id)
+    has_key = bool(assistant_llm.resolve_openai_key(tenant_id))
+    enabled = assistant_llm.assistant_enabled(ai_cfg)
+    model = assistant_llm.resolve_model(tenant_id, ai_cfg) if has_key else None
+    return jsonify(
+        {
+            "ok": True,
+            "llm_available": assistant_llm.llm_available(tenant_id, ai_cfg),
+            "assistant_enabled": enabled,
+            "has_openai_key": has_key,
+            "model": model,
+            "ai_config": ai_cfg,
+        }
+    )
+
+
+@app.post("/accio/<tenant_id>/assistant/chat")
+@require_api_key
+def assistant_chat(tenant_id: str):
+    from Motor_Tecnico.accio_engine import assistant_service
+
+    body = request.get_json(silent=True) or {}
+    prompt = (body.get("prompt") or body.get("message") or "").strip()
+    if not prompt:
+        return jsonify({"ok": False, "error": "Prompt requerido"}), 400
+    app_id = _requested_app_id(tenant_id)
+    result = assistant_service.process_message(
+        tenant_id,
+        prompt,
+        app_id=app_id,
+        user=session.get("user_name") or session.get("user_id") or "dashboard",
+        view=body.get("view", ""),
+        selected_post_id=body.get("selected_post_id"),
+        chat_history=body.get("history"),
+    )
+    return jsonify(result)
+
+
+@app.get("/accio/<tenant_id>/assistant/orders")
+@require_api_key
+def assistant_orders_list(tenant_id: str):
+    from Motor_Tecnico.accio_engine import assistant_store
+
+    # Todas las órdenes pendientes del tenant (visible desde cualquier app)
+    return jsonify({"ok": True, "orders": assistant_store.list_pending_orders(tenant_id)})
+
+
+@app.post("/accio/<tenant_id>/assistant/orders/<order_id>/approve")
+@require_api_key
+def assistant_order_approve(tenant_id: str, order_id: str):
+    from Motor_Tecnico.accio_engine import assistant_service
+
+    try:
+        result = assistant_service.approve_order(
+            tenant_id, order_id, user=session.get("user_name") or session.get("user_id") or "dashboard"
+        )
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    return jsonify(result)
+
+
+@app.post("/accio/<tenant_id>/assistant/orders/<order_id>/reject")
+@require_api_key
+def assistant_order_reject(tenant_id: str, order_id: str):
+    from Motor_Tecnico.accio_engine import assistant_service
+
+    try:
+        result = assistant_service.reject_order(tenant_id, order_id)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    return jsonify(result)
+
+
+@app.get("/accio/<tenant_id>/assistant/history")
+@require_api_key
+def assistant_history(tenant_id: str):
+    from Motor_Tecnico.accio_engine import assistant_store
+
+    limit = min(int(request.args.get("limit", 30)), 100)
+    return jsonify({"ok": True, "history": assistant_store.list_audit(tenant_id, limit=limit)})
+
+
+@app.get("/accio/<tenant_id>/leads")
+@require_api_key
+def leads_list(tenant_id: str):
+    from Motor_Tecnico.accio_engine import leads_store
+
+    app_id = request.args.get("app_id") or _requested_app_id(tenant_id)
+    limit = min(int(request.args.get("limit", 50)), 200)
+    items = leads_store.list_leads(tenant_id, app_id=app_id if app_id else None, limit=limit)
+    return jsonify({"ok": True, "tenant_id": tenant_id, "app_id": app_id, "leads": items})
 
 
 @app.post("/accio/<tenant_id>/calendar")
@@ -1698,6 +2034,9 @@ def _run_order(order: dict, tenant_id: str) -> dict:
             result=None,
             error=str(exc),
         )
+
+
+register_marketing_plan_api(app, require_api_key)
 
 
 # --- Legacy routes (default easytech) ---

@@ -104,6 +104,16 @@ class MarketingAppTests(unittest.TestCase):
             with self.assertRaises(AppNotFoundError):
                 marketing_app.get_app("easytech", "no-existe")
 
+    def test_provision_app_directory(self):
+        with self._patch():
+            marketing_app.bootstrap_registry("easytech")
+            marketing_app.create_app("easytech", {"app_id": "en1-test", "name": "EN1 Test"})
+            paths = marketing_app.provision_app_directory("easytech", "en1-test")
+            self.assertTrue((paths["app_root"] / "profile.json").is_file())
+            self.assertTrue((paths["app_root"] / "content_queue.json").is_file())
+            self.assertTrue((paths["app_root"] / "knowledge").is_dir())
+            self.assertTrue((paths["app_root"] / "metrics").is_dir())
+
 
 if __name__ == "__main__":
     unittest.main()

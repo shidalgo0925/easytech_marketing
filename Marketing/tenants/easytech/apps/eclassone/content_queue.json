@@ -1,0 +1,29 @@
+{
+  "posts": [
+    {
+      "id": "linkedin_09_educacion_matricula",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-17T13:00:00-05:00",
+      "content_type": "valor",
+      "flyer": "flyers/06_eclassone.png",
+      "flyer_num": 6,
+      "utm": "linkedin_post9",
+      "text": "Educación privada en Panamá: el cuello de botella casi nunca es \"falta de software\" 🎓\n\nEs esto:\n\n• Matrícula en un archivo\n• Pagos en otro\n• Notas en un tercero\n• Asistencia en WhatsApp\n\nResultado: 3 personas reconciliando lo mismo cada inicio de ciclo.\n\nInsight: centralizar matrícula + pagos + calificaciones no es digitalizar por moda — es recuperar horas docente y administrativas.\n\nPregunta útil: ¿cuántas horas hombre pierdes en inscripciones cada trimestre?\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EdTech #Panamá #Educacion #EClassOne #EasyTech #GestionAcademica",
+      "first_comment": "Directores académicos: ¿matrícula digital o híbrida hoy? Cuéntanos.",
+      "app_id": "eclassone"
+    },
+    {
+      "id": "instagram_04_educacion",
+      "platform": "instagram",
+      "status": "pending",
+      "scheduled_at": "2026-07-26T13:00:00-05:00",
+      "content_type": "valor",
+      "flyer": "flyers/06_eclassone.png",
+      "flyer_num": 6,
+      "utm": "instagram_post4",
+      "text": "Matrícula en un file · pagos en otro · notas en otro 🎓\n\nEl caos administrativo roba tiempo docente.\n\n#Panama #EdTech #EClassOne #Educacion #EasyTech",
+      "app_id": "eclassone"
+    }
+  ]
+}

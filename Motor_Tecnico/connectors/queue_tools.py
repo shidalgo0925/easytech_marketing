@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from Motor_Tecnico.accio_engine.editorial import is_publishable
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 QUEUE_PATH = BASE_DIR / "Marketing" / "content_queue.json"
 PANAMA = ZoneInfo("America/Panama")
@@ -32,7 +34,7 @@ def pick_next_post(queue: dict[str, Any], platform: str, force: bool = False) ->
     for post in queue.get("posts", []):
         if post.get("platform") != platform:
             continue
-        if post.get("status") != "pending":
+        if not is_publishable(post.get("status")):
             continue
         scheduled = parse_scheduled(post["scheduled_at"])
         if force or scheduled <= now:

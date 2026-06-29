@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from Motor_Tecnico.accio_engine import executor, queue_store
+from Motor_Tecnico.accio_engine import executor, metrics_store, queue_store
+from Motor_Tecnico.accio_engine.editorial import editorial_label, is_publishable, normalize_status
 from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, effective_paths, list_tenants, resolve_tenant
 from Motor_Tecnico.connectors.registry import all_connector_views
 
@@ -38,8 +39,8 @@ def _paths(tenant_id: str, app_id: str | None = None) -> dict[str, Path]:
     }
 
 
-def load_connectors(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
-    return all_connector_views(tenant_id)
+def load_connectors(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> list[dict[str, Any]]:
+    return all_connector_views(tenant_id, app_id)
 
 
 def _odoo_client(tenant_id: str = DEFAULT_TENANT):
@@ -190,7 +191,8 @@ def load_campaigns(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -
                 "product": base.get("product") or topic_by_num.get(flyer_num or 0, post_id),
                 "flyer_num": flyer_num,
                 "channel": post.get("platform", "linkedin"),
-                "status": post.get("status", "pending"),
+                "status": normalize_status(post.get("status")),
+                "status_label": editorial_label(post.get("status")),
                 "scheduled_at": post.get("scheduled_at"),
                 "published_at": post.get("published_at"),
                 "utm": post.get("utm"),
@@ -223,7 +225,8 @@ def load_calendar_view(tenant_id: str = DEFAULT_TENANT, app_id: str | None = Non
             posts.append(
                 {
                     **item,
-                    "status": live.get("status", "pending"),
+                    "status": normalize_status(live.get("status")),
+                    "status_label": editorial_label(live.get("status")),
                     "published_at": live.get("published_at"),
                 }
             )
@@ -320,6 +323,7 @@ def load_metrics(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> 
             "publish_log_entries": len(publish_log),
             "recent_published": publish_log[-3:][::-1] if publish_log else [],
         },
+        "app_events": metrics_store.summary_for_dashboard(tenant_id, app_id),
         "prospection": {"csv_rows": status["prospection_csv_rows"]},
         "odoo": {
             "total_leads": total_leads,
@@ -341,9 +345,10 @@ def pending_posts(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) ->
     queue = executor.load_content_queue_for_app(tenant_id, app_id)
     items = []
     for post in queue.get("posts", []):
-        if post.get("status") != "pending":
+        if not is_publishable(post.get("status")):
             continue
         flyer = post.get("flyer", "")
+        st = normalize_status(post.get("status"))
         items.append(
             {
                 "id": post.get("id"),
@@ -352,6 +357,9 @@ def pending_posts(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) ->
                 "flyer": flyer.split("/")[-1] if flyer else "—",
                 "preview": (post.get("text") or "")[:120] + "…",
                 "utm": post.get("utm"),
+                "status": st,
+                "status_label": editorial_label(st),
+                "app_id": post.get("app_id"),
             }
         )
     items.sort(key=lambda p: p.get("scheduled_at") or "")
@@ -404,6 +412,7 @@ def get_summary(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> d
             "instagram_pending": status["content_queue"].get("instagram_pending", 0),
             "prospection_csv": status["prospection_csv_rows"],
             "orders_pending": status["orders_pending"],
+            "editorial": status.get("editorial", {}),
         },
         "pending_posts": pending_posts(tenant_id, aid),
         "published_posts": published_posts(tenant_id=tenant_id, app_id=aid),
@@ -411,7 +420,7 @@ def get_summary(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> d
         "calendar": load_calendar_view(tenant_id, aid),
         "metrics": load_metrics(tenant_id, aid),
         "flyers": load_flyers_library(tenant_id, aid),
-        "connectors": load_connectors(tenant_id),
+        "connectors": load_connectors(tenant_id, aid),
         "orders": orders,
         "odoo": fetch_odoo_leads(tenant_id=tenant_id),
         "links": {

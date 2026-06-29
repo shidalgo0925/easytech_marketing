@@ -1,0 +1,73 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import date
+from decimal import Decimal
+from typing import Any
+
+from .enums import ConflictResolution, PlanPriority, StrategyType
+from .model import SuccessCriteria, TargetAudience
+
+
+@dataclass(frozen=True)
+class CreatePlanCommand:
+    tenant_id: str
+    app_id: str
+    nombre: str
+    objetivo_general: str
+    strategy_type: StrategyType | str
+    north_star_metric: str
+    success_criteria: SuccessCriteria
+    publico_objetivo: TargetAudience
+    marketing_brief: str
+    periodo_inicio: date | str
+    periodo_fin: date | str
+    budget_amount: Decimal | int | float | str
+    budget_currency: str
+    prioridad: PlanPriority | str
+    created_by: str
+    observaciones: str = ""
+    extra_fields: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class UpdatePlanCommand:
+    plan_id: str
+    tenant_id: str
+    updated_by: str
+    nombre: str | None = None
+    objetivo_general: str | None = None
+    strategy_type: StrategyType | str | None = None
+    north_star_metric: str | None = None
+    success_criteria: SuccessCriteria | None = None
+    publico_objetivo: TargetAudience | None = None
+    marketing_brief: str | None = None
+    periodo_inicio: date | str | None = None
+    periodo_fin: date | str | None = None
+    budget_amount: Decimal | int | float | str | None = None
+    budget_currency: str | None = None
+    prioridad: PlanPriority | str | None = None
+    observaciones: str | None = None
+    extra_fields: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ActivatePlanCommand:
+    plan_id: str
+    tenant_id: str
+    activated_by: str
+    resolution: ConflictResolution | None = None
+
+
+@dataclass(frozen=True)
+class PausePlanCommand:
+    plan_id: str
+    tenant_id: str
+    paused_by: str
+
+
+@dataclass(frozen=True)
+class CompletePlanCommand:
+    plan_id: str
+    tenant_id: str
+    completed_by: str

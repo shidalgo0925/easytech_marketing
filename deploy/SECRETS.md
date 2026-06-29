@@ -24,6 +24,9 @@ Guardar **fuera del repositorio** (gestor de contraseñas, vault, backup cifrado
 | `META_APP_SECRET` | App Meta |
 | `META_PAGE_ACCESS_TOKEN` | Token pagina FB |
 | `META_IG_USER_ID` | Instagram Business ID |
+| `OPENAI_API_KEY` | Asistente IA conversacional (OpenAI, `sk-…`) — **no** es `ACCIO_API_KEY` |
+| `OPENAI_MODEL` | Modelo OpenAI (default: `gpt-4o-mini`) |
+| `AI_ASSISTANT_ENABLED` | `true` / `false` — activar asistente IA globalmente |
 
 ## Backup recomendado
 

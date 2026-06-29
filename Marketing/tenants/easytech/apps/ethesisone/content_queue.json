@@ -1,0 +1,17 @@
+{
+  "posts": [
+    {
+      "id": "linkedin_10_tesis_caos",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-22T13:00:00-05:00",
+      "content_type": "valor",
+      "flyer": "flyers/07_ethesistone.png",
+      "flyer_num": 7,
+      "utm": "linkedin_post10",
+      "text": "Universidades: el caos de tesis tiene nombre — \"versión final_v7_final2.pdf\" 📚\n\nLo que vemos en procesos manuales:\n\n→ Asesorías sin trazabilidad de observaciones\n→ Jurados enterados tarde de cambios de tema\n→ Plazos que dependen de correos, no de workflow\n→ Estadísticas académicas imposibles de sacar a tiempo\n\nDigitalizar tesis no es burocracia extra: es claridad para estudiante, asesor y coordinación.\n\nValor inmediato: menos correos repetidos, más tiempo de acompañamiento real.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#EducacionSuperior #Panamá #EThesisOne #EasyTech #TransformacionDigital",
+      "first_comment": "Coordinadores: ¿cuántas versiones de tesis manejan por correo al mes?",
+      "app_id": "ethesisone"
+    }
+  ]
+}

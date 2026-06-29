@@ -28,6 +28,8 @@ from Motor_Tecnico.publisher_tenant import (
     resolve_flyer_path,
 )
 
+from Motor_Tecnico.accio_engine.editorial import is_publishable
+
 PANAMA = ZoneInfo("America/Panama")
 
 load_dotenv(BASE_DIR / ".env")
@@ -70,7 +72,7 @@ def pick_next_post(queue: dict, force: bool = False) -> dict | None:
     for post in queue.get("posts", []):
         if post.get("platform") != "linkedin":
             continue
-        if post.get("status") != "pending":
+        if not is_publishable(post.get("status")):
             continue
         scheduled = parse_scheduled(post["scheduled_at"])
         if force or scheduled <= now:
@@ -273,6 +275,19 @@ def publish_next(
         },
         tenant_id,
     )
+    try:
+        from Motor_Tecnico.accio_engine import metrics_store
+
+        metrics_store.record_event(
+            tenant_id,
+            "published",
+            app_id=aid,
+            channel="linkedin",
+            post_id=post["id"],
+            meta={"linkedin_post_id": post_id},
+        )
+    except Exception:
+        pass
     print("Listo. Cola actualizada.")
 
 

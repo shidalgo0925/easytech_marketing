@@ -56,6 +56,8 @@ def permission_for_request(method: str, path: str, tenant_id: str) -> str | None
         return "publish"
     if rel.startswith("content/queue") or rel.startswith("content/generate-topic"):
         return "publish"
+    if rel.startswith("assistant/") or rel.startswith("publications/"):
+        return "read" if method in ("GET", "HEAD") else "publish"
     if rel.startswith("settings/"):
         return "config"
     if rel.startswith("config/") or rel.startswith("calendar"):

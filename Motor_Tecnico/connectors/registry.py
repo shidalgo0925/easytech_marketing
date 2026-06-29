@@ -54,13 +54,18 @@ def is_configured(connector: dict[str, Any], tenant_id: str = DEFAULT_TENANT) ->
     return all(_env_or_secret(tenant_id, key) for key in required)
 
 
-def platform_stats(platform: str, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
-    queue_path = _paths(tenant_id)["content_queue"]
-    if not queue_path.exists():
+def platform_stats(platform: str, tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine import marketing_app
+    from Motor_Tecnico.accio_engine.editorial import is_publishable, normalize_status
+
+    path = marketing_app.queue_file_path(tenant_id, app_id)
+    if not path.exists():
         return {"pending": 0, "published": 0, "next_pending": None}
-    posts = json.loads(queue_path.read_text(encoding="utf-8")).get("posts", [])
-    pending = [p for p in posts if p.get("platform") == platform and p.get("status") == "pending"]
-    published = [p for p in posts if p.get("platform") == platform and p.get("status") == "published"]
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    aid = marketing_app.normalize_app_id(app_id or marketing_app.default_app_id(tenant_id))
+    posts = marketing_app.posts_for_app(raw.get("posts", []), aid, tenant_id)
+    pending = [p for p in posts if p.get("platform") == platform and is_publishable(p.get("status"))]
+    published = [p for p in posts if p.get("platform") == platform and normalize_status(p.get("status")) == "published"]
     pending.sort(key=lambda p: p.get("scheduled_at") or "")
     return {
         "pending": len(pending),
@@ -78,8 +83,8 @@ def connector_status(connector: dict[str, Any], tenant_id: str = DEFAULT_TENANT)
     return "needs_auth"
 
 
-def connector_view(connector: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
-    stats = platform_stats(connector["platform"], tenant_id)
+def connector_view(connector: dict[str, Any], tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    stats = platform_stats(connector["platform"], tenant_id, app_id)
     status = connector_status(connector, tenant_id)
     oauth = connector.get("oauth") or {}
     missing_env = [
@@ -102,8 +107,9 @@ def connector_view(connector: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -
         "log_file": connector.get("log_file"),
         "docs": connector.get("docs"),
         "tenant_id": tenant_id,
+        "app_id": app_id or "",
     }
 
 
-def all_connector_views(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
-    return [connector_view(c, tenant_id) for c in list_connectors(tenant_id=tenant_id)]
+def all_connector_views(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> list[dict[str, Any]]:
+    return [connector_view(c, tenant_id, app_id) for c in list_connectors(tenant_id=tenant_id)]

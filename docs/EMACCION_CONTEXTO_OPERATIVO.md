@@ -1,8 +1,8 @@
 # EM+Acción — Contexto operativo (snapshot)
 
-**Fecha:** 2026-06-27  
+**Fecha:** 2026-06-29  
 **Repo:** `/opt/easytech_marketing` · **Servicio:** `easytech-accio-engine` (:8092)  
-**Commit ref:** `7495180` · **Bitácora:** `docs/sessions/2026-06-27.md`
+**Bitácora:** `docs/sessions/2026-06-29-vs1-ux.md`
 
 Documento de continuidad para operadores y agentes. Complementa `docs/CONTEXTO.md` y `docs/EMACCION_V2_ESTADO.md`.
 
@@ -49,6 +49,7 @@ GET /accio/login/          → Login plataforma (email + contraseña)
 | `/accio/empresas/` | Selector de empresa |
 | `/accio/dashboard/` | Redirige a empresa en sesión o easytech si tiene acceso |
 | `/accio/dashboard/{tenant_id}/` | Dashboard operativo |
+| `/accio/plan/{tenant_id}/` | **Vertical Slice 1** — módulo Plan (5 pantallas) |
 | `/accio/{tenant_id}/legal/` | Documentos legales por tenant |
 | `/accio/login/{tenant_id}/` | Login legacy por empresa (compat) |
 
@@ -95,6 +96,30 @@ Página comercial oficial — **no** landing por tenant. Spec: `docs/LANDING_EMA
 | Configuración | Centro de configuración (13 sub-secciones) |
 
 Header: selector **Empresa** + nombre comercial. Barra de progreso al arrancar (~5 s).
+
+Pestaña **Plan** del dashboard redirige a `/accio/plan/{tenant}/` (módulo VS1).
+
+---
+
+## 4b. Vertical Slice 1 — Plan de Marketing (jun 2026)
+
+**Estado:** Implementado en repo · **sin deploy producción** hasta cierre UX.
+
+| Pantalla | Ruta / nav | UX producto |
+|----------|------------|-------------|
+| 1 Inicio | Sidebar · Inicio | ✅ Revisada |
+| 2 Crear Plan | Sidebar · Plan | ✅ Revisada |
+| 3 Activar Plan | Tras guardar plan | ⏳ Pendiente |
+| 4 Contexto | Sidebar · Contexto | ✅ Revisada |
+| 5 Propuesta | Sidebar · Propuestas | ⏳ Pendiente |
+
+**API v1:** `/api/v1/tenants/{tenant}/apps/{app}/marketing-plans` (+ `marketing-context`, `planner/proposals`)
+
+**Docs:** `docs/VERTICAL_SLICE_1.md` · `docs/MARKETING_PLAN_DOMAIN_v1.1.md`
+
+**Evidencia UX:** `Marketing/deliverables/vertical_slice_1/`
+
+**Regla:** iteración producto pantalla por pantalla; no reiniciar servicio en prod sin GO final.
 
 ---
 
@@ -156,7 +181,15 @@ Sitio referencia: https://relaticpanama.org/
 
 | Archivo | Rol |
 |---------|-----|
-| `Motor_Tecnico/accio_engine/app.py` | Rutas HTTP, landing, legal, leads |
+| `Motor_Tecnico/accio_engine/static/plan_slice.*` | UI Vertical Slice 1 (5 pantallas) |
+| `Motor_Tecnico/accio_engine/marketing_plan_*` | Dominio + API v1 Plan de Marketing |
+| `Motor_Tecnico/accio_engine/marketing_context_builder.py` | Context Builder V1 |
+| `Motor_Tecnico/accio_engine/marketing_planner.py` | Planner 3 propuestas |
+| `Motor_Tecnico/accio_engine/marketing_app.py` | Modelo Tenant → Apps, paths, provision |
+| `Motor_Tecnico/accio_engine/editorial.py` | Estados editoriales y transiciones |
+| `Motor_Tecnico/accio_engine/leads_store.py` | Leads locales con tenant/app/UTM |
+| `Motor_Tecnico/accio_engine/metrics_store.py` | Eventos métricos por tenant/app |
+| `Motor_Tecnico/accio_engine/app.py` | Rutas HTTP, landing, legal, leads, cola editorial |
 | `Motor_Tecnico/accio_engine/auth_service.py` | Login, RBAC, protección super_admin |
 | `Motor_Tecnico/accio_engine/static/emaccion/` | Landing producto |
 | `Motor_Tecnico/accio_engine/static/dashboard.html` | UI principal |
@@ -167,7 +200,20 @@ Sitio referencia: https://relaticpanama.org/
 
 ---
 
-## 8. Pendiente
+## 8. Procesos internos (GO 2026-06-27)
+
+| Capacidad | Estado |
+|-----------|--------|
+| Modelo Apps (`profile`, `branding`, `knowledge`, cola, calendario, métricas) | ✅ `provision_all_apps()` |
+| Cola por app `tenants/{id}/apps/{app_id}/content_queue.json` | ✅ EasyTech default sigue en raíz |
+| Selector Tenant + App en dashboard | ✅ |
+| Estados editoriales (`draft` … `archived`, legacy `pending`) | ✅ |
+| PATCH `/accio/{tenant}/content/queue/{post_id}` | ✅ |
+| Conectores con `tenant_id` + `app_id` | ✅ LinkedIn, Meta, channel, stub |
+| Leads locales + Odoo landing | ✅ `leads.json` |
+| Métricas por app | ✅ `metrics/events.jsonl` |
+
+**Pendiente operativo**
 
 | Ítem | Prioridad |
 |------|-----------|
@@ -178,6 +224,9 @@ Sitio referencia: https://relaticpanama.org/
 | Instagram / Google Business conectores | Media |
 | Cron/publicadores multi-tenant | Alta |
 | Wizard onboarding 7 pasos | Alta |
+| Migrar posts de producto a colas por App | ✅ `migrate_queue_by_app.py` |
+| Vista **Publicaciones** + historial filtrable | ✅ |
+| **Asistente EM+Acción** (chat + órdenes aprobables) | ✅ |
 
 ---
 
@@ -199,6 +248,7 @@ Sitio referencia: https://relaticpanama.org/
 |---------|-----|
 | **Landing producto** | https://emaccion.etsrv.site/accio/producto/ |
 | Dashboard easytech | https://emaccion.etsrv.site/accio/dashboard/easytech/ |
+| **Plan VS1** | https://emaccion.etsrv.site/accio/plan/easytech/ |
 | Dashboard relatic | https://emaccion.etsrv.site/accio/dashboard/relatic/ |
 | Login | https://emaccion.etsrv.site/accio/login/ |
 | Legal Relatic | https://emaccion.etsrv.site/accio/relatic/legal/ |

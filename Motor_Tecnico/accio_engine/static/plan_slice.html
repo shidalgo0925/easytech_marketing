@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EM+Acción — Plan de Marketing</title>
+  <link rel="icon" href="/accio/static/em-logomark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+  <link rel="stylesheet" href="/accio/static/accio-design.css">
+  <link rel="stylesheet" href="/accio/static/plan_slice.css">
+</head>
+<body>
+  <div class="vs1-app" id="vs1App">
+
+    <!-- Topbar: Workspace / sidebar screens -->
+    <header class="vs1-topbar" id="vs1TopbarDefault">
+      <div class="vs1-topbar-left">
+        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
+          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>EM+Acción</span>
+        </a>
+        <div class="vs1-tenant-pill">
+          <select id="vs1TenantSelect" aria-label="Empresa"></select>
+          <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        </div>
+      </div>
+      <div class="vs1-topbar-right">
+        <div class="vs1-avatar" id="vs1Avatar" title="Usuario">—</div>
+      </div>
+    </header>
+
+    <!-- Topbar: Wizard -->
+    <header class="vs1-topbar" id="vs1TopbarWizard" hidden>
+      <div class="vs1-topbar-left">
+        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
+          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>EM+Acción</span>
+        </a>
+        <button type="button" class="vs1-back-link" id="vs1BackWorkspace"><i class="ti ti-arrow-left"></i> Volver al inicio</button>
+      </div>
+      <div class="vs1-topbar-right">
+        <span class="vs1-autosave" id="vs1Autosave">Guardado automáticamente</span>
+      </div>
+    </header>
+
+    <!-- Topbar: Context -->
+    <header class="vs1-topbar" id="vs1TopbarContext" hidden>
+      <div class="vs1-topbar-left">
+        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
+          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>EM+Acción</span>
+        </a>
+        <span class="vs1-breadcrumb">Contexto para la IA</span>
+      </div>
+      <div class="vs1-topbar-right">
+        <span class="vs1-ts" id="vs1ContextTs">Actualizado hace — min</span>
+      </div>
+    </header>
+
+    <!-- Topbar: Proposal -->
+    <header class="vs1-topbar" id="vs1TopbarProposal" hidden>
+      <div class="vs1-topbar-left">
+        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
+          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>EM+Acción</span>
+        </a>
+        <span class="vs1-breadcrumb"><span class="vs1-breadcrumb-muted" id="vs1PropBreadcrumb">Propuesta 1 · </span><span id="vs1PropPlanName">—</span></span>
+      </div>
+      <div class="vs1-topbar-right">
+        <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1ExportBtn">Exportar</button>
+        <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1ViewCtxBtn">Ver contexto usado</button>
+      </div>
+    </header>
+
+    <!-- Topbar: Activate (minimal) -->
+    <header class="vs1-topbar" id="vs1TopbarActivate" hidden>
+      <div class="vs1-topbar-left">
+        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
+          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>EM+Acción</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- SCREEN 1: Workspace -->
+    <div class="vs1-screen" id="vs1ScreenWorkspace" data-layout="sidebar">
+      <div class="vs1-shell">
+        <aside class="vs1-sidebar" aria-label="Navegación principal">
+          <button type="button" class="vs1-nav-item is-active" data-nav="workspace"><i class="ti ti-layout-dashboard"></i> Inicio</button>
+          <button type="button" class="vs1-nav-item" data-nav="plan"><i class="ti ti-file-plus"></i> Plan</button>
+          <button type="button" class="vs1-nav-item" data-nav="context"><i class="ti ti-brain"></i> Contexto</button>
+          <button type="button" class="vs1-nav-item" data-nav="proposals"><i class="ti ti-sparkles"></i> Propuestas</button>
+          <div class="vs1-nav-sep"></div>
+          <button type="button" class="vs1-nav-item" data-nav="connectors"><i class="ti ti-plug"></i> Conectores</button>
+          <button type="button" class="vs1-nav-item" data-nav="config"><i class="ti ti-settings"></i> Configuración</button>
+        </aside>
+        <main class="vs1-main">
+          <div class="vs1-greeting">
+            <h1 id="vs1Greeting">Buenos días</h1>
+            <p id="vs1DayStatus">¿Qué quieres lograr hoy?</p>
+          </div>
+
+          <div id="vs1PlanBannerSlot"></div>
+
+          <div class="vs1-capability-banner" id="vs1IaBanner" hidden role="status">
+            <i class="ti ti-sparkles" aria-hidden="true"></i>
+            <div>
+              <strong id="vs1IaBannerTitle">¿Quieres recomendaciones personalizadas?</strong>
+              <p id="vs1IaBannerText">Activa el asistente en Configuración para recibir propuestas alineadas a tu negocio.</p>
+            </div>
+            <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1IaBannerCta">Configurar asistente</button>
+          </div>
+
+          <div class="vs1-card" id="vs1NextAction">
+            <p class="vs1-label-upper">Siguiente paso</p>
+            <h3 class="vs1-action-title" id="vs1NextTitle">—</h3>
+            <p class="vs1-action-desc" id="vs1NextDesc">—</p>
+            <div class="vs1-action-btns">
+              <button type="button" class="vs1-btn vs1-btn--primary" id="vs1NextPrimary">—</button>
+              <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1NextSecondary">Ver detalle del contexto</button>
+            </div>
+          </div>
+
+          <section class="vs1-signals" aria-label="Señales de estado">
+            <div class="vs1-signals-grid" id="vs1SignalsGrid"></div>
+          </section>
+
+          <section class="vs1-tasks-grid" aria-label="Trabajo pendiente">
+            <div class="vs1-card vs1-task-card">
+              <h3 class="vs1-task-head">Cola de publicaciones</h3>
+              <div class="vs1-task-body" id="vs1PubQueue"></div>
+            </div>
+            <div class="vs1-card vs1-task-card">
+              <h3 class="vs1-task-head">Planes en borrador</h3>
+              <div class="vs1-task-body" id="vs1DraftPlans"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: Crear Plan wizard -->
+    <div class="vs1-screen" id="vs1ScreenWizard" hidden data-layout="wizard">
+      <div class="vs1-wizard-progress" aria-hidden="true"><div class="vs1-wizard-progress-bar" id="vs1WizardBar"></div></div>
+      <div class="vs1-wizard-layout">
+        <aside class="vs1-wizard-steps" id="vs1WizardSteps" aria-label="Pasos del wizard"></aside>
+        <div class="vs1-wizard-form">
+          <div id="vs1WizardStepContent"></div>
+          <div class="vs1-wizard-nav">
+            <button type="button" class="vs1-btn vs1-btn--ghost" id="vs1WizardPrev">Anterior</button>
+            <button type="button" class="vs1-btn vs1-btn--primary" id="vs1WizardNext">Siguiente</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: Activar Plan -->
+    <div class="vs1-screen" id="vs1ScreenActivate" hidden data-layout="activate">
+      <main class="vs1-main vs1-main--no-sidebar vs1-main--center">
+        <div class="vs1-activate-card" id="vs1ActivateCard"></div>
+      </main>
+    </div>
+
+    <!-- SCREEN 4: Context Builder -->
+    <div class="vs1-screen" id="vs1ScreenContext" hidden data-layout="context">
+      <main class="vs1-main vs1-main--no-sidebar vs1-main--wide">
+        <div class="vs1-context-header">
+          <h1 class="vs1-context-title">Contexto para la IA</h1>
+          <p class="vs1-context-sub" id="vs1ContextSub">EM+Acción combina estas fuentes antes de generar propuestas estratégicas.</p>
+        </div>
+
+        <div class="vs1-card vs1-card--plan-ref" id="vs1ContextPlanRef" hidden>
+          <span class="vs1-dot-green" aria-hidden="true"></span>
+          <div class="vs1-banner-meta">
+            <p class="vs1-label-upper" style="margin:0 0 4px">Plan de referencia</p>
+            <p class="vs1-banner-title" id="vs1ContextPlanName">—</p>
+            <p class="vs1-banner-sub" id="vs1ContextPlanMeta">—</p>
+          </div>
+        </div>
+
+        <div class="vs1-card vs1-confidence" id="vs1ConfidenceCard"></div>
+
+        <section class="vs1-context-sources" aria-label="Fuentes del contexto">
+          <h2 class="vs1-section-head">Fuentes del contexto</h2>
+          <div id="vs1SourcesList"></div>
+        </section>
+
+        <div class="vs1-context-next" id="vs1ContextNextBanner" hidden role="status">
+          <i class="ti ti-info-circle" aria-hidden="true"></i>
+          <div>
+            <strong>Siguiente paso recomendado</strong>
+            <p id="vs1ContextNextText">—</p>
+          </div>
+          <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1ContextNextCta">Completar fuente</button>
+        </div>
+
+        <div class="vs1-context-actions">
+          <button type="button" class="vs1-btn vs1-btn--primary" id="vs1GenProposalBtn"><i class="ti ti-sparkles"></i> Generar propuesta</button>
+        </div>
+      </main>
+    </div>
+
+    <!-- SCREEN 5: Primera propuesta IA -->
+    <div class="vs1-screen" id="vs1ScreenProposal" hidden data-layout="proposal">
+      <main class="vs1-main vs1-main--no-sidebar vs1-main--wide">
+        <div class="vs1-proposal-layout">
+          <div class="vs1-proposal-main" id="vs1ProposalMain"></div>
+          <aside class="vs1-proposal-aside" id="vs1ProposalAside"></aside>
+        </div>
+      </main>
+    </div>
+
+  </div>
+  <div class="vs1-toast" id="vs1Toast" role="status"></div>
+  <script src="/accio/static/plan_slice.js"></script>
+</body>
+</html>

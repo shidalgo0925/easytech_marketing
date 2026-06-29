@@ -1,0 +1,17 @@
+{
+  "posts": [
+    {
+      "id": "linkedin_05_mapa_tecnologico",
+      "platform": "linkedin",
+      "status": "pending",
+      "scheduled_at": "2026-07-03T13:00:00-05:00",
+      "content_type": "valor",
+      "flyer": "flyers/04_consultoria_ti.png",
+      "flyer_num": 4,
+      "utm": "linkedin_post5",
+      "text": "¿Comprar software sin mapa tecnológico? Es como construir sin plano. 🗺️\n\nEn consultorías vemos el mismo patrón en PYMEs panameñas:\n\n→ Proyecto \"urgente\" que no conecta con ventas ni inventario\n→ 3 licencias que nadie usa a los 6 meses\n→ Integraciones \"después\" que nunca llegan\n\nAntes de invertir, responde esto (solo para ti):\n\n• ¿Qué proceso duele MÁS hoy: ventas, inventario, FE o RRHH?\n• ¿Qué reporte necesitas ver cada lunes y hoy no existe?\n• ¿Qué sistema NO se puede apagar sin parar la operación?\n\nCon eso ya tienes el 80% de un roadmap sensato.\n\n📩 easytechservices25@gmail.com\n📱 WhatsApp: +507 6688-4938\n\n#ConsultoriaTI #TransformacionDigital #Panamá #PYME #EasyTech #Odoo",
+      "first_comment": "Tip extra: si más de 2 áreas dependen de Excel crítico, prioriza integración antes de otro módulo nuevo.",
+      "app_id": "consultoria"
+    }
+  ]
+}
