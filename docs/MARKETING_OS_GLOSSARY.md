@@ -75,7 +75,8 @@ Director General · Gerente Comercial · Gerente de Marketing · Community Manag
 - **El dominio gobierna; el código implementa.**
 - **La memoria es el activo.**
 - **¿Ayuda a vender más?**
-- **5 preguntas por desarrollo:** ver [MARKETING_OS_DEV_FRAMEWORK.md](MARKETING_OS_DEV_FRAMEWORK.md)
+- **Constitución v1.0:** [MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md) — 20 principios
+- **Principio 3:** buscar antes de crear · **Principio 5/12:** memoria permanente
 
 ---
 

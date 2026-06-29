@@ -396,10 +396,10 @@ Si el equipo usa este documento antes de escribir código, las decisiones técni
 
 | Qué sigue | Estado |
 |-----------|--------|
-| Product Vision v2.2 | ✅ **CONGELADO** — guía oficial |
-| `ROADMAP.md` | Alineado a v2.2 |
-| Plan Maestro y resto de docs | Iteración posterior |
-| Arquitectura y código | Solo con base conceptual fija |
+| Product Vision v2.2 | ✅ **CONGELADO** |
+| [Constitución v1.0](MARKETING_OS_CONSTITUTION.md) | ✅ Reglas inmutables |
+| Domain Model + BD | Sprint 1 técnico |
+| Nuevos docs de visión | ❌ **Prohibido** |
 
 **No modificar** sin abrir **Product Vision v2.3+** con aprobación explícita.
 
@@ -409,7 +409,8 @@ Si el equipo usa este documento antes de escribir código, las decisiones técni
 
 | Documento | Rol |
 |-----------|-----|
-| [ROADMAP.md](ROADMAP.md) | Ejecución operativa |
+| [MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md) | **Leer primero** — reglas inmutables v1.0 |
+| [ROADMAP.md](ROADMAP.md) | Ejecución · Sprint 1 técnico |
 | [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) | Fases A–P *(alineación pendiente)* |
 | [MARKETING_PLAN_DOMAIN_v1.1.md](MARKETING_PLAN_DOMAIN_v1.1.md) | Dominio (IA propone, humano ejecuta) |
 | [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) | Embrión Marketing Console |

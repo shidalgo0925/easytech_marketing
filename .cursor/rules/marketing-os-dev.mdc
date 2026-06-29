@@ -1,30 +1,26 @@
 ---
-description: Marketing OS — cinco preguntas obligatorias antes de cualquier desarrollo
+description: Constitución Marketing OS v1.0 — leer antes que visión; Principio 19 pre-código
 alwaysApply: true
 ---
 
-# EM+Acción — Framework de desarrollo (Marketing OS)
+# EM+Acción — Constitución primero
 
-**North star:** `docs/EMACCION_PRODUCT_VISION_v2.2.md` (CONGELADO)
+**Orden:** Constitución → Vision v2.2 → Domain Model → Arquitectura → Roadmap → Código
 
-## No pedir módulos sueltos
+`docs/MARKETING_OS_CONSTITUTION.md` (20 principios)
 
-Antes de diseñar o implementar cualquier cambio, responder:
+**Fase conceptual cerrada.** No más docs de visión. Sprint 1 = Domain Model v1.0 + BD conceptual (`MARKETING_OS_DOMAIN_PERSISTENCE.md`).
 
-1. **¿A qué pilar pertenece?** (visión v2.2 — Company Brain, Corporate Memory, … ROI Engine)
-2. **¿Qué entidad del dominio afecta?** (`docs/MARKETING_OS_DOMAIN_MODEL.md`)
-3. **¿Qué evento genera?** (`docs/MARKETING_OS_DOMAIN_EVENTS.md`)
-4. **¿Qué registra en Corporate Memory?**
-5. **¿Cómo ayuda a vender más?**
+## Principio 19 — antes de programar
 
-Si alguna respuesta no es clara → **NO implementar**; alinear con producto primero.
+1. ¿Vender más? 2. Pilar 3. Entidad 4. Evento 5. Corporate Memory 6. KPI 7. Automatización 8. Reutilizable 9. Configurable 10. ¿Respeta Constitución?
 
-## Reglas adicionales
+Negativo → reevaluar.
 
-- Sprint 1 activo: **prohibido** feature nueva sin entidad de dominio.
-- **NO GO** pantallas, IA, automatizaciones hasta domain model v1.0 aprobado.
-- `MarketingPlan` v1.1 congelado — no expandir con campos operativos.
-- `app_id` ≈ **Marca** en dominio; no renombrar en código sin migración explícita.
-- Chat = herramienta de Marketing Console, no el producto.
+## Principios 3, 5, 12
 
-Doc completo: `docs/MARKETING_OS_DEV_FRAMEWORK.md`
+Buscar antes de crear · todo aprende → Memory · memoria no se borra
+
+## NO GO hasta Domain Model v1.0
+
+Código · UI · IA · CODITO · features

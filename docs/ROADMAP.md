@@ -1,18 +1,34 @@
 # EM+Acción V2 — Roadmap operativo
 
-**Producto:** EM+Acción (EasyMarketingOne)  
-**North star (CONGELADO):** [EMACCION_PRODUCT_VISION_v2.2.md](EMACCION_PRODUCT_VISION_v2.2.md) — **leer primero**  
-**Plan maestro:** [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) *(alineación pendiente)*  
+**Producto:** EM+Acción (EasyMarketingOne)
+
+## Jerarquía documental — orden de lectura
+
+```
+Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  Roadmap  →  Código
+(inmutable)      (qué es)           (objetos)        (cómo)           (cuándo)     (impl)
+```
+
+| # | Capa | Documento | Estado |
+|---|------|-----------|--------|
+| 1 | **Constitución** | [MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md) v1.0 | ✅ |
+| 2 | **Product Vision** | [EMACCION_PRODUCT_VISION_v2.2.md](EMACCION_PRODUCT_VISION_v2.2.md) | CONGELADO |
+| 3 | **Domain Model** | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | Sprint 1 → v1.0 |
+| 4 | **Arquitectura** | *(post Domain Model v1.0)* | ⏳ |
+| 5 | **Roadmap** | Este documento · Sprints | Activo |
+| 6 | **Código** | `Motor_Tecnico/` | Post-arquitectura |
+
+**Regla:** fase conceptual **cerrada** tras commit Constitución. Solo entregables técnicos verificables por sprint.
+
+**Plan maestro:** [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) *(alineación pendiente — capa 4)*  
 **Estado vs código:** [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md)  
 **Contexto operativo:** [EMACCION_CONTEXTO_OPERATIVO.md](EMACCION_CONTEXTO_OPERATIVO.md)  
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **Visión:** v2.2 congelada · **Sprint activo:** Sprint 1 (Domain Model)
+**Actualizado:** 2026-06-26 · **Fase conceptual:** cerrada (post-Constitución) · **Sprint activo:** Sprint 1 técnico (Domain Model + BD)
 
-**Misión (visión):** ayudar a vender más con conocimiento + automatización + IA. Filtro: *¿Esto ayuda a vender más?*
-
-**Transición:** aplicación → **plataforma**. El dominio gobierna; el código implementa.
+**Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
 ---
 
@@ -22,23 +38,25 @@
 
 ---
 
-## Sprint 1 — Modelo del Dominio (GO activo)
+## Sprint 1 — Domain Model + BD conceptual (GO — 100% técnico)
 
 **Spec:** [MARKETING_OS_SPRINT1_DOMAIN_MODEL.md](MARKETING_OS_SPRINT1_DOMAIN_MODEL.md)
 
-| Entregable | Doc | Estado |
-|------------|-----|--------|
-| Modelo del dominio + ER + reglas + estados | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | 🔄 v0.1 |
-| Catálogo eventos | [MARKETING_OS_DOMAIN_EVENTS.md](MARKETING_OS_DOMAIN_EVENTS.md) | 🔄 v0.1 |
-| Contratos servicios | [MARKETING_OS_DOMAIN_SERVICES.md](MARKETING_OS_DOMAIN_SERVICES.md) | 🔄 v0.1 |
-| Glosario oficial | [MARKETING_OS_GLOSSARY.md](MARKETING_OS_GLOSSARY.md) | 🔄 v0.1 |
-| Código · UI · IA · automatizaciones | — | ❌ **PROHIBIDO** |
+**Objetivo:** convertir la visión en **plataforma** — objetos del dominio + persistencia conceptual. **Cero** documentos conceptuales nuevos.
 
-**Regla Sprint 1:** ninguna feature nueva sin entidad de dominio.
+| Entregable | Doc | Criterio verificable |
+|------------|-----|----------------------|
+| Domain Model **v1.0** aprobado | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | Dev nuevo responde 6 preguntas aceptación |
+| ER + cardinalidad | §2 Domain Model | Diagrama revisado |
+| Catálogo eventos v1.0 | [MARKETING_OS_DOMAIN_EVENTS.md](MARKETING_OS_DOMAIN_EVENTS.md) | Todo evento → Corporate Memory |
+| Servicios dominio (contratos) | [MARKETING_OS_DOMAIN_SERVICES.md](MARKETING_OS_DOMAIN_SERVICES.md) | 1 servicio por agregado core |
+| **BD conceptual** | [MARKETING_OS_DOMAIN_PERSISTENCE.md](MARKETING_OS_DOMAIN_PERSISTENCE.md) | Tablas/agregados, FKs, tenant_id |
+| Glosario v1.0 | [MARKETING_OS_GLOSSARY.md](MARKETING_OS_GLOSSARY.md) | Términos alineados a entidades |
+| Código · UI · IA | — | ❌ **PROHIBIDO** en Sprint 1 |
 
-**Framework de trabajo:** [MARKETING_OS_DEV_FRAMEWORK.md](MARKETING_OS_DEV_FRAMEWORK.md) — 5 preguntas obligatorias por desarrollo.
-
-**Pausado:** CODITO · pantallas · cambios UI.
+**Pre-requisito:** Constitución v1.0 commiteada.  
+**Post-Sprint 1:** capa **Arquitectura** (cómo implementa el dominio).  
+**Constitución:** Principio 19 antes de cualquier código posterior.
 
 ---
 
@@ -71,24 +89,17 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 ## Prioridad actual (jun 2026)
 
 ```
-Sprint 0 — Arquitectura dominio ✅
-Sprint 1 — Domain Model (GO) → revisar v0.1 → aprobar v1.0
-Sprint 2+ — Implementación pilares (post Sprint 1)
-```
-
-**Cierre operativo previo (no bloquea Sprint 0):**
-
-```
-1. Workspace Shell — ✅ implementado
-2. Branding restoration — 🔄 en cierre
-3. AI Provider CODITO — ⏸ pausado (infra; después del dominio)
+Constitución v1.0 ✅ — fase conceptual cerrada
+Sprint 1 — Domain Model v1.0 + BD conceptual (GO técnico)
+Sprint 2 — Arquitectura de implementación
+Sprint 3+ — Código por pilares
 ```
 
 **Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell; embrión de Marketing Console.
 
-**Regla activa:** **NO GO** código hasta cierre Sprint 1 (domain model v1.0 aprobado).
+**Regla activa:** NO GO código hasta Domain Model v1.0 + persistencia conceptual aprobados.
 
-**Plan Maestro:** no tocar en Sprint 0 — alineación en iteración posterior.
+**Forma de trabajo:** entregables verificables · Principio 19 · sin docs conceptuales nuevos.
 
 ---
 
