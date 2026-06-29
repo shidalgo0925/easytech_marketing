@@ -10,7 +10,6 @@ from Motor_Tecnico.accio_engine.marketing_plan_application.adapters import (
     CollectingDomainEventPublisher,
     NoOpDomainEventPublisher,
 )
-from Motor_Tecnico.accio_engine.marketing_plan_application.context import ApplicationContext
 from Motor_Tecnico.accio_engine.marketing_plan_application.use_cases.commands.activate_marketing_plan import (
     ActivateMarketingPlan,
 )
@@ -30,6 +29,7 @@ from Motor_Tecnico.accio_engine.marketing_plan_infrastructure.application_adapte
 from Motor_Tecnico.accio_engine.marketing_plan_infrastructure.json_repository import (
     JsonMarketingPlanRepository,
 )
+from Motor_Tecnico.accio_engine.platform_infrastructure.db import memory_sql_enabled
 from Motor_Tecnico.accio_engine.tenant import TENANTS_ROOT, resolve_tenant
 
 
@@ -77,12 +77,23 @@ def build_domain_service() -> MarketingPlanDomainService:
     )
 
 
+def build_event_publisher():
+    if memory_sql_enabled():
+        from Motor_Tecnico.accio_engine.memory_api.composition import get_memory_domain_service
+        from Motor_Tecnico.accio_engine.memory_infrastructure.marketing_plan_bridge import (
+            MarketingPlanMemoryEventPublisher,
+        )
+
+        return MarketingPlanMemoryEventPublisher(get_memory_domain_service())
+    return NoOpDomainEventPublisher()
+
+
 class MarketingPlanUseCases:
     def __init__(self, *, events: CollectingDomainEventPublisher | None = None) -> None:
         domain = build_domain_service()
         auth = RbacAuthorizationAdapter()
         workspace = MarketingAppWorkspaceAdapter()
-        publisher = events or NoOpDomainEventPublisher()
+        publisher = events if events is not None else build_event_publisher()
         self.create = CreateMarketingPlan(domain, auth, workspace, publisher)
         self.activate = ActivateMarketingPlan(domain, auth, workspace, publisher)
         self.get = GetMarketingPlan(domain, auth, workspace)

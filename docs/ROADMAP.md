@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **Sprint activo:** Sprint 3 (M0+M1 Corporate Memory — requiere GO)
+**Actualizado:** 2026-06-26 · **Sprint 3:** M0+M1 Corporate Memory ✅ · **Siguiente:** M2 Company Brain (GO)
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -66,17 +66,23 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 ---
 
-## Sprint 3 — Implementación M0 + M1 (Corporate Memory)
+## Sprint 3 — M0 + M1 Corporate Memory ✅
 
-**Requiere GO explícito** — primer código de plataforma post-documentación.
+**Spec:** [MARKETING_OS_SPRINT3_MEMORY.md](MARKETING_OS_SPRINT3_MEMORY.md) — cerrado 2026-06-26
 
-| Fase | Entregable | Criterio |
-|------|------------|----------|
-| **M0** | `platform_infrastructure/` + `marketing_os.db` | Schema DDL aplicado; tests smoke |
-| **M1** | `memory_{domain,application,infrastructure,api}/` | Eventos → `memory_events`; import audit opcional |
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M0 | `platform_infrastructure/` + `marketing_os.db` | ✅ |
+| M1 | `memory_*` + API + bridge MarketingPlan | ✅ |
+| M1 | `scripts/migrate_audit_to_memory.py` | ✅ |
 
-**Patrón:** MarketingPlan slice · [ARCHITECTURE](MARKETING_OS_ARCHITECTURE.md) §4  
-**Regla:** Principio 19 · sin features fuera de M0/M1
+---
+
+## Sprint 4 — M2 Company Brain (requiere GO)
+
+| Fase | Entregable |
+|------|------------|
+| M2 | `knowledge_*` (brain) + `company_profiles` + API `company-brain` |
 
 ---
 
@@ -110,11 +116,11 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 
 ```
 Constitución ✅ · Domain Model ✅ · Arquitectura ✅
-Sprint 3 — M0 + M1 Corporate Memory (GO por fase)
-Sprint 4+ — M2 Brain, M3 Brand, M4 Publications…
+Sprint 3 M0+M1 Corporate Memory ✅
+M2 Company Brain — próximo (GO)
 ```
 
-**Regla activa:** código solo con GO explícito por fase M*. Patrón: MarketingPlan slice.
+**Regla activa:** código solo con GO explícito por fase M*.
 
 **Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell; embrión de Marketing Console.
 

@@ -22,6 +22,7 @@ if str(BASE_DIR) not in sys.path:
 from Motor_Tecnico.accio_engine import audit_service, auth_service, dashboard_data, executor, files_api, knowledge_api, marketing_app, queue_store, rbac, settings_center, tenant_profile, tenant_provisioning, tenant_secrets  # noqa: E402
 from Motor_Tecnico.accio_engine.env_loader import load_accio_env  # noqa: E402
 from Motor_Tecnico.accio_engine.marketing_plan_api import register_marketing_plan_api  # noqa: E402
+from Motor_Tecnico.accio_engine.memory_api import register_memory_api  # noqa: E402
 from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, TenantNotFoundError, list_tenants, resolve_tenant  # noqa: E402
 
 ACCIO_ENV = load_accio_env(BASE_DIR)
@@ -2109,6 +2110,7 @@ def _run_order(order: dict, tenant_id: str) -> dict:
 
 
 register_marketing_plan_api(app, require_api_key)
+register_memory_api(app, require_api_key)
 
 
 # --- Legacy routes (default easytech) ---

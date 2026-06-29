@@ -50,8 +50,8 @@ Dominio congelado v1.1 — sin expandir campos.
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `tenants/{tenant_id}/memory/events` | Query con filtros `entity_type`, `event_type`, `since` |
-| GET | `tenants/{tenant_id}/memory/events/{id}` | Detalle evento |
+| GET | `tenants/{tenant_id}/memory/events` | ✅ Sprint 3 — query con filtros |
+| GET | `tenants/{tenant_id}/memory/events/{id}` | ✅ Sprint 3 — detalle |
 | POST | *(interno)* | Solo vía DomainEventPublisher — no público |
 
 ### Publications (M4)
