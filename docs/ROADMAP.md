@@ -3,8 +3,166 @@
 **Producto:** EM+Acción (EasyMarketingOne)  
 **Plan maestro:** [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md)  
 **Estado vs código:** [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md)  
+**Contexto operativo:** [EMACCION_CONTEXTO_OPERATIVO.md](EMACCION_CONTEXTO_OPERATIVO.md)  
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
+
+**Actualizado:** 2026-06-26 · **Prioridad:** Próximo sprint → Accio AI Provider Manager (acotado)
+
+---
+
+## Prioridad actual (jun 2026)
+
+```
+1. Restaurar branding EM+Acción dentro del Workspace Shell — 🔄 en cierre
+2. Workspace Shell — shell único (APROBADO Opción A) — ✅ implementado
+3. Capturas antes/después branding — 🔄
+4. GO deploy → reiniciar easytech-accio-engine
+5. Fase D → matriz conocimiento
+```
+
+**Próximo sprint (GO explícito):** conectar IA local CODITO vía **Accio AI Provider Manager** — ver § «Próximo sprint» abajo.
+
+**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell de navegación; no más mini-aplicaciones fullscreen.
+
+**Regla activa:** congelar pantallas fullscreen y módulos independientes hasta cerrar el shell.
+
+**Regla IA (permanente):** no instalar OpenAI directo en EM+Acción; no pedir `OPENAI_API_KEY` en UI ni `.env` de producción.
+
+---
+
+## Próximo sprint — Accio AI Provider Manager (acotado)
+
+**Objetivo:** chat y propuestas IA del asistente EM+Acción usando **LiteLLM en CODITO → Ollama local**, sin dependencia de OpenAI.
+
+**Arquitectura acordada:**
+
+```
+EM+Acción (ARROZCONPOLLO)
+        ↓
+Accio AI Provider Manager  ← capa única de salida LLM
+        ↓
+LiteLLM (CODITO)
+        ↓
+Ollama / qwen2.5-coder (14B o 7B)
+```
+
+**Respaldo futuro (fuera de este sprint):** OCI / Ollama / mistral — solo documentar, no implementar.
+
+### Fuera de alcance (NO GO este sprint)
+
+| Item | Motivo |
+|------|--------|
+| OpenAI directo (`api.openai.com`) | Decisión producto: IA local primero |
+| `OPENAI_API_KEY` en UI / tenant secrets | Reemplazar por config servidor |
+| Instalar Ollama/LiteLLM en ARROZCONPOLLO | Usar CODITO existente |
+| Manual de operación IA | Después de validar conectividad |
+| Nuevos modelos / fine-tuning | Solo usar modelo ya disponible en CODITO |
+| Fase M (Community Manager IA) | Depende de este sprint, no es el sprint |
+
+### Estado al corte (2026-06-26)
+
+| Capa | Estado | Notas |
+|------|--------|-------|
+| `ai_provider/` (config, litellm, manager) | 🔄 Esqueleto | `Motor_Tecnico/accio_engine/ai_provider/` |
+| `assistant_llm.py` | 🔄 Parcial | Fachada hacia manager; falta cerrar integración |
+| `assistant_service.py` | 🔄 Parcial | Mensajes agnósticos; aún alias `_call_openai` |
+| `marketing_planner.py` | 🔄 Parcial | Usa `chat_completion` del manager |
+| `/assistant/status` + UI | ❌ Pendiente | Sigue `has_openai_key` / «Sin OpenAI Key» |
+| `.env` producción | ❌ Pendiente | Falta `ACCIO_AI_BASE_URL` (CODITO no resolvió desde ARROZCONPOLLO) |
+| Script validación CODITO | ❌ Pendiente | `scripts/validate_codito_ai.py` |
+| Tests `test_ai_provider.py` | ❌ Pendiente | Actualizar `test_assistant_v1.py` |
+| Deprecar `scripts/setup_openai_ia.py` | ❌ Pendiente | Obsoleto con nueva arquitectura |
+
+### Backlog sprint (orden sugerido)
+
+1. **Infra — validar CODITO** (bloqueante)
+   - Obtener URL/puerto real de LiteLLM en CODITO
+   - Probar desde ARROZCONPOLLO: DNS, firewall, token si aplica
+   - Listar modelos disponibles (`GET /v1/models`)
+   - Confirmar modelo V1: `qwen2.5-coder:14b` (o el que responda)
+
+2. **Config servidor** (ARROZCONPOLLO `.env`)
+   ```env
+   ACCIO_AI_PROVIDER=litellm
+   ACCIO_AI_BASE_URL=http://<CODITO>:<PUERTO>
+   ACCIO_AI_MODEL=qwen2.5-coder:14b
+   ACCIO_AI_API_KEY=          # solo si LiteLLM lo exige
+   AI_ASSISTANT_ENABLED=true
+   ```
+
+3. **Cerrar integración código**
+   - Terminar refactor: `assistant_llm` → `ai_provider.manager`
+   - `/assistant/status`: `provider`, `provider_reachable`, `llm_available` (quitar `has_openai_key`)
+   - UI `plan_slice.js` + `dashboard.html`: estados «IA activa» / «Proveedor no alcanzable» (sin OpenAI)
+   - Ocultar o deprecar campo `openai_api_key` en Variables (solo servidor)
+
+4. **Validación funcional**
+   - `GET /accio/{tenant}/assistant/status` → `llm_available: true`
+   - Chat asistente + propuesta planner con modelo local
+   - Reiniciar: `sudo systemctl restart easytech-accio-engine`
+
+5. **Documentación mínima**
+   - `docs/ACCIO_AI_PROVIDER_MANAGER.md` (contrato env + arquitectura)
+   - Actualizar fila «Asistente» en entregas transversales de este roadmap
+
+### Criterio de cierre sprint
+
+- [ ] ARROZCONPOLLO alcanza LiteLLM en CODITO (ping + al menos 1 modelo)
+- [ ] Asistente responde en chat sin OpenAI
+- [ ] UI no menciona OpenAI Key al usuario final
+- [ ] Tests unitarios del provider pasan
+- [ ] Sin regresión Workspace Shell / branding
+
+### Dependencias / riesgos
+
+| Riesgo | Mitigación |
+|--------|------------|
+| `codito.etsrv.site` no resuelve desde ARROZCONPOLLO | IP privada, `/etc/hosts`, o túnel — definir con ops |
+| LiteLLM sin auth vs con token | Probar ambos; documentar en `.env` |
+| Modelo 14B lento en primera carga | Fallback a `qwen2.5-coder:7b` documentado |
+| Tools (`create_post_drafts`) no soportados por Ollama | Probar; si falla, desactivar tools en V1 y mantener modo reglas |
+
+### Proveedores (inventario infra)
+
+| Servidor | Stack | Modelos | Uso |
+|----------|-------|---------|-----|
+| **CODITO** | Open WebUI, LiteLLM, Ollama | qwen2.5-coder 14B/7B | **V1 producción EM+Acción** |
+| **OCI** | Ollama | mistral | Respaldo / pruebas ligeras (post-V1) |
+
+---
+
+## Vertical Slice 1 — Plan de Marketing (track transversal)
+
+**Objetivo:** Primer flujo end-to-end del **Asistente Ejecutivo de Marketing** atravesando dominio → API → UI — **dentro del Workspace Shell**.
+
+```
+Inicio → Plan (Crear/Resumen) → Contexto → Propuestas IA
+```
+
+| Capa | Estado | Referencia |
+|------|--------|------------|
+| Dominio `MarketingPlan` v1.1 | ✅ Congelado | `docs/MARKETING_PLAN_DOMAIN_v1.1.md` |
+| Application + JSON adapter | ✅ | `marketing_plan_*` |
+| API v1 (`/api/v1/tenants/…/apps/…`) | ✅ 4 endpoints + context + planner | `docs/API_CONTRACT_V1.md` |
+| Workspace Shell | 🔄 En curso | `docs/WORKSPACE_SHELL.md` |
+| UI módulo `plan_slice` | 🔄 Migrando al shell | `/accio/plan/{tenant}/` |
+| Tests integración | ✅ | `tests/test_vertical_slice_1.py` |
+| Evidencia visual | ✅ | `Marketing/deliverables/vertical_slice_1/` |
+
+### Revisión UX producto (iterativa)
+
+| # | Pantalla | UX | Deploy |
+|---|----------|-----|--------|
+| 1 | Inicio (Workspace) | ✅ Aprobación pendiente | — |
+| 2 | Crear Plan (wizard) | ✅ Aprobación pendiente | — |
+| 3 | Activar Plan | ✅ Aprobación pendiente | — |
+| 4 | Context Builder | ✅ Revisada | — |
+| 5 | Propuesta IA | ✅ Aprobación pendiente | — |
+
+**Bitácora:** [sessions/2026-06-29-vs1-ux.md](sessions/2026-06-29-vs1-ux.md)
+
+**Congelado hasta post-VS1:** Campaigns, Calendar, Assets, OpenAPI completo, dashboard nuevo integral.
 
 ---
 
@@ -14,28 +172,30 @@
 A → B → C → D → E → F → G → H → I → J → K → L → M → N → O → P
 ```
 
+VS1 no sustituye fases E–P; valida arquitectura y entrega el primer valor de producto sobre el dominio Plan.
+
 ---
 
 ## Mapa de fases
 
 | Fase | Nombre | Estado | Prioridad |
 |------|--------|--------|-----------|
-| **A** | Base técnica | 🔄 ~75% | **Activa — cerrar** |
-| **B** | Multi-Tenant Core | 🔄 ~65% | **Activa — cerrar** |
-| **C** | Configuration Center | 🔄 ~25% | Alta |
-| **D** | Knowledge Engine | 🔄 ~35% | Alta |
-| **E** | Opportunity Engine | 📋 | Alta |
+| **A** | Base técnica | 🔄 ~90% | Cerrar backup + entornos |
+| **B** | Multi-Tenant Core | ✅ ~95% | Apps por tenant + login plataforma |
+| **C** | Configuration Center | ✅ ~98% | Guía anti-JSON-manual |
+| **D** | Knowledge Engine | 🔄 ~50% | Matriz producto-sector |
+| **E** | Opportunity Engine | 📋 | Alta (post-D) |
 | **F** | Campaign Engine | 📋 | Alta |
 | **G** | Image Engine | 📋 | Media |
-| **H** | Publisher | 🔄 parcial | Media |
-| **I** | Landing Manager | 📋 | Alta |
-| **J** | CRM Integration | 🔄 Odoo | Alta |
+| **H** | Publisher | 🔄 LI+FB parcial | Media |
+| **I** | Landing Manager | 🔄 producto + Relatic | Alta |
+| **J** | CRM Integration | 🔄 Odoo + leads locales | Alta |
 | **K** | Analytics | 🔄 básico | Media |
 | **L** | Learning Engine | 📋 | Media |
 | **M** | Community Manager IA | 📋 | Baja |
-| **N** | Scheduler | 🔄 manual | Media |
+| **N** | Scheduler | 🔄 calendario manual | Media |
 | **O** | Automation Engine | 📋 | Media |
-| **P** | API Marketplace | 📋 | Baja |
+| **P** | API Marketplace | 🔄 API v1 Plan (no marketplace) | Baja |
 
 ---
 
@@ -50,9 +210,10 @@ A → B → C → D → E → F → G → H → I → J → K → L → M → N 
 | nginx + proxy `/accio/` | ✅ |
 | emaccion.etsrv.site vhost | 🔄 |
 | SSL origen / Cloudflare Full | 🔄 |
-| Backup `.env` cifrado | ❌ |
-| Separar DEV / TEST / PROD | ❌ |
-| Logs y deploy documentados | 🔄 |
+| Backup `.env` cifrado | 🔄 `scripts/backup_secrets.sh` |
+| Separar DEV / TEST / PROD | 🔄 `env_loader` + units dev/test |
+| Logs y deploy documentados | 🔄 `docs/INVENTARIO_DESPLIEGUE.md` |
+| Bitácora sesiones | ✅ `docs/sessions/` |
 
 **Cierre:** checklist en `docs/fases/A_CHECKLIST.md` (pendiente) + evidencia pruebas.
 
@@ -67,15 +228,17 @@ A → B → C → D → E → F → G → H → I → J → K → L → M → N 
 | `registry.json` + tenants easytech/relatic | ✅ |
 | API `/accio/{tenant_id}/` | ✅ |
 | Dashboard por tenant | ✅ |
+| Login plataforma + selector empresa | ✅ |
 | Datos aislados por carpeta | ✅ |
-| Modelo tenant (logo, color, dominio) | ❌ |
-| Usuarios por tenant | ❌ |
-| Branding por tenant | ❌ |
-| `tenant_id` en todo el modelo | 🔄 |
-| Tests aislamiento | ❌ |
+| Modelo tenant (subdomain, registration, branding) | ✅ |
+| Usuarios por tenant (`auth.db`) | ✅ |
+| **Apps por tenant** (`apps/{app_id}/`) | ✅ cola, KB, campañas por app |
+| CRUD empresas plataforma (`super_admin`) | ✅ |
+| `tenant_id` + `app_id` en modelo editorial | 🔄 |
+| Tests aislamiento | ✅ |
 | Deprecar `Marketing/accio/` legacy | ❌ |
 
-**Doc detalle:** [EMACCION_PHASE_M_MULTI_TENANT.md](EMACCION_PHASE_M_MULTI_TENANT.md) (≡ Fase B V2)
+**Doc:** [EMACCION_TENANT_VS_APP.md](EMACCION_TENANT_VS_APP.md) · [EMACCION_PHASE_M_MULTI_TENANT.md](EMACCION_PHASE_M_MULTI_TENANT.md)
 
 ---
 
@@ -85,31 +248,48 @@ A → B → C → D → E → F → G → H → I → J → K → L → M → N 
 
 | Tarea | Estado |
 |-------|--------|
-| Tab Configuración (conectores, CRM, API key) | ✅ |
+| Tab Configuración (13 sub-secciones) | ✅ |
 | Secretos cifrados SQLite | ✅ |
-| Probar conexión | ✅ |
-| Menú completo (usuarios, roles, productos, IA…) | ❌ |
-| Variables · logs · backups desde UI | ❌ |
-| RBAC | ❌ |
+| CRUD usuarios, roles, productos, landings, variables | ✅ |
+| CRUD empresas plataforma | ✅ |
+| Probar conexión conectores | ✅ |
+| RBAC en API | ✅ |
+| Logs y backup desde UI | ✅ |
+| Guía operativa anti-JSON-manual | ❌ |
 
-**Doc detalle:** [EMACCION_PHASE_N_TENANT_SETTINGS.md](EMACCION_PHASE_N_TENANT_SETTINGS.md) (≡ parte de Fase C V2)
+**Doc:** [EMACCION_PHASE_N_TENANT_SETTINGS.md](EMACCION_PHASE_N_TENANT_SETTINGS.md)
 
 ---
 
 ## Fase D — Knowledge Engine
 
-**Objetivo:** Conocimiento completo del portafolio por tenant.
+**Objetivo:** Conocimiento completo del portafolio por tenant/app.
 
 | Tarea | Estado |
 |-------|--------|
-| KB por tenant (`knowledge/`) | ✅ easytech |
-| business_context + editorial_rules | ✅ |
-| API + tab Conocimiento | ✅ |
+| KB por tenant y por app | ✅ |
+| `business_context.json` + editorial_rules | ✅ |
+| API + tab Conocimiento + CRUD artículos | ✅ |
+| Context Builder V1 (VS1) | ✅ integrado en slice |
 | Matriz producto-sector-necesidad | ❌ |
-| Converso + competencia | ❌ |
+| Converso + competencia en KB | ❌ |
 | Q&A automático | ❌ |
 
 **Doc:** [EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md](EMACCION_PHASE_E_KNOWLEDGE_ENGINE.md)
+
+---
+
+## Entregas transversales recientes (no son fases V2)
+
+| Entrega | Estado | Notas |
+|---------|--------|-------|
+| Landing producto `/accio/producto/` | ✅ | SaaS enterprise v2 |
+| Asistente EM+Acción V1 (chat + órdenes) | 🔄 | Panel dashboard; **IA pendiente Provider Manager → CODITO** |
+| Accio AI Provider Manager | 📋 | Próximo sprint — § arriba |
+| Vista Publicaciones + estados editoriales | ✅ | `editorial.py` |
+| Leads locales + métricas por app | ✅ | |
+| Tenant Relatic (catálogo, legal, landings) | ✅ | |
+| API pública v1 — recurso `MarketingPlan` | ✅ | Primer recurso; no marketplace |
 
 ---
 
@@ -128,7 +308,7 @@ A → B → C → D → E → F → G → H → I → J → K → L → M → N 
 | **M** | Respuesta IA comentarios/DMs |
 | **N** | Scheduler sugiere hora/día óptimo |
 | **O** | Nurturing email/WhatsApp |
-| **P** | API pública documentada + auth |
+| **P** | API pública documentada + auth marketplace |
 
 Detalle completo: [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) §7–19.
 
@@ -141,11 +321,22 @@ Dashboard · Oportunidades · Campañas · Publicaciones · Leads · CRM
 Productos · Knowledge · Conectores · Automatizaciones · Métricas · Configuración
 ```
 
+**Hoy:** dashboard operativo legacy + módulo **Plan** (`/accio/plan/{tenant}/`) como primer paso hacia el dashboard objetivo.
+
+---
+
+## Editorial (contenido publicado)
+
+Regla interina **3 valor + 1 venta** (75/25). Objetivo Fase E matriz: **95/5**.  
+Calendario: `Marketing/CALENDARIO_PUBLICACION.md`
+
 ---
 
 ## Criterio final V2 (§27)
 
 12 capacidades end-to-end: detectar → clasificar → producto → campaña → contenido → publicar → landing → lead → CRM → seguimiento → medir → aprender.
+
+**Hito intermedio VS1:** plan estratégico → contexto → propuesta IA (sin ejecución automática de campañas).
 
 ---
 
@@ -153,10 +344,12 @@ Productos · Knowledge · Conectores · Automatizaciones · Métricas · Configu
 
 | Doc | Contenido |
 |-----|-----------|
+| [VERTICAL_SLICE_1.md](VERTICAL_SLICE_1.md) | Slice técnico |
+| [MARKETING_PLAN_DOMAIN_v1.1.md](MARKETING_PLAN_DOMAIN_v1.1.md) | Dominio congelado (Principio 5 — IA agnóstica) |
+| [API_CONTRACT_V1.md](API_CONTRACT_V1.md) | Contrato API pública |
+| [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) | Shell único de navegación |
 | [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) | Plan estratégico completo |
 | [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md) | Estado código vs plan |
 | [CONTEXTO.md](CONTEXTO.md) | Operación diaria |
-| [EMACCION_ARCHITECTURE.md](EMACCION_ARCHITECTURE.md) | Arquitectura |
-| [EMACCION_GAP_ANALYSIS.md](EMACCION_GAP_ANALYSIS.md) | Brecha histórica |
-
-**Actualizado:** 2026-06-26 · **Versión roadmap:** 2.0
+| [sessions/2026-06-29-vs1-ux.md](sessions/2026-06-29-vs1-ux.md) | Bitácora VS1 UX |
+| `docs/ACCIO_AI_PROVIDER_MANAGER.md` | *(pendiente sprint)* Contrato env + LiteLLM CODITO |
