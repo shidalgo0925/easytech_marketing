@@ -1,20 +1,24 @@
 # EM+Acción V2 — Roadmap operativo
 
 **Producto:** EM+Acción (EasyMarketingOne)  
-**North star (CONGELADO):** [EMACCION_PRODUCT_VISION_v2.1.md](EMACCION_PRODUCT_VISION_v2.1.md) — **leer primero**  
+**North star (CONGELADO):** [EMACCION_PRODUCT_VISION_v2.2.md](EMACCION_PRODUCT_VISION_v2.2.md) — **leer primero**  
 **Plan maestro:** [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) *(alineación pendiente)*  
 **Estado vs código:** [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md)  
 **Contexto operativo:** [EMACCION_CONTEXTO_OPERATIVO.md](EMACCION_CONTEXTO_OPERATIVO.md)  
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **Visión:** Product Vision v2.1 congelada
+**Actualizado:** 2026-06-26 · **Visión:** Product Vision v2.2 congelada
+
+**Misión (visión):** ayudar a vender más con conocimiento + automatización + IA. Filtro: *¿Esto ayuda a vender más?*
 
 ---
 
-## Alineación a Product Vision v2.1
+## Alineación a Product Vision v2.2
 
 EM+Acción = **Marketing OS**. Núcleo: ciclo **Observar → Analizar → Planificar → Crear → Ejecutar → Medir → Aprender**.
+
+Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo con responsable** · **multiempresa** Tenant→Marcas→Productos.
 
 | Pilar (visión) | Fases del ciclo | En código hoy |
 |----------------|-----------------|---------------|
@@ -26,12 +30,13 @@ EM+Acción = **Marketing OS**. Núcleo: ciclo **Observar → Analizar → Planif
 | 6 Marketing Brain | Analizar · Planificar | Parcial (planner, propuestas) |
 | 7 Roadmap Engine | Planificar | Esbozo (workspace, banner) |
 | 8 AI Provider Manager | Crear | En curso (`ai_provider/`) |
-| 9 Automation Engine | Ejecutar · Medir | Parcial (publicador, órdenes) |
+| 9 Automation Engine | Ejecutar | Parcial (publicador, órdenes) |
+| 10 ROI Engine | Medir · Aprender | ❌ Fragmentado (métricas básicas) |
 | Marketing Console | Todas (UI) | Embrión ([WORKSPACE_SHELL.md](WORKSPACE_SHELL.md)) |
 
-**Regla de desarrollo (visión §11):** toda feature debe mapear a pilar + fase del ciclo. Si no, reevaluar antes de implementar.
+**Regla de desarrollo (visión §13):** pilar + fase del ciclo + *¿ayuda a vender más?*
 
-**Plan Maestro (fases A–P):** se alineará en iteración posterior; no sustituye la visión v2.1.
+**Plan Maestro (fases A–P):** alineación en iteración posterior.
 
 ---
 
