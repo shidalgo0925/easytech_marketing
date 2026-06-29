@@ -8,9 +8,37 @@
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **Visión:** Product Vision v2.2 congelada
+**Actualizado:** 2026-06-26 · **Visión:** v2.2 congelada · **Sprint activo:** Sprint 1 (Domain Model)
 
 **Misión (visión):** ayudar a vender más con conocimiento + automatización + IA. Filtro: *¿Esto ayuda a vender más?*
+
+**Transición:** aplicación → **plataforma**. El dominio gobierna; el código implementa.
+
+---
+
+## Sprint 0 — Arquitectura del dominio ✅
+
+**Spec:** [MARKETING_OS_DOMAIN_SPRINT0.md](MARKETING_OS_DOMAIN_SPRINT0.md) · **ADR:** [adr/0001-marketing-os-domain-sprint0.md](adr/0001-marketing-os-domain-sprint0.md)
+
+---
+
+## Sprint 1 — Modelo del Dominio (GO activo)
+
+**Spec:** [MARKETING_OS_SPRINT1_DOMAIN_MODEL.md](MARKETING_OS_SPRINT1_DOMAIN_MODEL.md)
+
+| Entregable | Doc | Estado |
+|------------|-----|--------|
+| Modelo del dominio + ER + reglas + estados | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | 🔄 v0.1 |
+| Catálogo eventos | [MARKETING_OS_DOMAIN_EVENTS.md](MARKETING_OS_DOMAIN_EVENTS.md) | 🔄 v0.1 |
+| Contratos servicios | [MARKETING_OS_DOMAIN_SERVICES.md](MARKETING_OS_DOMAIN_SERVICES.md) | 🔄 v0.1 |
+| Glosario oficial | [MARKETING_OS_GLOSSARY.md](MARKETING_OS_GLOSSARY.md) | 🔄 v0.1 |
+| Código · UI · IA · automatizaciones | — | ❌ **PROHIBIDO** |
+
+**Regla Sprint 1:** ninguna feature nueva sin entidad de dominio.
+
+**Framework de trabajo:** [MARKETING_OS_DEV_FRAMEWORK.md](MARKETING_OS_DEV_FRAMEWORK.md) — 5 preguntas obligatorias por desarrollo.
+
+**Pausado:** CODITO · pantallas · cambios UI.
 
 ---
 
@@ -43,20 +71,24 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 ## Prioridad actual (jun 2026)
 
 ```
-1. Restaurar branding EM+Acción dentro del Workspace Shell — 🔄 en cierre
-2. Workspace Shell — shell único (APROBADO Opción A) — ✅ implementado
-3. Capturas antes/después branding — 🔄
-4. GO deploy → reiniciar easytech-accio-engine
-5. Fase D → matriz conocimiento
+Sprint 0 — Arquitectura dominio ✅
+Sprint 1 — Domain Model (GO) → revisar v0.1 → aprobar v1.0
+Sprint 2+ — Implementación pilares (post Sprint 1)
 ```
 
-**Próximo sprint (GO explícito):** conectar IA local CODITO vía **Accio AI Provider Manager** — ver § «Próximo sprint» abajo.
+**Cierre operativo previo (no bloquea Sprint 0):**
 
-**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell de navegación; no más mini-aplicaciones fullscreen.
+```
+1. Workspace Shell — ✅ implementado
+2. Branding restoration — 🔄 en cierre
+3. AI Provider CODITO — ⏸ pausado (infra; después del dominio)
+```
 
-**Regla activa:** congelar pantallas fullscreen y módulos independientes hasta cerrar el shell.
+**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell; embrión de Marketing Console.
 
-**Regla IA (permanente):** no instalar OpenAI directo en EM+Acción; no pedir `OPENAI_API_KEY` en UI ni `.env` de producción.
+**Regla activa:** **NO GO** código hasta cierre Sprint 1 (domain model v1.0 aprobado).
+
+**Plan Maestro:** no tocar en Sprint 0 — alineación en iteración posterior.
 
 ---
 
