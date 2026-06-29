@@ -1,7 +1,8 @@
 # EM+Acción V2 — Plan Maestro de Desarrollo
 
 **Producto:** EM+Acción (EasyMarketingOne)  
-**Visión:** Motor Comercial IA Multi-Tenant del Ecosistema EasyTech  
+**Visión:** Marketing OS — [EMACCION_PRODUCT_VISION_v2.1.md](EMACCION_PRODUCT_VISION_v2.1.md) **(CONGELADO)**  
+**Visión técnica (legacy):** Motor Comercial IA Multi-Tenant del Ecosistema EasyTech  
 **Versión:** 2.0  
 **Estado:** Plan Maestro — fuente de verdad estratégica  
 **Regla principal:** **No implementar una fase hasta cerrar completamente la anterior.**

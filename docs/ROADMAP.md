@@ -1,13 +1,37 @@
 # EM+Acción V2 — Roadmap operativo
 
 **Producto:** EM+Acción (EasyMarketingOne)  
-**Plan maestro:** [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md)  
+**North star (CONGELADO):** [EMACCION_PRODUCT_VISION_v2.1.md](EMACCION_PRODUCT_VISION_v2.1.md) — **leer primero**  
+**Plan maestro:** [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) *(alineación pendiente)*  
 **Estado vs código:** [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md)  
 **Contexto operativo:** [EMACCION_CONTEXTO_OPERATIVO.md](EMACCION_CONTEXTO_OPERATIVO.md)  
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **Prioridad:** Próximo sprint → Accio AI Provider Manager (acotado)
+**Actualizado:** 2026-06-26 · **Visión:** Product Vision v2.1 congelada
+
+---
+
+## Alineación a Product Vision v2.1
+
+EM+Acción = **Marketing OS**. Núcleo: ciclo **Observar → Analizar → Planificar → Crear → Ejecutar → Medir → Aprender**.
+
+| Pilar (visión) | Fases del ciclo | En código hoy |
+|----------------|-----------------|---------------|
+| 1 Company Brain | Observar · Aprender | Parcial (`business_context`, tenants) |
+| 2 Corporate Memory | Observar · Aprender · Medir | ❌ No existe como pilar |
+| 3 Product Knowledge Base | Observar · Crear · Aprender | Parcial (Knowledge Engine) |
+| 4 Brand Center | Crear | Parcial (branding tenant) |
+| 5 Asset Manager | Crear · Ejecutar | Parcial (`flyers/`, cola) |
+| 6 Marketing Brain | Analizar · Planificar | Parcial (planner, propuestas) |
+| 7 Roadmap Engine | Planificar | Esbozo (workspace, banner) |
+| 8 AI Provider Manager | Crear | En curso (`ai_provider/`) |
+| 9 Automation Engine | Ejecutar · Medir | Parcial (publicador, órdenes) |
+| Marketing Console | Todas (UI) | Embrión ([WORKSPACE_SHELL.md](WORKSPACE_SHELL.md)) |
+
+**Regla de desarrollo (visión §11):** toda feature debe mapear a pilar + fase del ciclo. Si no, reevaluar antes de implementar.
+
+**Plan Maestro (fases A–P):** se alineará en iteración posterior; no sustituye la visión v2.1.
 
 ---
 
