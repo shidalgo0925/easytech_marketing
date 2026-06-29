@@ -136,16 +136,25 @@ def generate_proposals(
         "actions (lista de 3 strings), rationale."
     )
     user = f"Contexto:\n{json.dumps(prompt_context, ensure_ascii=False, indent=2)}"
-    api_key = assistant_llm.resolve_openai_key(tenant_id)
-    model = assistant_llm.resolve_model(tenant_id)
-    result = assistant_llm.chat_completion(
-        tenant_id,
-        [{"role": "system", "content": system}, {"role": "user", "content": user}],
-        model=model,
-        ai_cfg=ai_cfg if isinstance(ai_cfg, dict) else None,
-        api_key=api_key,
-    )
-    text = (result.get("choices") or [{}])[0].get("message", {}).get("content") or ""
+    try:
+        msg, model_name, _cost = assistant_llm.chat_completion(
+            tenant_id,
+            [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            model=assistant_llm.resolve_model(tenant_id, ai_cfg if isinstance(ai_cfg, dict) else None),
+            ai_cfg=ai_cfg if isinstance(ai_cfg, dict) else None,
+        )
+        text = (msg.get("content") or "").strip()
+    except RuntimeError:
+        proposals = _fallback_proposals(context)
+        return {
+            "mode": "fallback",
+            "executive_summary": _executive_summary(context, proposals),
+            "proposals": proposals,
+            "context_snapshot": {
+                "has_active_plan": bool(context.get("marketing_plan_active")),
+                "knowledge_articles": len(context.get("knowledge_base") or []),
+            },
+        }
     exec_summary = None
     proposals: list[dict[str, Any]] | None = None
     obj_match = re.search(r"\{[\s\S]*\}", text)

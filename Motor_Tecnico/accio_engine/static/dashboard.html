@@ -12,7 +12,7 @@
   <div id="app">
     <header class="topbar">
       <div class="topbar-left">
-        <a class="topbar-brand" href="/accio/dashboard/" aria-label="EMAccion">
+        <a class="topbar-brand" id="topbarBrand" href="/accio/plan/" aria-label="EMAccion">
           <svg class="topbar-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <g class="em-gear-ring" stroke="currentColor" fill="none">
               <circle cx="18" cy="18" r="14" stroke-width="1.5" stroke-dasharray="2.4 1.9"/>
@@ -55,7 +55,7 @@
     </header>
 
     <nav class="navbar" id="tabs" aria-label="Secciones del dashboard">
-      <button class="nav-item active" type="button" data-tab="resumen">Resumen</button>
+      <button class="nav-item active" type="button" data-tab="resumen">Operaciones</button>
       <button class="nav-item" type="button" data-tab="plan" data-href-plan="1">Plan</button>
       <button class="nav-item" type="button" data-tab="campanas">Campañas</button>
       <button class="nav-item" type="button" data-tab="publicaciones">Publicaciones</button>
@@ -79,6 +79,13 @@
     <main class="content">
 
       <div id="panel-resumen" class="tab-panel active">
+        <div class="accio-home-banner" id="accioHomeBanner">
+          <div>
+            <strong>Inicio renovado</strong>
+            <p>Tu punto de partida ahora es el módulo Plan: siguiente paso, señales y trabajo pendiente.</p>
+          </div>
+          <a class="btn-primary btn-sm" id="accioHomeLink" href="#">Ir a Inicio</a>
+        </div>
         <div class="resumen-empresa-banner" id="resumenEmpresaBanner"></div>
         <div class="metrics-grid accio-kpi-grid" id="stats"></div>
         <div class="panels-grid accio-grid">
@@ -367,10 +374,10 @@
     </main>
 
     <aside class="assistant-panel" id="assistantPanel" aria-label="Asistente EM+Acción">
-      <div class="assistant-panel-head"><i class="ti ti-sparkles"></i> Asistente EM+Acción <span id="assistantModelBadge" class="badge badge-gray assistant-badge-click" style="margin-left:6px;font-weight:normal" title="Configurar OpenAI API Key" onclick="openAssistantApiKeyConfig()" role="button" tabindex="0"></span></div>
+      <div class="assistant-panel-head"><i class="ti ti-sparkles"></i> Asistente EM+Acción <span id="assistantModelBadge" class="badge badge-gray assistant-badge-click" style="margin-left:6px;font-weight:normal" title="Estado del motor IA" role="status"></span></div>
       <div class="assistant-setup-hint hidden" id="assistantSetupHint">
-        Chat conversacional requiere <strong>OpenAI API Key</strong> (<code>sk-…</code>), distinta de ACCIO_API_KEY.
-        <button type="button" class="btn-ghost btn-sm" onclick="openAssistantApiKeyConfig()">Configurar ahora</button>
+        Chat conversacional requiere el motor IA de Accio (LiteLLM/CODITO) configurado en el servidor.
+        <button type="button" class="btn-ghost btn-sm" onclick="switchTab('configuracion'); showConfigSection('ia')">Configuración → IA</button>
       </div>
       <div class="assistant-messages" id="assistantMessages"></div>
       <div class="assistant-orders" id="assistantOrders"></div>
@@ -385,6 +392,13 @@
   <script>
     const TENANT_ID = (window.__ACCIO_TENANT__ || 'easytech');
     const TENANTS = window.__ACCIO_TENANTS__ || [{ id: 'easytech', name: 'EasyTech' }];
+    const EMBEDDED = new URLSearchParams(location.search).get('embedded') === '1';
+    if (EMBEDDED) document.documentElement.classList.add('accio-embedded');
+    (function redirectToPlanHome() {
+      const q = new URLSearchParams(location.search);
+      if (q.get('vista') === 'operaciones' || EMBEDDED) return;
+      location.replace(`/accio/plan/${TENANT_ID}/`);
+    })();
     const APP_STORAGE_KEY = () => `accio_app_${TENANT_ID}`;
     let APP_ID = localStorage.getItem(APP_STORAGE_KEY()) || 'default';
     let lastData = null;
@@ -829,13 +843,7 @@
 
     function openAssistantApiKeyConfig() {
       switchTab('configuracion');
-      showConfigSection('variables');
-      if (!lastSettings) loadSettings();
-      toast('Pega tu OpenAI API Key en «Secretos» y guarda Variables');
-      setTimeout(() => {
-        const el = document.getElementById('varsec_openai_api_key');
-        if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-      }, 400);
+      showConfigSection('ia');
     }
 
     function appendAssistantMsg(role, text) {
@@ -926,7 +934,7 @@
         appendAssistantMsg('bot', data.response || '—');
         const badge = document.getElementById('assistantModelBadge');
         if (badge) {
-          badge.textContent = data.llm ? (data.model || 'IA') : (data.error_code === 'ASSISTANT_DISABLED' ? 'IA off' : 'sin OpenAI Key');
+          badge.textContent = data.llm ? (data.model || 'IA') : (data.error_code === 'ASSISTANT_DISABLED' ? 'IA off' : 'sin motor IA');
           badge.className = 'badge ' + (data.llm ? 'badge-green' : 'badge-amber');
         }
         renderAssistantOrders(mergeAssistantOrders(data));
@@ -950,7 +958,7 @@
         if (data.llm_available) {
           badge.textContent = data.model || 'IA';
           badge.className = 'badge badge-green assistant-badge-click';
-          badge.title = 'IA activa (' + (data.model || 'OpenAI') + ')';
+          badge.title = 'IA activa (' + (data.model || 'local') + ')';
           if (hint) hint.classList.add('hidden');
         } else if (!data.assistant_enabled) {
           badge.textContent = 'IA off';
@@ -960,19 +968,24 @@
             hint.classList.remove('hidden');
             hint.innerHTML = 'Asistente desactivado. <button type="button" class="btn-ghost btn-sm" onclick="switchTab(\'configuracion\'); showConfigSection(\'ia\')">Configuración → IA</button>';
           }
-        } else if (data.has_openai_key) {
+        } else if (!data.provider_configured) {
+          badge.textContent = 'sin motor IA';
+          badge.className = 'badge badge-amber assistant-badge-click';
+          badge.title = 'ACCIO_AI_BASE_URL no configurado en servidor';
+          if (hint) hint.classList.remove('hidden');
+          if (!assistantMessages.length) {
+            appendAssistantMsg('bot', 'Hola. Soy el Asistente EM+Acción.\n\nEl chat conversacional requiere el motor IA de Accio (LiteLLM en CODITO), configurado por el administrador del servidor.\n\nMientras tanto uso modo básico: «Genera 1 publicación para LinkedIn», «Revisa la cola», «Dame ideas para EN1».');
+          }
+        } else if (!data.provider_reachable) {
+          badge.textContent = 'IA no alcanzable';
+          badge.className = 'badge badge-amber assistant-badge-click';
+          badge.title = 'Proveedor IA no responde (revisar CODITO/red)';
+          if (hint) hint.classList.remove('hidden');
+        } else {
           badge.textContent = 'IA desactivada';
           badge.className = 'badge badge-amber assistant-badge-click';
           badge.title = 'Activa IA en Configuración → IA';
           if (hint) { hint.classList.remove('hidden'); hint.innerHTML = 'IA desactivada. <button type="button" class="btn-ghost btn-sm" onclick="switchTab(\'configuracion\'); showConfigSection(\'ia\')">Activar en Configuración → IA</button>'; }
-        } else {
-          badge.textContent = 'sin OpenAI Key';
-          badge.className = 'badge badge-amber assistant-badge-click';
-          badge.title = 'Clic para configurar OpenAI API Key (sk-…)';
-          if (hint) hint.classList.remove('hidden');
-          if (!assistantMessages.length) {
-            appendAssistantMsg('bot', 'Hola. Soy el Asistente EM+Acción.\n\nPara chat conversacional (como ChatGPT) necesitas la OpenAI API Key (sk-…), distinta de ACCIO_API_KEY.\n\nClic en «sin OpenAI Key» → Variables → OpenAI API Key.\n\nSin clave uso modo básico: «Genera 1 publicación para LinkedIn», «Revisa la cola», «Dame ideas para EN1».');
-          }
         }
       } catch (_) { /* ignore */ }
     }
@@ -2739,6 +2752,11 @@
     }
 
     async function bootstrapDashboard() {
+      const planHome = `/accio/plan/${TENANT_ID}/`;
+      const brand = document.getElementById('topbarBrand');
+      if (brand) brand.href = planHome;
+      const homeLink = document.getElementById('accioHomeLink');
+      if (homeLink) homeLink.href = planHome;
       initTenantSelector();
       updatePrimaryLabel();
       try {
@@ -2755,6 +2773,14 @@
         toast('Error al cargar: ' + e.message, true);
       }
       setInterval(() => loadData(), 60000);
+      const params = new URLSearchParams(location.search);
+      const tab = params.get('tab') || location.hash.replace('#', '');
+      if (tab && document.querySelector(`.navbar .nav-item[data-tab="${tab}"]`)) {
+        switchTab(tab);
+        if (tab === 'conocimiento' && !lastKnowledge) loadKnowledge();
+        if (tab === 'configuracion' && !lastSettings) loadSettings();
+        if (tab === 'publicaciones') loadPublications();
+      }
     }
 
     bootstrapDashboard();

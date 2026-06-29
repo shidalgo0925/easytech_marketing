@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "topic_model": "llm",
+  "image_model": "static_flyers",
+  "tone_override": "Profesional, institucional, B2B. Relatic Panamá.",
+  "enabled": true,
+  "updated_at": "2026-06-29T00:00:00+00:00"
+}

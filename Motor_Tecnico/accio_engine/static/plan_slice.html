@@ -3,98 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EM+Acción — Plan de Marketing</title>
+  <title>EM+Acción — Workspace</title>
   <link rel="icon" href="/accio/static/em-logomark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
   <link rel="stylesheet" href="/accio/static/accio-design.css">
   <link rel="stylesheet" href="/accio/static/plan_slice.css">
 </head>
 <body>
-  <div class="vs1-app" id="vs1App">
+  <div class="vs1-app ws-app" id="vs1App">
 
-    <!-- Topbar: Workspace / sidebar screens -->
-    <header class="vs1-topbar" id="vs1TopbarDefault">
-      <div class="vs1-topbar-left">
-        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
-          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
-          <span>EM+Acción</span>
+    <!-- Topbar única (inmutable — ADN Command Center) -->
+    <header class="topbar vs1-topbar ws-topbar" id="vs1Topbar">
+      <div class="topbar-left vs1-topbar-left">
+        <a class="topbar-brand vs1-logo" href="/accio/plan/" aria-label="EM+Acción">
+          <img class="brand-icon vs1-brand-logo" src="" alt="" width="34" height="34" hidden>
+          <svg class="topbar-mark vs1-logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <g class="em-gear-ring" stroke="currentColor" fill="none">
+              <circle cx="18" cy="18" r="14" stroke-width="1.5" stroke-dasharray="2.4 1.9"/>
+              <circle cx="18" cy="18" r="11.5" stroke-width="1" opacity="0.45"/>
+            </g>
+          </svg>
+          <span class="brand-name vs1-brand-wordmark"><span class="brand-em">EM</span>+Acción</span>
         </a>
-        <div class="vs1-tenant-pill">
-          <select id="vs1TenantSelect" aria-label="Empresa"></select>
-          <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        <div class="empresa-pill empresa-pill--claro vs1-tenant-pill" title="Tenant activo">
+          <span class="empresa-pill-label">Tenant:</span>
+          <select id="vs1TenantSelect" class="empresa-select" aria-label="Empresa"></select>
+          <i class="ti ti-chevron-down empresa-chevron" aria-hidden="true"></i>
+        </div>
+        <div class="empresa-pill empresa-pill--claro vs1-tenant-pill" title="App / línea de marketing">
+          <span class="empresa-pill-label">App:</span>
+          <select id="vs1AppSelect" class="empresa-select" aria-label="Aplicación"></select>
+          <i class="ti ti-chevron-down empresa-chevron" aria-hidden="true"></i>
         </div>
       </div>
-      <div class="vs1-topbar-right">
-        <div class="vs1-avatar" id="vs1Avatar" title="Usuario">—</div>
+      <div class="topbar-center vs1-topbar-center">
+        <span class="ws-topbar-plan resumen-empresa-name" id="vs1TopbarPlanName" title="Plan activo">Sin plan</span>
+      </div>
+      <div class="topbar-right vs1-topbar-right">
+        <div class="vs1-ia-indicator status-pill status-pill--ia" id="vs1IaIndicator" title="Estado del asistente">
+          <span class="vs1-ia-dot" id="vs1IaDot" hidden></span>
+          <span id="vs1IaLabel">IA —</span>
+        </div>
+        <span class="status-pill" id="vs1UserBadge" title="Usuario">
+          <span id="vs1Avatar">—</span>
+        </span>
       </div>
     </header>
 
-    <!-- Topbar: Wizard -->
-    <header class="vs1-topbar" id="vs1TopbarWizard" hidden>
-      <div class="vs1-topbar-left">
-        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
-          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
-          <span>EM+Acción</span>
-        </a>
-        <button type="button" class="vs1-back-link" id="vs1BackWorkspace"><i class="ti ti-arrow-left"></i> Volver al inicio</button>
-      </div>
-      <div class="vs1-topbar-right">
-        <span class="vs1-autosave" id="vs1Autosave">Guardado automáticamente</span>
-      </div>
-    </header>
+    <!-- Banner estrategia (discreto — estilo resumen empresa) -->
+    <div class="ws-strategy-banner resumen-empresa-banner" id="wsStrategyBanner" role="status" aria-live="polite">
+      <span class="resumen-empresa-label">Plan:</span>
+      <span class="resumen-empresa-name" id="wsStrategyPlanName">—</span>
+      <span class="resumen-empresa-sep" aria-hidden="true">·</span>
+      <span class="resumen-empresa-label">Estado:</span>
+      <span class="resumen-empresa-name" id="wsStrategyPlanState">Sin plan activo</span>
+    </div>
 
-    <!-- Topbar: Context -->
-    <header class="vs1-topbar" id="vs1TopbarContext" hidden>
-      <div class="vs1-topbar-left">
-        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
-          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
-          <span>EM+Acción</span>
-        </a>
-        <span class="vs1-breadcrumb">Contexto para la IA</span>
-      </div>
-      <div class="vs1-topbar-right">
-        <span class="vs1-ts" id="vs1ContextTs">Actualizado hace — min</span>
-      </div>
-    </header>
+    <div class="ws-body">
+      <aside class="vs1-sidebar ws-sidebar accio-sidebar" aria-label="Navegación del producto">
+        <button type="button" class="vs1-nav-item is-active" data-nav="workspace"><i class="ti ti-layout-dashboard"></i> Inicio</button>
+        <button type="button" class="vs1-nav-item" data-nav="plan"><i class="ti ti-target"></i> Plan</button>
+        <button type="button" class="vs1-nav-item" data-nav="context"><i class="ti ti-brain"></i> Contexto</button>
+        <button type="button" class="vs1-nav-item" data-nav="proposals"><i class="ti ti-sparkles"></i> Propuestas</button>
+        <div class="vs1-nav-sep"></div>
+        <button type="button" class="vs1-nav-item" data-nav="publications"><i class="ti ti-calendar-event"></i> Publicaciones</button>
+        <button type="button" class="vs1-nav-item" data-nav="clients"><i class="ti ti-users"></i> Clientes</button>
+        <button type="button" class="vs1-nav-item" data-nav="operations"><i class="ti ti-chart-bar"></i> Operaciones</button>
+        <button type="button" class="vs1-nav-item" data-nav="config"><i class="ti ti-settings"></i> Configuración</button>
+      </aside>
 
-    <!-- Topbar: Proposal -->
-    <header class="vs1-topbar" id="vs1TopbarProposal" hidden>
-      <div class="vs1-topbar-left">
-        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
-          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
-          <span>EM+Acción</span>
-        </a>
-        <span class="vs1-breadcrumb"><span class="vs1-breadcrumb-muted" id="vs1PropBreadcrumb">Propuesta 1 · </span><span id="vs1PropPlanName">—</span></span>
-      </div>
-      <div class="vs1-topbar-right">
-        <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1ExportBtn">Exportar</button>
-        <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1ViewCtxBtn">Ver contexto usado</button>
-      </div>
-    </header>
+      <main class="vs1-main ws-main content" id="wsMain">
 
-    <!-- Topbar: Activate (minimal) -->
-    <header class="vs1-topbar" id="vs1TopbarActivate" hidden>
-      <div class="vs1-topbar-left">
-        <a class="vs1-logo" href="/accio/dashboard/" aria-label="EM+Acción">
-          <svg class="vs1-logo-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="14" stroke="currentColor" stroke-width="1.5"/></svg>
-          <span>EM+Acción</span>
-        </a>
-      </div>
-    </header>
-
-    <!-- SCREEN 1: Workspace -->
-    <div class="vs1-screen" id="vs1ScreenWorkspace" data-layout="sidebar">
-      <div class="vs1-shell">
-        <aside class="vs1-sidebar" aria-label="Navegación principal">
-          <button type="button" class="vs1-nav-item is-active" data-nav="workspace"><i class="ti ti-layout-dashboard"></i> Inicio</button>
-          <button type="button" class="vs1-nav-item" data-nav="plan"><i class="ti ti-file-plus"></i> Plan</button>
-          <button type="button" class="vs1-nav-item" data-nav="context"><i class="ti ti-brain"></i> Contexto</button>
-          <button type="button" class="vs1-nav-item" data-nav="proposals"><i class="ti ti-sparkles"></i> Propuestas</button>
-          <div class="vs1-nav-sep"></div>
-          <button type="button" class="vs1-nav-item" data-nav="connectors"><i class="ti ti-plug"></i> Conectores</button>
-          <button type="button" class="vs1-nav-item" data-nav="config"><i class="ti ti-settings"></i> Configuración</button>
-        </aside>
-        <main class="vs1-main">
+        <!-- Inicio -->
+        <div class="ws-view" id="vs1ViewWorkspace" data-area="workspace">
           <div class="vs1-greeting">
             <h1 id="vs1Greeting">Buenos días</h1>
             <p id="vs1DayStatus">¿Qué quieres lograr hoy?</p>
@@ -111,7 +92,7 @@
             <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1IaBannerCta">Configurar asistente</button>
           </div>
 
-          <div class="vs1-card" id="vs1NextAction">
+          <div class="vs1-card accio-card" id="vs1NextAction">
             <p class="vs1-label-upper">Siguiente paso</p>
             <h3 class="vs1-action-title" id="vs1NextTitle">—</h3>
             <p class="vs1-action-desc" id="vs1NextDesc">—</p>
@@ -126,90 +107,132 @@
           </section>
 
           <section class="vs1-tasks-grid" aria-label="Trabajo pendiente">
-            <div class="vs1-card vs1-task-card">
-              <h3 class="vs1-task-head">Cola de publicaciones</h3>
-              <div class="vs1-task-body" id="vs1PubQueue"></div>
+            <div class="vs1-card vs1-task-card accio-card panel">
+              <h3 class="vs1-task-head panel-title panel-header">Cola de publicaciones</h3>
+              <div class="vs1-task-body panel-body accio-card-body" id="vs1PubQueue"></div>
             </div>
-            <div class="vs1-card vs1-task-card">
-              <h3 class="vs1-task-head">Planes en borrador</h3>
-              <div class="vs1-task-body" id="vs1DraftPlans"></div>
+            <div class="vs1-card vs1-task-card accio-card panel">
+              <h3 class="vs1-task-head panel-title panel-header" id="vs1PendingHead">Pendientes de tu atención</h3>
+              <div class="vs1-task-body panel-body accio-card-body" id="vs1DraftPlans"></div>
             </div>
           </section>
-        </main>
+        </div>
+
+        <!-- Plan (área estratégica) -->
+        <div class="ws-view" id="vs1ViewPlan" data-area="plan" hidden>
+          <nav class="ws-area-nav" aria-label="Vistas de Plan">
+            <button type="button" class="ws-area-nav-item is-active" data-plan-view="resumen">Resumen</button>
+            <button type="button" class="ws-area-nav-item" data-plan-view="crear">Crear</button>
+            <button type="button" class="ws-area-nav-item" data-plan-view="historial">Historial</button>
+          </nav>
+
+          <div class="ws-plan-panel" id="vs1PlanViewResumen">
+            <div class="vs1-activate-card" id="vs1ActivateCard"></div>
+          </div>
+
+          <div class="ws-plan-panel" id="vs1PlanViewCrear" hidden>
+            <div class="vs1-wizard-toolbar">
+              <span class="vs1-autosave" id="vs1Autosave">Guardado automáticamente</span>
+            </div>
+            <div class="vs1-wizard-progress" aria-hidden="true"><div class="vs1-wizard-progress-bar" id="vs1WizardBar"></div></div>
+            <div class="vs1-wizard-layout ws-wizard-layout">
+              <aside class="vs1-wizard-steps" id="vs1WizardSteps" aria-label="Pasos del wizard"></aside>
+              <div class="vs1-wizard-form">
+                <div id="vs1WizardStepContent"></div>
+                <div class="vs1-wizard-nav">
+                  <button type="button" class="vs1-btn vs1-btn--ghost" id="vs1WizardPrev">Anterior</button>
+                  <button type="button" class="vs1-btn vs1-btn--primary" id="vs1WizardNext">Siguiente</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ws-plan-panel" id="vs1PlanViewHistorial" hidden>
+            <div class="vs1-context-header">
+              <h1 class="vs1-context-title">Historial de planes</h1>
+              <p class="vs1-context-sub">Borradores y planes anteriores. Puedes activar o revisar cualquiera.</p>
+            </div>
+            <div class="vs1-card" id="vs1PlanHistorialList"></div>
+          </div>
+        </div>
+
+        <!-- Contexto -->
+        <div class="ws-view" id="vs1ViewContext" data-area="context" hidden>
+          <div class="vs1-context-header">
+            <h1 class="vs1-context-title">Contexto para la IA</h1>
+            <p class="vs1-context-sub" id="vs1ContextSub">EM+Acción combina estas fuentes antes de generar propuestas estratégicas.</p>
+            <p class="vs1-ts" id="vs1ContextTs">Actualizado hace — min</p>
+          </div>
+
+          <div class="vs1-card vs1-card--plan-ref" id="vs1ContextPlanRef" hidden>
+            <span class="vs1-dot-green" aria-hidden="true"></span>
+            <div class="vs1-banner-meta">
+              <p class="vs1-label-upper" style="margin:0 0 4px">Plan de referencia</p>
+              <p class="vs1-banner-title" id="vs1ContextPlanName">—</p>
+              <p class="vs1-banner-sub" id="vs1ContextPlanMeta">—</p>
+            </div>
+          </div>
+
+          <div class="vs1-card vs1-confidence" id="vs1ConfidenceCard"></div>
+
+          <section class="vs1-context-sources" aria-label="Fuentes del contexto">
+            <h2 class="vs1-section-head">Fuentes del contexto</h2>
+            <div id="vs1SourcesList"></div>
+          </section>
+
+          <div class="vs1-context-next" id="vs1ContextNextBanner" hidden role="status">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <div>
+              <strong>Siguiente paso recomendado</strong>
+              <p id="vs1ContextNextText">—</p>
+            </div>
+            <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1ContextNextCta">Completar fuente</button>
+          </div>
+
+          <div class="vs1-context-actions">
+            <button type="button" class="vs1-btn vs1-btn--primary" id="vs1GenProposalBtn"><i class="ti ti-sparkles"></i> Generar propuesta</button>
+          </div>
+        </div>
+
+        <!-- Propuestas -->
+        <div class="ws-view" id="vs1ViewProposals" data-area="proposals" hidden>
+          <div id="vs1ProposalMain" class="vs1-proposal-page"></div>
+        </div>
+
+        <!-- Publicaciones (iframe operaciones) -->
+        <div class="ws-view ws-view--embed" id="vs1ViewPublications" data-area="publications" hidden>
+          <iframe class="ws-embed-frame" id="vs1PubFrame" title="Publicaciones" loading="lazy"></iframe>
+        </div>
+
+        <!-- Clientes (stub → operaciones) -->
+        <div class="ws-view ws-view--embed" id="vs1ViewClients" data-area="clients" hidden>
+          <iframe class="ws-embed-frame" id="vs1ClientsFrame" title="Clientes" loading="lazy"></iframe>
+        </div>
+
+        <!-- Operaciones -->
+        <div class="ws-view ws-view--embed" id="vs1ViewOperations" data-area="operations" hidden>
+          <iframe class="ws-embed-frame" id="vs1OpsFrame" title="Operaciones" loading="lazy"></iframe>
+        </div>
+
+        <!-- Configuración -->
+        <div class="ws-view ws-view--embed" id="vs1ViewConfig" data-area="config" hidden>
+          <iframe class="ws-embed-frame" id="vs1ConfigFrame" title="Configuración" loading="lazy"></iframe>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <div class="vs1-modal" id="vs1ReviewModal" hidden>
+    <div class="vs1-modal-backdrop" id="vs1ReviewBackdrop" aria-hidden="true"></div>
+    <div class="vs1-modal-card" role="dialog" aria-modal="true" aria-labelledby="vs1ReviewTitle">
+      <div class="vs1-modal-head">
+        <h3 id="vs1ReviewTitle">Revisar</h3>
+        <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" id="vs1ReviewClose" aria-label="Cerrar">×</button>
       </div>
+      <div class="vs1-modal-body" id="vs1ReviewBody"></div>
+      <div class="vs1-modal-foot" id="vs1ReviewFoot"></div>
     </div>
-
-    <!-- SCREEN 2: Crear Plan wizard -->
-    <div class="vs1-screen" id="vs1ScreenWizard" hidden data-layout="wizard">
-      <div class="vs1-wizard-progress" aria-hidden="true"><div class="vs1-wizard-progress-bar" id="vs1WizardBar"></div></div>
-      <div class="vs1-wizard-layout">
-        <aside class="vs1-wizard-steps" id="vs1WizardSteps" aria-label="Pasos del wizard"></aside>
-        <div class="vs1-wizard-form">
-          <div id="vs1WizardStepContent"></div>
-          <div class="vs1-wizard-nav">
-            <button type="button" class="vs1-btn vs1-btn--ghost" id="vs1WizardPrev">Anterior</button>
-            <button type="button" class="vs1-btn vs1-btn--primary" id="vs1WizardNext">Siguiente</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SCREEN 3: Activar Plan -->
-    <div class="vs1-screen" id="vs1ScreenActivate" hidden data-layout="activate">
-      <main class="vs1-main vs1-main--no-sidebar vs1-main--center">
-        <div class="vs1-activate-card" id="vs1ActivateCard"></div>
-      </main>
-    </div>
-
-    <!-- SCREEN 4: Context Builder -->
-    <div class="vs1-screen" id="vs1ScreenContext" hidden data-layout="context">
-      <main class="vs1-main vs1-main--no-sidebar vs1-main--wide">
-        <div class="vs1-context-header">
-          <h1 class="vs1-context-title">Contexto para la IA</h1>
-          <p class="vs1-context-sub" id="vs1ContextSub">EM+Acción combina estas fuentes antes de generar propuestas estratégicas.</p>
-        </div>
-
-        <div class="vs1-card vs1-card--plan-ref" id="vs1ContextPlanRef" hidden>
-          <span class="vs1-dot-green" aria-hidden="true"></span>
-          <div class="vs1-banner-meta">
-            <p class="vs1-label-upper" style="margin:0 0 4px">Plan de referencia</p>
-            <p class="vs1-banner-title" id="vs1ContextPlanName">—</p>
-            <p class="vs1-banner-sub" id="vs1ContextPlanMeta">—</p>
-          </div>
-        </div>
-
-        <div class="vs1-card vs1-confidence" id="vs1ConfidenceCard"></div>
-
-        <section class="vs1-context-sources" aria-label="Fuentes del contexto">
-          <h2 class="vs1-section-head">Fuentes del contexto</h2>
-          <div id="vs1SourcesList"></div>
-        </section>
-
-        <div class="vs1-context-next" id="vs1ContextNextBanner" hidden role="status">
-          <i class="ti ti-info-circle" aria-hidden="true"></i>
-          <div>
-            <strong>Siguiente paso recomendado</strong>
-            <p id="vs1ContextNextText">—</p>
-          </div>
-          <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1ContextNextCta">Completar fuente</button>
-        </div>
-
-        <div class="vs1-context-actions">
-          <button type="button" class="vs1-btn vs1-btn--primary" id="vs1GenProposalBtn"><i class="ti ti-sparkles"></i> Generar propuesta</button>
-        </div>
-      </main>
-    </div>
-
-    <!-- SCREEN 5: Primera propuesta IA -->
-    <div class="vs1-screen" id="vs1ScreenProposal" hidden data-layout="proposal">
-      <main class="vs1-main vs1-main--no-sidebar vs1-main--wide">
-        <div class="vs1-proposal-layout">
-          <div class="vs1-proposal-main" id="vs1ProposalMain"></div>
-          <aside class="vs1-proposal-aside" id="vs1ProposalAside"></aside>
-        </div>
-      </main>
-    </div>
-
   </div>
   <div class="vs1-toast" id="vs1Toast" role="status"></div>
   <script src="/accio/static/plan_slice.js"></script>

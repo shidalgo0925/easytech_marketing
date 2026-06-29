@@ -73,19 +73,19 @@ class AssistantV1Tests(unittest.TestCase):
             REGISTRY_PATH=self.root / "registry.json",
         )
 
-    def test_llm_available_requires_openai_key(self):
-        with mock.patch.dict(os.environ, {"AI_ASSISTANT_ENABLED": "true"}, clear=False):
-            with mock.patch.object(assistant_llm, "resolve_openai_key", return_value=""):
-                self.assertFalse(assistant_llm.llm_available("easytech", {"enabled": True}))
+    def test_llm_available_requires_provider_config(self):
+        with mock.patch.dict(os.environ, {"AI_ASSISTANT_ENABLED": "true", "ACCIO_AI_BASE_URL": ""}, clear=False):
+            self.assertFalse(assistant_llm.llm_available("easytech", {"enabled": True}))
+        with mock.patch.dict(os.environ, {"AI_ASSISTANT_ENABLED": "true", "ACCIO_AI_BASE_URL": "http://codito:4000"}, clear=False):
+            self.assertTrue(assistant_llm.llm_available("easytech", {"enabled": True}))
 
     def test_assistant_disabled_via_env(self):
-        with mock.patch.dict(os.environ, {"AI_ASSISTANT_ENABLED": "false"}, clear=False):
-            with mock.patch.object(assistant_llm, "resolve_openai_key", return_value="sk-test"):
-                self.assertFalse(assistant_llm.llm_available("easytech", {"enabled": True}))
+        with mock.patch.dict(os.environ, {"AI_ASSISTANT_ENABLED": "false", "ACCIO_AI_BASE_URL": "http://codito:4000"}, clear=False):
+            self.assertFalse(assistant_llm.llm_available("easytech", {"enabled": True}))
 
     def test_resolve_model_from_env(self):
-        with mock.patch.dict(os.environ, {"OPENAI_MODEL": "gpt-4o"}, clear=False):
-            self.assertEqual(assistant_llm.resolve_model("easytech"), "gpt-4o")
+        with mock.patch.dict(os.environ, {"ACCIO_AI_MODEL": "qwen2.5-coder:14b"}, clear=False):
+            self.assertEqual(assistant_llm.resolve_model("easytech"), "qwen2.5-coder:14b")
 
     def test_build_context_includes_products_and_connectors(self):
         with self._patch():
@@ -133,13 +133,13 @@ class AssistantV1Tests(unittest.TestCase):
         self.assertEqual(entry["user"], "tester")
         self.assertEqual(history[0]["prompt"], "Hola")
 
-    def test_missing_key_returns_error_code(self):
+    def test_missing_provider_returns_error_code(self):
         with self._patch():
-            with mock.patch.object(assistant_llm, "resolve_openai_key", return_value=""):
+            with mock.patch.dict(os.environ, {"ACCIO_AI_BASE_URL": ""}, clear=False):
                 result = assistant_service.process_message("easytech", "Hola", app_id="default")
         self.assertTrue(result["ok"])
         self.assertFalse(result["llm"])
-        self.assertEqual(result.get("error_code"), "OPENAI_KEY_MISSING")
+        self.assertEqual(result.get("error_code"), "AI_PROVIDER_UNAVAILABLE")
 
 
 if __name__ == "__main__":

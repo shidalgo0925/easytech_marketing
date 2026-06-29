@@ -305,40 +305,26 @@ def _emaccion_marketing_advice() -> str:
     )
 
 
-def _call_openai(prompt: str, system: str, tenant_id: str, ai_cfg: dict[str, Any] | None = None) -> tuple[str, str, float | None]:
+def _call_llm(prompt: str, system: str, tenant_id: str, ai_cfg: dict[str, Any] | None = None) -> tuple[str, str, float | None]:
     from Motor_Tecnico.accio_engine import assistant_llm
 
-    api_key = assistant_llm.resolve_openai_key(tenant_id)
-    if not api_key:
+    if not assistant_llm.llm_available(tenant_id, ai_cfg):
         return "", "rules", None
-    model = assistant_llm.resolve_model(tenant_id, ai_cfg)
     try:
-        import urllib.request
-
-        body = json.dumps(
-            {
-                "model": model,
-                "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": prompt},
-                ],
-                "temperature": 0.4,
-            }
-        ).encode("utf-8")
-        req = urllib.request.Request(
-            "https://api.openai.com/v1/chat/completions",
-            data=body,
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-            method="POST",
+        msg, model, cost = assistant_llm.chat_completion(
+            tenant_id,
+            [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+            ai_cfg=ai_cfg,
+            temperature=0.4,
         )
-        with urllib.request.urlopen(req, timeout=45) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        text = data["choices"][0]["message"]["content"].strip()
-        usage = data.get("usage", {})
-        cost = round((usage.get("prompt_tokens", 0) * 0.00000015 + usage.get("completion_tokens", 0) * 0.0000006), 4)
-        return text, model, cost
-    except Exception:
+        return (msg.get("content") or "").strip(), model, cost
+    except RuntimeError:
         return "", "rules", None
+
+
+def _call_openai(prompt: str, system: str, tenant_id: str, ai_cfg: dict[str, Any] | None = None) -> tuple[str, str, float | None]:
+    """Deprecated alias — usa Accio AI Provider Manager."""
+    return _call_llm(prompt, system, tenant_id, ai_cfg)
 
 
 def _execute_tool_call(
@@ -477,11 +463,10 @@ def _no_llm_message(tenant_id: str, ai_cfg: dict[str, Any] | None = None) -> str
             "El asistente IA está desactivado.\n"
             "Actívalo en Configuración → IA, o define AI_ASSISTANT_ENABLED=true en el servidor."
         )
-    if not assistant_llm.resolve_openai_key(tenant_id):
+    if not assistant_llm.llm_available(tenant_id, ai_cfg):
         return (
-            "Para chat conversacional necesitas la API Key de OpenAI (sk-…), distinta de ACCIO_API_KEY.\n\n"
-            "Configuración → Variables → OpenAI API Key (IA)\n"
-            "O en el servidor: OPENAI_API_KEY=sk-…\n\n"
+            "El asistente IA no está conectado al motor Accio en este momento.\n\n"
+            "El administrador debe configurar ACCIO_AI_BASE_URL (LiteLLM en CODITO) en el servidor.\n\n"
             "Mientras tanto puedo ayudarte con órdenes: «Genera 1 publicación para LinkedIn», "
             "«Revisa la cola», «¿Dónde veo el borrador?»."
         )
@@ -509,30 +494,29 @@ def process_message(
         try:
             return _process_with_llm(tenant_id, prompt, ctx, user=user, chat_history=chat_history)
         except RuntimeError as exc:
-            if "OPENAI_KEY_MISSING" in str(exc):
+            if "AI_PROVIDER_UNAVAILABLE" in str(exc):
                 pass
             else:
                 err = str(exc)
-                if "401" in err or "invalid_api_key" in err.lower():
+                if "401" in err or "invalid" in err.lower():
                     return {
                         "ok": True,
                         "mode": "suggestion",
-                        "response": "La API Key de OpenAI no es válida. Revísala en Configuración → Variables (debe empezar con sk-).",
+                        "response": "El proveedor de IA de Accio rechazó la solicitud. Revisa ACCIO_AI_BASE_URL y credenciales en el servidor.",
                         "orders": [],
                         "model": "error",
                         "llm": False,
-                        "error_code": "OPENAI_KEY_INVALID",
+                        "error_code": "AI_PROVIDER_AUTH",
                         "pending_orders": assistant_store.list_pending_orders(tenant_id),
                     }
-                # fallback rules on transient errors
                 pass
 
-    if not assistant_llm.resolve_openai_key(tenant_id):
+    if not assistant_llm.llm_available(tenant_id, ai_cfg):
         result = _process_rules(tenant_id, prompt, ctx, user=user, view=view)
         if result.get("response", "").startswith("No capté"):
             result["response"] = _no_llm_message(tenant_id, ai_cfg)
         result["llm"] = False
-        result["error_code"] = "OPENAI_KEY_MISSING"
+        result["error_code"] = "AI_PROVIDER_UNAVAILABLE"
         return result
 
     if not assistant_llm.assistant_enabled(ai_cfg):

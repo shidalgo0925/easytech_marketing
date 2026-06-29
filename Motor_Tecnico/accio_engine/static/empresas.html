@@ -72,7 +72,7 @@
         alert(data.error || 'No se pudo entrar');
         return;
       }
-      location.href = data.redirect || ('/accio/dashboard/' + id + '/');
+      location.href = data.redirect || ('/accio/plan/' + id + '/');
     }
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {

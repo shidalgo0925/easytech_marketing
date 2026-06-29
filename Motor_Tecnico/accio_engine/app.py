@@ -357,27 +357,50 @@ def _enter_empresa_session(tenant_id: str) -> str | None:
     return None
 
 
-def _redirect_after_login(user: dict | None = None) -> Response:
-    nxt = (request.args.get("next") or "").strip()
-    if nxt.startswith("/accio/dashboard/"):
+def _tenant_home_url(tenant_id: str) -> str:
+    """Home post-login: módulo Plan (Inicio unificado)."""
+    return f"/accio/plan/{tenant_id.strip().lower()}/"
+
+
+def _tenant_dashboard_url(tenant_id: str) -> str:
+    """Vista operativa legacy (Resumen, conectores, configuración avanzada)."""
+    return f"/accio/dashboard/{tenant_id.strip().lower()}/"
+
+
+def _redirect_for_next_or_home(nxt: str | None) -> Response | None:
+    """Respeta ?next= si apunta a dashboard o plan de un tenant permitido."""
+    nxt = (nxt or "").strip()
+    for prefix in ("/accio/dashboard/", "/accio/plan/"):
+        if not nxt.startswith(prefix):
+            continue
         parts = [p for p in nxt.rstrip("/").split("/") if p]
-        if len(parts) >= 3:
-            tid = parts[2].lower()
-            if _user_can_access_tenant(tid):
-                err = _enter_empresa_session(tid)
-                if not err:
-                    return redirect(nxt, code=302)
+        if len(parts) < 3:
+            continue
+        tid = parts[2].lower()
+        if not _user_can_access_tenant(tid):
+            continue
+        err = _enter_empresa_session(tid)
+        if err:
+            continue
+        return redirect(nxt, code=302)
+    return None
+
+
+def _redirect_after_login(user: dict | None = None) -> Response:
+    hit = _redirect_for_next_or_home(request.args.get("next"))
+    if hit:
+        return hit
     companies = _company_rows_for_session()
     if len(companies) == 1:
         err = _enter_empresa_session(companies[0]["id"])
         if err:
             return _render_login_platform(error=err)
-        return redirect(f"/accio/dashboard/{companies[0]['id']}/", code=302)
+        return redirect(_tenant_home_url(companies[0]["id"]), code=302)
     preferred = next((c for c in companies if c["id"] == DEFAULT_TENANT), None)
     if preferred:
         err = _enter_empresa_session(preferred["id"])
         if not err:
-            return redirect(f"/accio/dashboard/{preferred['id']}/", code=302)
+            return redirect(_tenant_home_url(preferred["id"]), code=302)
     return redirect("/accio/empresas/", code=302)
 
 
@@ -403,7 +426,7 @@ def auth_empresas_enter(tenant_id: str):
     err = _enter_empresa_session(tenant_id)
     if err:
         return jsonify({"ok": False, "error": err}), 403
-    return jsonify({"ok": True, "redirect": f"/accio/dashboard/{tenant_id}/"})
+    return jsonify({"ok": True, "redirect": _tenant_home_url(tenant_id)})
 
 
 @app.post("/accio/auth/logout")
@@ -465,7 +488,7 @@ def _render_login(tenant_id: str, *, error: str | None = None) -> Response:
     html = html.replace('href="/accio/static/em-logomark.svg"', f'href="{icon_url}"', 1)
     html = html.replace('href="/accio/static/accio-design.css"', f'href="{css_url}"', 1)
     branding = tenant_profile.branding_css(tenant_id)
-    redirect_to = request.args.get("next") or f"/accio/dashboard/{tenant_id}/"
+    redirect_to = request.args.get("next") or _tenant_home_url(tenant_id)
     inject = (
         f"<style>{branding}</style>"
         f'<script>window.__ACCIO_TENANT__={json.dumps(tenant_id)};'
@@ -537,22 +560,46 @@ def _render_plan_slice(tenant_id: str) -> Response:
     css_design = _static_asset_url("accio-design.css")
     css_slice = _static_asset_url("plan_slice.css")
     js_slice = _static_asset_url("plan_slice.js")
-    icon_url = _static_asset_url("em-logomark.svg")
+    profile = tenant_profile.load_profile(tenant_id)
+    branding_data = profile.get("branding") or tenant_profile.DEFAULT_BRANDING
+    logo_url = branding_data.get("logo_url") or _static_asset_url("em-logomark.svg").split("?")[0]
+    if logo_url.startswith("/accio/static/"):
+        icon_url = _static_asset_url(logo_url.split("/")[-1])
+    else:
+        icon_url = logo_url
     html = html.replace('href="/accio/static/em-logomark.svg"', f'href="{icon_url}"', 1)
     html = html.replace('href="/accio/static/accio-design.css"', f'href="{css_design}"', 1)
     html = html.replace('href="/accio/static/plan_slice.css"', f'href="{css_slice}"', 1)
     html = html.replace('src="/accio/static/plan_slice.js"', f'src="{js_slice}"', 1)
+    branding = tenant_profile.branding_css(tenant_id)
     tenants_js = json.dumps(_allowed_tenant_rows(), ensure_ascii=False)
     user_name = session.get("user_name") or session.get("user_id") or "Administrador"
     app_id = _requested_app_id(tenant_id)
+    session_role = _session_role(tenant_id) if session.get("accio_auth") else None
+    branding_js = json.dumps(
+        {
+            "logo_url": branding_data.get("logo_url", "/accio/static/em-logomark.svg"),
+            "primary_color": branding_data.get("primary_color"),
+            "accent_color": branding_data.get("accent_color"),
+            "display_name": tenant.display_name,
+        },
+        ensure_ascii=False,
+    )
     inject = (
+        f"<style>{CRITICAL_CSS}{branding}</style>"
         f"<script>window.__ACCIO_TENANT__={json.dumps(tenant_id)};"
         f"window.__ACCIO_TENANTS__={tenants_js};"
         f"window.__ACCIO_EMPRESA_NAME__={json.dumps(tenant.display_name)};"
         f"window.__ACCIO_USER_NAME__={json.dumps(str(user_name))};"
-        f"window.__ACCIO_APP__={json.dumps(app_id)};</script>"
+        f"window.__ACCIO_APP__={json.dumps(app_id)};"
+        f"window.__ACCIO_BRANDING__={branding_js};"
+        f"window.__ACCIO_SESSION_ROLE__={json.dumps(session_role)};</script>"
     )
     html = html.replace("</head>", inject + "\n</head>", 1)
+    html = html.replace(
+        "<title>EM+Acción — Plan de Marketing</title>",
+        f"<title>{tenant.display_name} — EM+Acción</title>",
+    )
     return Response(
         html,
         mimetype="text/html",
@@ -611,7 +658,7 @@ def empresas_page():
     if len(companies) == 1:
         err = _enter_empresa_session(companies[0]["id"])
         if not err:
-            return redirect(f"/accio/dashboard/{companies[0]['id']}/", code=302)
+            return redirect(_tenant_home_url(companies[0]["id"]), code=302)
     return _render_empresas_page()
 
 
@@ -637,12 +684,12 @@ def login_page(tenant_id: str):
             category="auth",
             detail={"role": user["role"], "method": "form"},
         )
-        nxt = request.args.get("next") or f"/accio/dashboard/{tenant_id}/"
+        nxt = request.args.get("next") or _tenant_home_url(tenant_id)
         resp = redirect(nxt, code=302)
         resp.headers["Cache-Control"] = "no-store"
         return resp
     if session.get("accio_auth") and _user_can_access_tenant(tenant_id):
-        nxt = request.args.get("next") or f"/accio/dashboard/{tenant_id}/"
+        nxt = request.args.get("next") or _tenant_home_url(tenant_id)
         return redirect(nxt, code=302)
     return _render_login(tenant_id)
 
@@ -652,13 +699,13 @@ def dashboard_redirect_root():
     if session.get("accio_auth"):
         tid = session.get("tenant_id")
         if tid and _user_can_access_tenant(tid):
-            return redirect(f"/accio/dashboard/{tid}/", code=302)
+            return redirect(_tenant_home_url(tid), code=302)
         allowed = _allowed_tenant_rows()
         if allowed:
             pick = next((row for row in allowed if row["id"] == DEFAULT_TENANT), allowed[0])
             err = _enter_empresa_session(pick["id"])
             if not err:
-                return redirect(f"/accio/dashboard/{pick['id']}/", code=302)
+                return redirect(_tenant_home_url(pick["id"]), code=302)
         return redirect("/accio/empresas/", code=302)
     return redirect("/accio/login/", code=302)
 
@@ -681,12 +728,31 @@ def dashboard_page(tenant_id: str):
         allowed = _allowed_tenant_rows()
         if allowed:
             pick = next((row for row in allowed if row["id"] == DEFAULT_TENANT), allowed[0])
-            return redirect(f"/accio/dashboard/{pick['id']}/", code=302)
+            return redirect(_tenant_home_url(pick["id"]), code=302)
         return jsonify({"ok": False, "error": "Sin acceso a ningún tenant"}), 403
     err = _enter_empresa_session(tenant_id)
     if err:
         return jsonify({"ok": False, "error": err}), 403
+    if request.args.get("vista") != "operaciones" and not request.args.get("tab"):
+        return redirect(_tenant_home_url(tenant_id), code=302)
     return _render_dashboard(tenant_id)
+
+
+@app.get("/accio/plan")
+@app.get("/accio/plan/")
+def plan_redirect_root():
+    if not session.get("accio_auth"):
+        return redirect("/accio/login/", code=302)
+    tid = session.get("tenant_id")
+    if tid and _user_can_access_tenant(tid):
+        return redirect(_tenant_home_url(tid), code=302)
+    allowed = _allowed_tenant_rows()
+    if allowed:
+        pick = next((row for row in allowed if row["id"] == DEFAULT_TENANT), allowed[0])
+        err = _enter_empresa_session(pick["id"])
+        if not err:
+            return redirect(_tenant_home_url(pick["id"]), code=302)
+    return redirect("/accio/empresas/", code=302)
 
 
 @app.get("/accio/plan/<tenant_id>/", strict_slashes=False)
@@ -1885,19 +1951,25 @@ def assistant_context(tenant_id: str):
 @require_api_key
 def assistant_status(tenant_id: str):
     from Motor_Tecnico.accio_engine import assistant_llm, settings_center
+    from Motor_Tecnico.accio_engine.ai_provider import manager as ai_provider
 
     ai_cfg = settings_center.load_ai_config(tenant_id)
-    has_key = bool(assistant_llm.resolve_openai_key(tenant_id))
     enabled = assistant_llm.assistant_enabled(ai_cfg)
-    model = assistant_llm.resolve_model(tenant_id, ai_cfg) if has_key else None
+    prov = ai_provider.provider_status()
+    llm_ok = assistant_llm.llm_available(tenant_id, ai_cfg)
+    model = assistant_llm.resolve_model(tenant_id, ai_cfg) if llm_ok else None
     return jsonify(
         {
             "ok": True,
-            "llm_available": assistant_llm.llm_available(tenant_id, ai_cfg),
+            "llm_available": llm_ok,
             "assistant_enabled": enabled,
-            "has_openai_key": has_key,
+            "provider": prov.get("provider"),
+            "provider_configured": prov.get("configured", False),
+            "provider_reachable": prov.get("reachable", False),
             "model": model,
             "ai_config": ai_cfg,
+            # Deprecated — mantener false para clientes legacy
+            "has_openai_key": False,
         }
     )
 

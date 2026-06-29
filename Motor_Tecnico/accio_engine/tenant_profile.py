@@ -19,6 +19,11 @@ DEFAULT_BRANDING = {
 }
 
 
+def _hex_rgb(hex_color: str) -> tuple[int, int, int]:
+    h = hex_color.lstrip("#")
+    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+
+
 def _profile_path(tenant_id: str) -> Path:
     return TENANTS_ROOT / tenant_id / "tenant.json"
 
@@ -100,13 +105,28 @@ def _sync_registry_display_name(tenant_id: str, display_name: str | None) -> Non
 
 
 def branding_css(tenant_id: str) -> str:
+    """Variables y controles UI alineados al tenant (dashboard + plan_slice)."""
     profile = load_profile(tenant_id)
     b = profile.get("branding") or DEFAULT_BRANDING
     primary = b.get("primary_color", DEFAULT_BRANDING["primary_color"])
     accent = b.get("accent_color", DEFAULT_BRANDING["accent_color"])
-    # Variables de marca por tenant — no pisar la paleta global del dashboard.
+    r, g, bl = _hex_rgb(primary)
+    tint_bg = f"rgba({r},{g},{bl},0.09)"
+    tint_sel = f"rgba({r},{g},{bl},0.14)"
+    tint_border = f"rgba({r},{g},{bl},0.22)"
+    border_soft = f"rgba({r},{g},{bl},0.12)"
     return (
-        f":root{{--tenant-brand-primary:{primary};--tenant-brand-accent:{accent};}}"
-        ".btn-primary,.accio-btn-primary{background:var(--tenant-brand-primary)}"
-        ".btn-primary:hover,.accio-btn-primary:hover{background:var(--tenant-brand-accent)}"
+        f":root{{--tenant-brand-primary:{primary};--tenant-brand-accent:{accent};"
+        f"--accent:{primary};--text-primary:{primary};"
+        f"--green-700:{primary};--green-600:{primary};--green-400:{accent};--green-light:{primary};"
+        f"--accent-bg:{tint_bg};--accent-border:{tint_border};--bg-selected:{tint_sel};"
+        f"--border:{border_soft};--border-strong:rgba({r},{g},{bl},0.2);}}"
+        f".btn-primary,.accio-btn-primary,.vs1-btn--primary{{background:{primary}!important;"
+        f"border-color:{primary}!important;color:#fff!important}}"
+        f".btn-primary:hover,.accio-btn-primary:hover,.vs1-btn--primary:hover{{"
+        f"background:{accent}!important;border-color:{accent}!important}}"
+        f".vs1-nav-item.is-active,.vs1-step-item.is-active .vs1-step-name{{color:{primary}}}"
+        f".vs1-nav-item.is-active{{border-color:{primary}}}"
+        f".vs1-logo-mark,.topbar-mark,.vs1-brand-wordmark,.brand-name,.brand-em,"
+        f".topbar-brand .brand-name,.topbar-mark{{color:{primary}}}"
     )

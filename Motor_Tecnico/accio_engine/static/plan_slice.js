@@ -5,6 +5,25 @@
   const APP_ID = window.__ACCIO_APP__ || localStorage.getItem(`accio_app_${TENANT_ID}`) || 'default';
   const USER_NAME = window.__ACCIO_USER_NAME__ || 'Administrador';
   const TENANTS = window.__ACCIO_TENANTS__ || [];
+  const BRANDING = window.__ACCIO_BRANDING__ || {};
+
+  function initBranding() {
+    const logo = BRANDING.logo_url;
+    const isCustom = logo && !logo.endsWith('em-logomark.svg');
+    document.querySelectorAll('.brand-icon, .vs1-brand-logo').forEach((img) => {
+      if (isCustom) {
+        img.src = logo;
+        img.hidden = false;
+      } else {
+        img.hidden = true;
+      }
+    });
+    document.querySelectorAll('.topbar-mark, .vs1-logo-mark').forEach((svg) => {
+      svg.hidden = isCustom;
+    });
+    const name = BRANDING.display_name || window.__ACCIO_EMPRESA_NAME__ || TENANT_ID;
+    document.title = `${name} — EM+Acción`;
+  }
 
   const WIZARD_STEPS = [
     { id: 'name', name: 'Tu objetivo', desc: 'Qué quieres lograr y cómo lo llamas' },
@@ -45,6 +64,28 @@
   let contextData = null;
   let proposalData = null;
   let contextUpdatedAt = null;
+  let pendingAssistantOrders = [];
+  let proposalsPendingDecision = false;
+  let currentArea = 'workspace';
+  let planSubview = 'resumen';
+
+  const AREA_VIEWS = {
+    workspace: 'vs1ViewWorkspace',
+    plan: 'vs1ViewPlan',
+    context: 'vs1ViewContext',
+    proposals: 'vs1ViewProposals',
+    publications: 'vs1ViewPublications',
+    clients: 'vs1ViewClients',
+    operations: 'vs1ViewOperations',
+    config: 'vs1ViewConfig',
+  };
+
+  const EMBED_FRAMES = {
+    operations: { id: 'vs1OpsFrame', defaultTab: 'resumen' },
+    publications: { id: 'vs1PubFrame', defaultTab: 'publicaciones' },
+    clients: { id: 'vs1ClientsFrame', defaultTab: 'resumen' },
+    config: { id: 'vs1ConfigFrame', defaultTab: 'configuracion' },
+  };
 
   const $ = (id) => document.getElementById(id);
 
@@ -91,7 +132,10 @@
 
   function saveDraft() {
     localStorage.setItem(draftKey(), JSON.stringify(draft));
-    $('vs1Autosave').textContent = 'Guardado automáticamente · ' + new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit' });
+    const autosave = $('vs1Autosave');
+    if (autosave) {
+      autosave.textContent = 'Guardado automáticamente · ' + new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit' });
+    }
   }
 
   function planSessionKey() {
@@ -140,6 +184,28 @@
     return d.toLocaleDateString('es-PA', { day: 'numeric', month: 'short' }) + ' · ' + time;
   }
 
+  function opsEmbeddedUrl(tab) {
+    const base = `/accio/dashboard/${encodeURIComponent(TENANT_ID)}/?vista=operaciones&embedded=1&app_id=${encodeURIComponent(APP_ID)}`;
+    return tab ? `${base}&tab=${encodeURIComponent(tab)}` : base;
+  }
+
+  function opsUrl(tab) {
+    return opsEmbeddedUrl(tab);
+  }
+
+  function loadEmbedFrame(area, tab) {
+    const cfg = EMBED_FRAMES[area];
+    if (!cfg) return;
+    const iframe = $(cfg.id);
+    if (!iframe) return;
+    const t = tab || cfg.defaultTab;
+    const url = opsEmbeddedUrl(t);
+    if (iframe.dataset.loadedTab !== t) {
+      iframe.src = url;
+      iframe.dataset.loadedTab = t;
+    }
+  }
+
   async function dashFetch(path) {
     const res = await fetch(dashApi(path), { credentials: 'include' });
     const data = await res.json().catch(() => ({}));
@@ -165,11 +231,31 @@
     const bannerTitle = $('vs1IaBannerTitle');
     const bannerText = $('vs1IaBannerText');
     const bannerCta = $('vs1IaBannerCta');
-    if (!banner) return;
+    const iaLabel = $('vs1IaLabel');
+    const iaDot = $('vs1IaDot');
+    const iaInd = $('vs1IaIndicator');
     try {
       const res = await fetch(`/accio/${encodeURIComponent(TENANT_ID)}/assistant/status`, { credentials: 'include' });
       const data = await res.json().catch(() => ({}));
-      if (!data.ok) return;
+      if (!data.ok) {
+        if (iaLabel) iaLabel.textContent = 'IA —';
+        return;
+      }
+      const active = data.llm_available && data.assistant_enabled;
+      if (iaLabel) {
+        if (!data.assistant_enabled) iaLabel.textContent = 'IA off';
+        else if (active) iaLabel.textContent = 'IA activa';
+        else if (!data.provider_configured) iaLabel.textContent = 'IA sin motor';
+        else if (!data.provider_reachable) iaLabel.textContent = 'IA no alcanzable';
+        else iaLabel.textContent = 'IA inactiva';
+      }
+      if (iaInd) {
+        iaInd.classList.remove('is-active', 'is-off');
+        if (active) iaInd.classList.add('is-active');
+        else iaInd.classList.add('is-off');
+      }
+      if (iaDot) iaDot.hidden = true;
+      if (!banner) return;
       if (data.llm_available) {
         banner.hidden = true;
         return;
@@ -177,23 +263,104 @@
       banner.hidden = false;
       bannerTitle.textContent = '¿Quieres recomendaciones personalizadas?';
       bannerCta.textContent = 'Configurar asistente';
-      bannerCta.onclick = () => { location.href = `/accio/dashboard/${TENANT_ID}/#configuracion`; };
+      bannerCta.onclick = () => navigateTo('config');
       if (!data.assistant_enabled) {
         bannerText.textContent = 'Activa el asistente en Configuración para recibir propuestas alineadas a tu negocio.';
-      } else if (!data.has_openai_key) {
-        bannerText.textContent = 'Completa la configuración del asistente para desbloquear propuestas estratégicas.';
+      } else if (!data.provider_configured) {
+        bannerText.textContent = 'El motor de IA (LiteLLM en CODITO) aún no está configurado en el servidor. El administrador debe definir ACCIO_AI_BASE_URL.';
+      } else if (!data.provider_reachable) {
+        bannerText.textContent = 'El proveedor de IA no responde desde este servidor. Revisa conectividad hacia CODITO.';
       } else {
         bannerText.textContent = 'El asistente está listo pero desactivado. Actívalo en Configuración cuando quieras usarlo.';
       }
-    } catch (_) { /* ignore */ }
+    } catch (_) {
+      if (iaLabel) iaLabel.textContent = 'IA —';
+    }
   }
 
-  function signalCard(question, answer, detail) {
-    return `<div class="vs1-signal-card">
+  function proposalsStorageKey() {
+    return `vs1_proposals_${TENANT_ID}_${APP_ID}`;
+  }
+
+  function loadStoredProposals() {
+    proposalsPendingDecision = false;
+    try {
+      const raw = JSON.parse(localStorage.getItem(proposalsStorageKey()) || 'null');
+      if (raw && activePlan && raw.planId === activePlan.id && raw.pending && raw.data) {
+        proposalData = raw.data;
+        proposalsPendingDecision = true;
+        return true;
+      }
+    } catch (_) { /* ignore */ }
+    proposalData = null;
+    return false;
+  }
+
+  function storeProposalsPending(data) {
+    if (!activePlan) return;
+    proposalData = data;
+    proposalsPendingDecision = true;
+    localStorage.setItem(proposalsStorageKey(), JSON.stringify({
+      planId: activePlan.id,
+      data,
+      pending: true,
+    }));
+  }
+
+  function clearStoredProposals() {
+    proposalsPendingDecision = false;
+    localStorage.removeItem(proposalsStorageKey());
+  }
+
+  async function loadAssistantOrders() {
+    try {
+      const res = await fetch(`/accio/${encodeURIComponent(TENANT_ID)}/assistant/orders`, { credentials: 'include' });
+      const data = await res.json().catch(() => ({}));
+      pendingAssistantOrders = data.ok ? (data.orders || []) : [];
+    } catch (_) {
+      pendingAssistantOrders = [];
+    }
+  }
+
+  function signalCard(question, answer, detail, action) {
+    const cls = action ? 'vs1-signal-card is-clickable' : 'vs1-signal-card';
+    const attrs = action ? ` data-signal-action="${action}" role="button" tabindex="0"` : '';
+    return `<div class="${cls}"${attrs}>
       <p class="vs1-signal-label">${esc(question)}</p>
       <p class="vs1-signal-value">${esc(answer)}</p>
       ${detail ? `<p class="vs1-signal-meaning">${esc(detail)}</p>` : ''}
     </div>`;
+  }
+
+  function bindSignalActions() {
+    $('vs1SignalsGrid').querySelectorAll('[data-signal-action]').forEach((el) => {
+      const run = () => handleSignalAction(el.dataset.signalAction);
+      el.addEventListener('click', run);
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          run();
+        }
+      });
+    });
+  }
+
+  function handleSignalAction(action) {
+    if (action === 'publications') {
+      navigateTo('publications');
+      return;
+    }
+    if (action === 'leads') {
+      navigateTo('clients');
+      return;
+    }
+    if (action === 'proposals') {
+      navigateTo('proposals');
+      return;
+    }
+    if (action === 'context') {
+      navigateTo('context');
+    }
   }
 
   function renderSignals(summary, ctxPct) {
@@ -215,7 +382,9 @@
         : 'Sin prospectos en etapa comercial todavía';
     }
 
-    const proposalCount = proposalData && (proposalData.proposals || []).length ? (proposalData.proposals || []).length : 0;
+    const proposalCount = proposalsPendingDecision && proposalData && (proposalData.proposals || []).length
+      ? (proposalData.proposals || []).length
+      : 0;
     let propDetail;
     if (proposalCount) {
       propDetail = proposalCount === 1 ? 'Una propuesta espera tu decisión' : `${proposalCount} propuestas esperan tu decisión`;
@@ -238,11 +407,12 @@
     }
 
     $('vs1SignalsGrid').innerHTML = [
-      signalCard('¿Qué publicaciones están pendientes?', String(pendingCount), pubDetail),
-      signalCard('¿Cuántos prospectos tienes en marketing?', leadsAnswer, leadsDetail),
-      signalCard('¿Hay propuestas por decidir?', String(proposalCount), propDetail),
-      signalCard('¿Qué tan completo está tu contexto?', ctxAnswer, ctxDetail),
+      signalCard('¿Qué publicaciones están pendientes?', String(pendingCount), pubDetail, 'publications'),
+      signalCard('¿Cuántos prospectos tienes en marketing?', leadsAnswer, leadsDetail, 'leads'),
+      signalCard('¿Hay propuestas por decidir?', String(proposalCount), propDetail, 'proposals'),
+      signalCard('¿Qué tan completo está tu contexto?', ctxAnswer, ctxDetail, 'context'),
     ].join('');
+    bindSignalActions();
   }
 
   function renderPubQueue(posts) {
@@ -250,7 +420,7 @@
     if (!posts || !posts.length) {
       el.innerHTML = `<div class="vs1-empty-task"><p>No tienes publicaciones pendientes.</p><button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1GoCalendar">Ver calendario</button></div>`;
       const btn = $('vs1GoCalendar');
-      if (btn) btn.onclick = () => { location.href = `/accio/dashboard/${TENANT_ID}/#calendario`; };
+      if (btn) btn.onclick = () => navigateTo('publications');
       return;
     }
     el.innerHTML = `<ul class="vs1-queue-list">${posts.slice(0, 6).map((p) => {
@@ -277,29 +447,54 @@
     return plans;
   }
 
-  function renderDraftPlans(plans) {
+  function renderPendingAttention(assistantOrders, plans) {
     const el = $('vs1DraftPlans');
-    if (!plans.length) {
-      el.innerHTML = `<div class="vs1-empty-task"><p>No tienes planes guardados sin activar.</p><button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" id="vs1NewDraft">Crear plan</button></div>`;
+    const items = [];
+    (assistantOrders || []).forEach((o) => items.push({ kind: 'assistant', data: o }));
+    (plans || []).forEach((p) => items.push({ kind: 'plan', data: p }));
+
+    if (!items.length) {
+      el.innerHTML = `<div class="vs1-empty-task"><p>No hay borradores ni planes esperando tu decisión.</p><button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" id="vs1NewDraft">Crear plan</button></div>`;
       $('vs1NewDraft').onclick = () => goWizard();
       return;
     }
-    el.innerHTML = `<ul class="vs1-draft-list">${plans.map((p) => {
+
+    el.innerHTML = `<ul class="vs1-draft-list">${items.map((item) => {
+      if (item.kind === 'assistant') {
+        const o = item.data;
+        const preview = (o.preview || [])[0];
+        const snippet = preview ? String(preview.text || '').replace(/\s+/g, ' ').trim().slice(0, 72) : (o.title || 'Publicación sugerida');
+        const channel = platformLabel(o.channel || (preview && preview.platform));
+        return `<li class="vs1-draft-item"><div class="vs1-draft-row">
+          <div><span class="vs1-pending-tag">Borrador IA</span><p class="vs1-draft-name">${esc(snippet)}${snippet.length >= 72 ? '…' : ''}</p>
+          <p class="vs1-draft-sub">${esc(channel)} · Sugerida hoy</p></div>
+          <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" data-review-order="${esc(o.id)}">Revisar</button>
+        </div></li>`;
+      }
+      const p = item.data;
       const created = (p.created_at || p.updated_at || '').slice(0, 10);
       const when = created ? `Guardado el ${created}` : 'Guardado recientemente';
       return `<li class="vs1-draft-item"><div class="vs1-draft-row">
-        <div><p class="vs1-draft-name">${esc(p.nombre)}</p><p class="vs1-draft-sub">${esc(when)}</p></div>
+        <div><span class="vs1-pending-tag">Plan</span><p class="vs1-draft-name">${esc(p.nombre)}</p><p class="vs1-draft-sub">${esc(when)}</p></div>
         <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" data-activate="${esc(p.id)}">Activar</button>
       </div></li>`;
     }).join('')}</ul>`;
+
     el.querySelectorAll('[data-activate]').forEach((btn) => {
       btn.onclick = () => goActivate(btn.getAttribute('data-activate'));
+    });
+    el.querySelectorAll('[data-review-order]').forEach((btn) => {
+      btn.onclick = () => {
+        const order = assistantOrders.find((o) => o.id === btn.getAttribute('data-review-order'));
+        if (order) openAssistantReview(order);
+      };
     });
   }
 
   async function loadWorkspace() {
     greeting();
     loadAssistantStatus();
+    await loadAssistantOrders();
     let summary = null;
     try {
       const resp = await v1Api('/marketing-plans/active');
@@ -308,30 +503,196 @@
       if (e.message !== 'Sesión expirada') activePlan = null;
       else throw e;
     }
+    if (activePlan) {
+      loadStoredProposals();
+      if (!contextData) {
+        try {
+          const ctxResp = await v1Api('/marketing-context');
+          contextData = ctxResp.data;
+          contextUpdatedAt = 'Actualizado recientemente';
+        } catch (_) { /* optional for workspace */ }
+      }
+    } else {
+      contextData = null;
+      clearStoredProposals();
+    }
     try {
       summary = await dashFetch('/summary');
     } catch (e) {
       toast(e.message, true);
     }
-    if (!contextData && activePlan) {
-      try {
-        const ctxResp = await v1Api('/marketing-context');
-        contextData = ctxResp.data;
-        contextUpdatedAt = 'Actualizado recientemente';
-      } catch (_) { /* optional for workspace */ }
-    }
-    renderPlanBanner();
-    renderNextAction();
     const ctxPct = contextData ? computeConfidence(contextData) : null;
+    const posts = summary ? summary.pending_posts : [];
+    renderPlanBanner();
+    renderNextAction(posts, ctxPct);
     renderSignals(summary || {}, ctxPct);
-    renderPubQueue(summary ? summary.pending_posts : []);
+    renderPubQueue(posts);
     try {
       const drafts = await loadDraftPlansList();
-      renderDraftPlans(drafts);
+      renderPendingAttention(pendingAssistantOrders, drafts);
     } catch (e) {
-      renderDraftPlans([]);
+      renderPendingAttention(pendingAssistantOrders, []);
     }
-    $('vs1NextSecondary').onclick = () => { showScreen('context'); loadContext(); };
+  }
+
+  function pickNextAction(posts, ctxPct) {
+    const firstOrder = pendingAssistantOrders[0];
+    if (firstOrder) {
+      return {
+        title: 'Revisa la publicación sugerida',
+        desc: 'El asistente preparó un borrador que espera tu aprobación antes de encolarlo.',
+        primary: 'Revisar publicación sugerida',
+        onPrimary: () => openAssistantReview(firstOrder),
+        secondary: 'Ver todas las publicaciones',
+        onSecondary: () => navigateTo('publications'),
+      };
+    }
+
+    const queue = posts || [];
+    if (queue.length) {
+      const p = queue[0];
+      const channel = platformLabel(p.platform);
+      const snippet = (p.preview || '').replace(/…$/, '').trim();
+      return {
+        title: `Tienes una publicación lista para ${channel}`,
+        desc: snippet
+          ? `Revisa el texto y confirma si quieres publicarla: «${snippet.slice(0, 90)}${snippet.length > 90 ? '…' : ''}»`
+          : 'Revisa el contenido y confirma si quieres publicarla.',
+        primary: 'Revisar publicación',
+        onPrimary: () => openPostReview(p),
+        secondary: 'Ver calendario',
+        onSecondary: () => navigateTo('publications'),
+      };
+    }
+
+    if (!activePlan) {
+      return {
+        title: 'Define tu plan de marketing',
+        desc: 'Sin un plan activo, no sabemos qué priorizar para ti.',
+        primary: 'Crear plan',
+        onPrimary: () => goWizard(),
+        secondary: null,
+      };
+    }
+
+    if (proposalsPendingDecision && proposalData && (proposalData.proposals || []).length) {
+      return {
+        title: 'Tienes propuestas por revisar',
+        desc: 'Compara las opciones estratégicas y elige con cuál avanzar.',
+        primary: 'Ver propuestas',
+        onPrimary: () => { navigateTo('proposals'); },
+        secondary: 'Ver contexto',
+        onSecondary: () => navigateTo('context'),
+      };
+    }
+
+    if (ctxPct != null && ctxPct < 50) {
+      return {
+        title: 'Completa tu contexto',
+        desc: 'Falta información sobre tu negocio para proponer con precisión.',
+        primary: 'Completar contexto',
+        onPrimary: () => navigateTo('context'),
+        secondary: null,
+      };
+    }
+
+    return {
+      title: 'Elige tu próximo movimiento estratégico',
+      desc: 'Revisa tu contexto y recibe tres opciones concretas para avanzar.',
+      primary: 'Ver opciones estratégicas',
+      onPrimary: () => navigateTo('context'),
+      secondary: 'Ver contexto',
+      onSecondary: () => navigateTo('context'),
+    };
+  }
+
+  function renderNextAction(posts, ctxPct) {
+    const action = pickNextAction(posts, ctxPct);
+    $('vs1NextTitle').textContent = action.title;
+    $('vs1NextDesc').textContent = action.desc;
+    $('vs1NextPrimary').textContent = action.primary;
+    $('vs1NextPrimary').onclick = action.onPrimary;
+
+    const sec = $('vs1NextSecondary');
+    if (action.secondary && action.onSecondary) {
+      sec.hidden = false;
+      sec.textContent = action.secondary;
+      sec.onclick = action.onSecondary;
+    } else {
+      sec.hidden = true;
+    }
+  }
+
+  function closeReviewModal() {
+    const modal = $('vs1ReviewModal');
+    if (modal) modal.hidden = true;
+  }
+
+  function openReviewModal(title, bodyHtml, footHtml) {
+    $('vs1ReviewTitle').textContent = title;
+    $('vs1ReviewBody').innerHTML = bodyHtml;
+    $('vs1ReviewFoot').innerHTML = footHtml;
+    $('vs1ReviewModal').hidden = false;
+    $('vs1ReviewClose').onclick = closeReviewModal;
+    $('vs1ReviewBackdrop').onclick = closeReviewModal;
+  }
+
+  function openAssistantReview(order) {
+    const preview = (order.preview || [])[0];
+    const text = preview ? String(preview.text || '').trim() : '';
+    const channel = platformLabel(order.channel || (preview && preview.platform));
+    const body = `${text ? `<p>${esc(text)}</p>` : '<p class="vs1-review-meta">Sin vista previa de texto.</p>'}
+      <p class="vs1-review-meta">${esc(channel)} · ${esc(order.title || 'Borrador del asistente')}</p>`;
+    const foot = `
+      <button type="button" class="vs1-btn vs1-btn--ghost" id="vs1ReviewReject">Rechazar</button>
+      <button type="button" class="vs1-btn vs1-btn--primary" id="vs1ReviewApprove">Aprobar y encolar</button>`;
+    openReviewModal('Revisar publicación sugerida', body, foot);
+    $('vs1ReviewReject').onclick = async () => {
+      try {
+        await rejectAssistantOrder(order.id);
+        closeReviewModal();
+        await loadWorkspace();
+      } catch (e) { toast(e.message, true); }
+    };
+    $('vs1ReviewApprove').onclick = async () => {
+      try {
+        await approveAssistantOrder(order.id);
+        closeReviewModal();
+        await loadWorkspace();
+      } catch (e) { toast(e.message, true); }
+    };
+  }
+
+  function openPostReview(post) {
+    const text = (post.preview || '').replace(/…$/, '').trim() || 'Sin vista previa';
+    const meta = `${platformLabel(post.platform)} · ${humanPostStatus(post.status_label)} · ${formatSchedule(post.scheduled_at)}`;
+    const body = `<p>${esc(text)}</p><p class="vs1-review-meta">${esc(meta)}</p>`;
+    const foot = `
+      <button type="button" class="vs1-btn vs1-btn--ghost" id="vs1ReviewOps">Ver en Operaciones</button>
+      <button type="button" class="vs1-btn vs1-btn--primary" id="vs1ReviewPub">Ir a publicaciones</button>`;
+    openReviewModal('Revisar publicación', body, foot);
+    $('vs1ReviewOps').onclick = () => { closeReviewModal(); navigateTo('operations'); };
+    $('vs1ReviewPub').onclick = () => { closeReviewModal(); navigateTo('publications'); };
+  }
+
+  async function approveAssistantOrder(id) {
+    const res = await fetch(`/accio/${encodeURIComponent(TENANT_ID)}/assistant/orders/${encodeURIComponent(id)}/approve`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'No se pudo aprobar');
+    toast('Publicación encolada correctamente');
+  }
+
+  async function rejectAssistantOrder(id) {
+    const res = await fetch(`/accio/${encodeURIComponent(TENANT_ID)}/assistant/orders/${encodeURIComponent(id)}/reject`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'No se pudo rechazar');
+    toast('Borrador descartado');
   }
 
   async function v1Api(path, opts = {}) {
@@ -357,32 +718,116 @@
     return data;
   }
 
-  function showScreen(name) {
-    const screens = {
-      workspace: 'vs1ScreenWorkspace',
-      wizard: 'vs1ScreenWizard',
-      activate: 'vs1ScreenActivate',
-      context: 'vs1ScreenContext',
-      proposal: 'vs1ScreenProposal',
-    };
-    Object.entries(screens).forEach(([k, id]) => {
+  function renderGlobalStrategyBanner() {
+    const nameEl = $('wsStrategyPlanName');
+    const stateEl = $('wsStrategyPlanState');
+    const topPlan = $('vs1TopbarPlanName');
+    if (!nameEl || !stateEl) return;
+    if (!activePlan || activePlan.estado !== 'activo') {
+      nameEl.textContent = '—';
+      stateEl.textContent = 'Sin plan activo';
+      if (topPlan) topPlan.textContent = 'Sin plan';
+      return;
+    }
+    const strategy = strategyLabel(activePlan.strategy_type);
+    const label = strategy ? `${activePlan.nombre} — ${strategy}` : activePlan.nombre;
+    nameEl.textContent = label;
+    stateEl.textContent = 'Activo';
+    if (topPlan) topPlan.textContent = activePlan.nombre;
+  }
+
+  function showPlanSubview(sub) {
+    planSubview = sub;
+    ['resumen', 'crear', 'historial'].forEach((s) => {
+      const el = $('vs1PlanView' + s.charAt(0).toUpperCase() + s.slice(1));
+      if (el) el.hidden = s !== sub;
+    });
+    document.querySelectorAll('.ws-area-nav-item[data-plan-view]').forEach((btn) => {
+      btn.classList.toggle('is-active', btn.dataset.planView === sub);
+    });
+    if (sub === 'crear') {
+      renderWizardChrome();
+      renderWizardStep();
+    } else if (sub === 'resumen') {
+      showPlanResumen();
+    } else if (sub === 'historial') {
+      renderPlanHistorial();
+    }
+  }
+
+  async function showPlanResumen() {
+    if (!activateTarget && activePlan) activateTarget = activePlan.id;
+    if (!activateTarget) {
+      $('vs1ActivateCard').innerHTML = `<div class="vs1-empty-task">
+        <p>Aún no tienes un plan para revisar.</p>
+        <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" id="vs1PlanEmptyCta">Crear plan</button>
+      </div>`;
+      const cta = $('vs1PlanEmptyCta');
+      if (cta) cta.onclick = () => showPlanSubview('crear');
+      return;
+    }
+    renderActivate();
+  }
+
+  async function renderPlanHistorial() {
+    const el = $('vs1PlanHistorialList');
+    if (!el) return;
+    el.innerHTML = '<p class="vs1-page-sub">Cargando historial…</p>';
+    try {
+      const drafts = await loadDraftPlansList();
+      const items = [...drafts];
+      if (activePlan) items.unshift(activePlan);
+      if (!items.length) {
+        el.innerHTML = `<div class="vs1-empty-task"><p>No hay planes guardados todavía.</p>
+          <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" id="vs1HistNew">Crear plan</button></div>`;
+        $('vs1HistNew').onclick = () => showPlanSubview('crear');
+        return;
+      }
+      el.innerHTML = `<ul class="vs1-draft-list">${items.map((p) => {
+        const estado = p.estado === 'activo' ? 'Activo' : 'Borrador';
+        const created = (p.created_at || p.updated_at || '').slice(0, 10);
+        return `<li class="vs1-draft-item"><div class="vs1-draft-row">
+          <div><span class="vs1-pending-tag">${esc(estado)}</span>
+          <p class="vs1-draft-name">${esc(p.nombre)}</p>
+          <p class="vs1-draft-sub">${created ? `Actualizado ${created}` : ''}</p></div>
+          <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" data-hist-plan="${esc(p.id)}">Ver</button>
+        </div></li>`;
+      }).join('')}</ul>`;
+      el.querySelectorAll('[data-hist-plan]').forEach((btn) => {
+        btn.onclick = () => goActivate(btn.getAttribute('data-hist-plan'));
+      });
+    } catch (e) {
+      el.innerHTML = `<p class="vs1-page-sub">${esc(e.message)}</p>`;
+    }
+  }
+
+  function navigateTo(area, opts = {}) {
+    const { planView, opsTab, skipLoad } = opts;
+    currentArea = area;
+
+    Object.entries(AREA_VIEWS).forEach(([key, id]) => {
       const el = $(id);
-      if (el) el.hidden = k !== name;
+      if (el) el.hidden = key !== area;
     });
-    ['vs1TopbarDefault', 'vs1TopbarWizard', 'vs1TopbarContext', 'vs1TopbarProposal', 'vs1TopbarActivate'].forEach((id) => {
-      if ($(id)) $(id).hidden = true;
-    });
-    const topbars = {
-      workspace: 'vs1TopbarDefault',
-      wizard: 'vs1TopbarWizard',
-      activate: 'vs1TopbarActivate',
-      context: 'vs1TopbarContext',
-      proposal: 'vs1TopbarProposal',
-    };
-    if (topbars[name] && $(topbars[name])) $(topbars[name]).hidden = false;
+
     document.querySelectorAll('.vs1-nav-item[data-nav]').forEach((btn) => {
-      btn.classList.toggle('is-active', btn.dataset.nav === name || (name === 'wizard' && btn.dataset.nav === 'plan') || (name === 'proposal' && btn.dataset.nav === 'proposals'));
+      btn.classList.toggle('is-active', btn.dataset.nav === area);
     });
+
+    if (area === 'plan') {
+      const sub = planView || (activePlan ? 'resumen' : 'crear');
+      showPlanSubview(sub);
+    }
+
+    if (EMBED_FRAMES[area]) {
+      loadEmbedFrame(area, opsTab);
+    }
+
+    if (skipLoad) return;
+
+    if (area === 'workspace') loadWorkspace();
+    else if (area === 'context') loadContext();
+    else if (area === 'proposals') loadProposalCachedOrGenerate();
   }
 
   function greeting() {
@@ -394,6 +839,7 @@
 
   function renderPlanBanner() {
     const slot = $('vs1PlanBannerSlot');
+    renderGlobalStrategyBanner();
     if (!activePlan) {
       slot.innerHTML = `<div class="vs1-card vs1-onboarding">
         <h3>¿Cuál es tu objetivo este trimestre?</h3>
@@ -404,42 +850,13 @@
       $('vs1DayStatus').textContent = 'Empieza definiendo tu plan de marketing.';
       return;
     }
-    const activated = activePlan.activated_at ? activePlan.activated_at.slice(0, 10) : '';
-    const meta = [
-      activated ? `En curso desde ${activated}` : '',
-      activePlan.north_star_metric ? `Meta: ${activePlan.north_star_metric}` : '',
-    ].filter(Boolean).join(' · ');
-    slot.innerHTML = `<div class="vs1-card vs1-card--banner-active">
-      <span class="vs1-dot-green" aria-hidden="true"></span>
-      <div class="vs1-banner-meta">
-        <p class="vs1-banner-title">${esc(activePlan.nombre)}</p>
-        <p class="vs1-banner-sub">${esc(meta || 'Plan en curso')}</p>
-      </div>
-      <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1ViewPlanBtn">Ver detalle</button>
-    </div>`;
-    $('vs1ViewPlanBtn').onclick = () => goActivate(activePlan.id);
+    slot.innerHTML = '';
     $('vs1DayStatus').textContent = `Tu prioridad hoy: avanzar «${activePlan.nombre}».`;
-  }
-
-  function renderNextAction() {
-    $('vs1NextSecondary').hidden = false;
-    if (!activePlan) {
-      $('vs1NextTitle').textContent = 'Define tu plan de marketing';
-      $('vs1NextDesc').textContent = 'Sin un plan activo, no sabemos qué priorizar para ti.';
-      $('vs1NextPrimary').textContent = 'Crear plan';
-      $('vs1NextPrimary').onclick = () => goWizard();
-      $('vs1NextSecondary').hidden = true;
-      return;
-    }
-    $('vs1NextTitle').textContent = 'Elige tu próximo movimiento estratégico';
-    $('vs1NextDesc').textContent = 'Revisa tu contexto y recibe tres opciones concretas para avanzar.';
-    $('vs1NextPrimary').textContent = 'Ver opciones estratégicas';
-    $('vs1NextPrimary').onclick = () => { showScreen('context'); loadContext(); };
   }
 
   function goWizard() {
     wizardStep = 0;
-    showScreen('wizard');
+    navigateTo('plan', { planView: 'crear', skipLoad: true });
     renderWizardChrome();
     renderWizardStep();
   }
@@ -540,9 +957,56 @@
     goActivate(resp.data.id);
   }
 
+  function strategyLabel(strategyId) {
+    const row = STRATEGIES.find((s) => s.id === strategyId);
+    return row ? row.name : 'Sin definir';
+  }
+
+  function formatPlanPeriod(plan) {
+    const p = plan.periodo || {};
+    const ini = String(p.inicio || plan.periodo_inicio || '').slice(0, 10);
+    const fin = String(p.fin || plan.periodo_fin || '').slice(0, 10);
+    const fmt = (d) => {
+      if (!d) return '—';
+      const dt = new Date(d + 'T12:00:00');
+      if (Number.isNaN(dt.getTime())) return d;
+      return dt.toLocaleDateString('es-PA', { day: 'numeric', month: 'short', year: 'numeric' });
+    };
+    if (!ini && !fin) return '—';
+    return `${fmt(ini)} – ${fmt(fin)}`;
+  }
+
+  function formatAudience(plan) {
+    const pub = plan.publico_objetivo;
+    if (Array.isArray(pub)) return pub.filter(Boolean).join(' · ') || '—';
+    return pub || '—';
+  }
+
+  function formatCriteria(plan) {
+    const c = plan.success_criteria;
+    if (Array.isArray(c) && c.length) return c.join(' · ');
+    return '—';
+  }
+
+  function planSummaryFactsHtml(plan) {
+    return `<dl class="vs1-activate-facts">
+      <div><dt>Tu objetivo</dt><dd>${esc(plan.objetivo_general || '—')}</dd></div>
+      <div><dt>Tu enfoque</dt><dd>${esc(strategyLabel(plan.strategy_type))}</dd></div>
+      <div><dt>Tu audiencia</dt><dd>${esc(formatAudience(plan))}</dd></div>
+      <div><dt>Tu meta</dt><dd>${esc(plan.north_star_metric || '—')}</dd></div>
+      <div><dt>Periodo</dt><dd>${esc(formatPlanPeriod(plan))}</dd></div>
+      ${formatCriteria(plan) !== '—' ? `<div><dt>Hitos de progreso</dt><dd>${esc(formatCriteria(plan))}</dd></div>` : ''}
+    </dl>`;
+  }
+
+  function bindActivateCancel() {
+    const cancel = () => navigateTo('workspace');
+    $('vs1ActCancel').onclick = cancel;
+  }
+
   function goActivate(planId) {
     activateTarget = planId;
-    showScreen('activate');
+    navigateTo('plan', { planView: 'resumen', skipLoad: true });
     renderActivate();
   }
 
@@ -554,56 +1018,86 @@
         plan = resp.data;
       } catch (e) {
         toast(e.message, true);
-        showScreen('workspace');
+        navigateTo('workspace');
         return;
       }
     }
+
+    const isActiveView = plan.estado === 'activo';
     let otherActive = null;
-    if (activePlan && activePlan.id !== plan.id) {
-      otherActive = activePlan;
-    } else {
-      try {
-        const r = await v1Api('/marketing-plans/active');
-        if (r.data && r.data.id !== plan.id) otherActive = r.data;
-      } catch (_) { /* ignore */ }
+    if (!isActiveView) {
+      if (activePlan && activePlan.id !== plan.id && activePlan.estado === 'activo') {
+        otherActive = activePlan;
+      } else {
+        try {
+          const r = await v1Api('/marketing-plans/active');
+          if (r.data && r.data.id !== plan.id) otherActive = r.data;
+        } catch (_) { /* ignore */ }
+      }
     }
-    const pub = Array.isArray(plan.publico_objetivo) ? plan.publico_objetivo.join(', ') : plan.publico_objetivo;
-    $('vs1ActivateCard').innerHTML = `
-      <div class="vs1-activate-block">
-        <p class="vs1-page-label">Activar plan</p>
-        <h2 class="vs1-page-title" style="margin-bottom:6px">${esc(plan.nombre)}</h2>
-        <p class="vs1-page-sub" style="margin:0">Al activar, la IA usará este plan como referencia estratégica principal.</p>
-      </div>
-      <div class="vs1-activate-block">
-        <div class="vs1-meta-grid">
-          <div class="vs1-meta-item"><span>Objetivo</span><strong>${esc((plan.objetivo_general || '').slice(0, 80))}</strong></div>
-          <div class="vs1-meta-item"><span>Estrategia</span><strong>${esc(plan.strategy_type)}</strong></div>
-          <div class="vs1-meta-item"><span>Público objetivo</span><strong>${esc(pub || '—')}</strong></div>
-          <div class="vs1-meta-item"><span>North Star Metric</span><strong>${esc(plan.north_star_metric || '—')}</strong></div>
+
+    const summaryCard = `<div class="vs1-card vs1-activate-summary">
+      <h3 class="vs1-activate-plan-name">${esc(plan.nombre)}</h3>
+      ${planSummaryFactsHtml(plan)}
+    </div>`;
+
+    if (isActiveView) {
+      $('vs1ActivateCard').innerHTML = `
+        <div class="vs1-activate-intro">
+          <p class="vs1-page-label">Tu plan en curso</p>
+          <h2 class="vs1-activate-q">¿Qué estás trabajando ahora?</h2>
+          <p class="vs1-page-sub">Este plan guía tus recomendaciones y el trabajo pendiente en Inicio.</p>
         </div>
+        ${summaryCard}
+        <div class="vs1-activate-footer" id="vs1ActFooter">
+          <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1ActCancel">Volver al inicio</button>
+          <button type="button" class="vs1-btn vs1-btn--primary" id="vs1ActStrategic">Ver opciones estratégicas</button>
+        </div>`;
+      bindActivateCancel();
+      $('vs1ActStrategic').onclick = () => navigateTo('proposals');
+      return;
+    }
+
+    const conflictCard = otherActive ? `
+      <div class="vs1-card vs1-activate-choice">
+        <p class="vs1-label-upper">Tu plan actual</p>
+        <h3 class="vs1-activate-subq">¿Qué hacemos con «${esc(otherActive.nombre)}»?</h3>
+        <p>Ese plan sigue en curso. Elige si lo pausas o lo das por terminado antes de continuar con el nuevo.</p>
+      </div>` : '';
+
+    $('vs1ActivateCard').innerHTML = `
+      <div class="vs1-activate-intro">
+        <p class="vs1-page-label">Confirmar plan</p>
+        <h2 class="vs1-activate-q">¿Quieres poner en marcha este plan?</h2>
+        <p class="vs1-page-sub">Revisa el resumen. Al confirmar, será tu referencia para las próximas recomendaciones.</p>
       </div>
-      ${otherActive ? `<div class="vs1-activate-block"><div class="vs1-conflict-banner"><i class="ti ti-alert-triangle"></i><div><strong>Conflicto R2:</strong> El plan «${esc(otherActive.nombre)}» está activo. Al continuar, debes finalizarlo o pausarlo.</div></div></div>` : ''}
-      <div class="vs1-activate-block">
-        <ul class="vs1-impact-list">
-          <li class="vs1-impact-item"><span class="vs1-impact-icon vs1-impact-icon--ok"><i class="ti ti-brain"></i></span><div><strong>Contexto IA actualizado</strong><p>El Context Builder priorizará este plan en las propuestas.</p></div></li>
-          <li class="vs1-impact-item"><span class="vs1-impact-icon vs1-impact-icon--ok"><i class="ti ti-chart-line"></i></span><div><strong>North Star operativa</strong><p>Las acciones recomendadas se alinearán a ${esc(plan.north_star_metric || 'tu métrica')}.</p></div></li>
-          <li class="vs1-impact-item"><span class="vs1-impact-icon vs1-impact-icon--warn"><i class="ti ti-switch-horizontal"></i></span><div><strong>Plan anterior</strong><p>${otherActive ? 'Requiere resolución: finalizar o pausar el plan activo actual.' : 'No hay otro plan activo; activación directa.'}</p></div></li>
+      ${summaryCard}
+      <div class="vs1-card" style="margin-bottom:var(--space-lg);padding:var(--space-xl)">
+        <p class="vs1-label-upper">Qué pasará</p>
+        <ul class="vs1-activate-effects">
+          <li><i class="ti ti-check" aria-hidden="true"></i><span>Tus siguientes recomendaciones se basarán en este plan.</span></li>
+          <li><i class="ti ti-check" aria-hidden="true"></i><span>Las publicaciones sugeridas apuntarán a tu meta.</span></li>
+          <li><i class="ti ti-check" aria-hidden="true"></i><span>Puedes cambiar de plan cuando lo necesites.</span></li>
         </ul>
       </div>
-      <div class="vs1-activate-block vs1-activate-footer" id="vs1ActFooter">
-        <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1ActCancel">Cancelar</button>
-        <button type="button" class="vs1-btn vs1-btn--primary" id="vs1ActGo"><i class="ti ti-player-play"></i> Activar plan</button>
-      </div>`;
-    $('vs1ActCancel').onclick = () => { showScreen('workspace'); loadWorkspace(); };
+      ${conflictCard}
+      <div class="vs1-activate-footer" id="vs1ActFooter"></div>`;
+
+    bindActivateCancel();
+
     if (otherActive) {
       $('vs1ActFooter').innerHTML = `
         <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1ActCancel">Cancelar</button>
-        <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1ActPause">Activar · pausar anterior</button>
-        <button type="button" class="vs1-btn vs1-btn--primary" id="vs1ActFinalize"><i class="ti ti-player-play"></i> Activar · finalizar anterior</button>`;
-      $('vs1ActCancel').onclick = () => { showScreen('workspace'); loadWorkspace(); };
+        <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1ActPause">Pausar el anterior y continuar</button>
+        <button type="button" class="vs1-btn vs1-btn--primary" id="vs1ActFinalize">Terminar el anterior y continuar</button>`;
+      bindActivateCancel();
       $('vs1ActPause').onclick = () => doActivate(plan.id, 'pause_previous');
       $('vs1ActFinalize').onclick = () => doActivate(plan.id, 'finalize_previous');
     } else {
+      $('vs1ActFooter').innerHTML = `
+        <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1ActCancel">Cancelar</button>
+        <button type="button" class="vs1-btn vs1-btn--primary" id="vs1ActGo">Poner en marcha</button>`;
+      bindActivateCancel();
       $('vs1ActGo').onclick = () => doActivate(plan.id, null);
     }
   }
@@ -613,8 +1107,9 @@
       const body = resolution ? { resolution } : {};
       const resp = await v1Api('/marketing-plans/' + encodeURIComponent(planId) + '/activate', { method: 'POST', body: JSON.stringify(body) });
       activePlan = resp.data;
-      toast('Plan activado');
-      showScreen('workspace');
+      contextData = null;
+      toast('Plan en marcha');
+      navigateTo('workspace');
       await loadWorkspace();
     } catch (e) {
       toast(e.message, true);
@@ -680,15 +1175,16 @@
     return 'Próximamente';
   }
 
+  function navigateToSourceFix(sourceId) {
+    if (sourceId === 'plan') {
+      navigateTo('plan', { planView: activePlan ? 'resumen' : 'crear' });
+      return;
+    }
+    navigateTo('config', { opsTab: 'conocimiento' });
+  }
+
   function sourceFixUrl(sourceId) {
-    const dash = `/accio/dashboard/${encodeURIComponent(TENANT_ID)}/`;
-    const map = {
-      company: dash + '#conocimiento',
-      kb: dash + '#conocimiento',
-      brand: dash + '#conocimiento',
-      plan: `/accio/plan/${encodeURIComponent(TENANT_ID)}/`,
-    };
-    return map[sourceId] || dash + '#conocimiento';
+    return '#';
   }
 
   function confidenceMeaning(pct) {
@@ -749,7 +1245,7 @@
       }).join('');
 
       $('vs1SourcesList').querySelectorAll('.vs1-source-row:not(.is-na)').forEach((btn) => {
-        btn.onclick = () => { location.href = sourceFixUrl(btn.dataset.source); };
+        btn.onclick = () => navigateToSourceFix(btn.dataset.source);
       });
 
       const incomplete = rows.find((r) => r.status === 'incomplete');
@@ -759,13 +1255,107 @@
         nextBanner.hidden = false;
         $('vs1ContextNextText').textContent = `Completa «${incomplete.name}» para que las propuestas reflejen mejor tu negocio.`;
         nextCta.textContent = `Ir a ${incomplete.name}`;
-        nextCta.onclick = () => { location.href = sourceFixUrl(incomplete.id); };
+        nextCta.onclick = () => navigateToSourceFix(incomplete.id);
       } else {
         nextBanner.hidden = true;
       }
     } catch (e) {
       toast(e.message, true);
     }
+  }
+
+  async function loadProposalCachedOrGenerate() {
+    if (!activePlan) {
+      try {
+        const r = await v1Api('/marketing-plans/active');
+        activePlan = r.data;
+      } catch (_) { /* ignore */ }
+    }
+    if (!activePlan) {
+      toast('Activa un plan antes de ver propuestas', true);
+      navigateTo('workspace');
+      return;
+    }
+    if (proposalData && renderProposalUI()) return;
+    await loadProposal();
+  }
+
+  function channelHintHuman(hint) {
+    const h = String(hint || '').toLowerCase();
+    if (h.includes('linkedin')) return 'LinkedIn';
+    if (h.includes('facebook') || h.includes('meta') || h.includes('instagram')) return 'Redes sociales';
+    if (h.includes('email') || h.includes('correo')) return 'Email';
+    if (h.includes('web') || h.includes('landing') || h.includes('sitio')) return 'Web';
+    return hint || 'Varios canales';
+  }
+
+  function priorityHuman(p) {
+    const map = { alta: 'Prioridad alta', media: 'Prioridad media', baja: 'Prioridad baja' };
+    return map[String(p || '').toLowerCase()] || 'Prioridad media';
+  }
+
+  function proposalOptionCard(row, index) {
+    const rec = index === 0;
+    return `<article class="vs1-option-card${rec ? ' is-recommended' : ''}">
+      <div class="vs1-option-head">
+        <span class="vs1-option-num">${index + 1}</span>
+        <h3>${esc(row.title)}</h3>
+        ${rec ? '<span class="vs1-badge vs1-badge--rec">Para empezar</span>' : ''}
+      </div>
+      <p class="vs1-option-meta">${esc(channelHintHuman(row.channel_hint))} · ${esc(priorityHuman(row.priority))}</p>
+      <p class="vs1-option-body">${esc(row.summary || '')}</p>
+      <div class="vs1-option-actions">
+        <button type="button" class="vs1-btn vs1-btn--${rec ? 'primary' : 'secondary'} vs1-btn--sm" data-choose-proposal="${index}">Elegir esta opción</button>
+      </div>
+    </article>`;
+  }
+
+  async function chooseProposalOption(index) {
+    const all = (proposalData && proposalData.proposals) || [];
+    const row = all[index];
+    if (!row) return;
+    clearStoredProposals();
+    toast(`Opción elegida: ${row.title}`);
+    navigateTo('workspace');
+    await loadWorkspace();
+  }
+
+  function bindProposalActions() {
+    document.querySelectorAll('[data-choose-proposal]').forEach((btn) => {
+      btn.onclick = () => chooseProposalOption(Number(btn.getAttribute('data-choose-proposal')));
+    });
+    const regen = $('vs1PropRegen');
+    if (regen) regen.onclick = () => loadProposal();
+    const back = $('vs1PropBack');
+    if (back) back.onclick = () => navigateTo('workspace');
+    const backTop = $('vs1BackFromProposal');
+    if (backTop) backTop.onclick = () => navigateTo('workspace');
+  }
+
+  function renderProposalUI() {
+    const all = proposalData.proposals || [];
+    if (!all.length) return false;
+
+    const intro = proposalData.executive_summary || '';
+    const ideas = (all[0].actions || []).filter(Boolean);
+
+    $('vs1ProposalMain').innerHTML = `
+      <div class="vs1-proposal-intro">
+        <p class="vs1-page-label">Opciones para tu plan</p>
+        <h1 class="vs1-proposal-q">¿Cuál movimiento quieres explorar primero?</h1>
+        <p class="vs1-page-sub">Tres caminos concretos basados en tu plan y lo que sabemos de tu negocio.</p>
+      </div>
+      ${intro ? `<div class="vs1-card vs1-proposal-summary"><p class="vs1-label-upper">En pocas palabras</p><p>${esc(intro)}</p></div>` : ''}
+      ${ideas.length ? `<div class="vs1-card vs1-proposal-ideas"><p class="vs1-label-upper">Qué podrías hacer</p><ul class="vs1-opp-list">${ideas.map((a) => `<li><i class="ti ti-check" aria-hidden="true"></i><span>${esc(a)}</span></li>`).join('')}</ul></div>` : ''}
+      <div class="vs1-proposal-options" aria-label="Opciones estratégicas">
+        ${all.map((row, i) => proposalOptionCard(row, i)).join('')}
+      </div>
+      <div class="vs1-proposal-footer">
+        <button type="button" class="vs1-btn vs1-btn--ghost" id="vs1PropBack">Volver al inicio</button>
+        <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1PropRegen">Ver otras opciones</button>
+      </div>`;
+    bindProposalActions();
+    return true;
   }
 
   async function loadProposal() {
@@ -777,72 +1367,67 @@
     }
     if (!activePlan) {
       toast('Activa un plan antes de generar propuestas', true);
-      showScreen('workspace');
+      navigateTo('workspace');
       return;
     }
-    $('vs1PropPlanName').textContent = activePlan.nombre;
-    $('vs1ProposalMain').innerHTML = '<p class="vs1-page-sub">Generando propuesta…</p>';
+    $('vs1ProposalMain').innerHTML = '<p class="vs1-page-sub">Preparando opciones para ti…</p>';
     try {
       if (!contextData) await loadContext();
       const resp = await v1Api('/planner/proposals', { method: 'POST', body: '{}' });
-      proposalData = resp.data;
-      const p = (proposalData.proposals || [])[0];
-      if (!p) throw new Error('Sin propuestas');
-      const opps = (p.actions || []).map((a) => `<li><i class="ti ti-check"></i><span>${esc(a)}</span></li>`).join('');
-      const all = proposalData.proposals || [];
-      $('vs1ProposalMain').innerHTML = `
-        <div class="vs1-doc-header">
-          <div class="vs1-doc-label"><i class="ti ti-sparkles"></i> Generado por EM+Acción IA</div>
-          <h1 class="vs1-doc-title">${esc(p.title)}</h1>
-          <p class="vs1-doc-meta">${esc(window.__ACCIO_EMPRESA_NAME__ || TENANT_ID)} · ${new Date().toLocaleDateString('es-PA')} · ${(contextData?.knowledge_base || []).length} fuentes</p>
-        </div>
-        <div class="vs1-section"><h3>Resumen ejecutivo</h3><div class="vs1-exec-card">${esc(proposalData.executive_summary || '')}</div></div>
-        <div class="vs1-section"><h3>Oportunidades identificadas</h3><ul class="vs1-opp-list">${opps || '<li><i class="ti ti-check"></i><span>—</span></li>'}</ul></div>
-        <div class="vs1-section"><h3>Propuestas priorizadas</h3>
-          ${all.map((row, i) => {
-            const conf = i === 0 ? 88 : i === 1 ? 72 : 65;
-            return `<div class="vs1-priority-card${i === 0 ? ' is-recommended' : ''}">
-              <div class="vs1-priority-head"><span class="vs1-priority-num">${i + 1}</span><h4>${esc(row.title)}</h4>${i === 0 ? '<span class="vs1-badge vs1-badge--rec">Recomendada</span>' : ''}</div>
-              <p class="vs1-priority-type">${esc(row.channel_hint || '')} · Prioridad ${esc(row.priority || 'media')}</p>
-              <p>${esc(row.summary || '')}</p>
-              <div class="vs1-confidence-bar"><div class="vs1-progress-track"><div class="vs1-progress-fill" style="width:${conf}%"></div></div><span>${conf}% confianza</span></div>
-            </div>`;
-          }).join('')}
-        </div>`;
-      const rows = contextData ? sourceRows(contextData) : [];
-      $('vs1ProposalAside').innerHTML = `
-        <div class="vs1-aside-block"><h4>Contexto utilizado</h4><ul class="vs1-ctx-used">
-          ${rows.map((r) => `<li><i class="ti ti-${r.status === 'complete' ? 'check ok' : 'minus na'}"></i> ${esc(r.name)}</li>`).join('')}
-        </ul></div>
-        <div class="vs1-aside-divider"></div>
-        <div class="vs1-aside-block"><h4>Tu decisión</h4>
-          <div class="vs1-aside-actions">
-            <button type="button" class="vs1-btn vs1-btn--primary" id="vs1Approve">Aprobar propuesta</button>
-            <textarea id="vs1Feedback" placeholder="¿Qué quieres cambiar?"></textarea>
-            <button type="button" class="vs1-btn vs1-btn--secondary" id="vs1RequestChanges">Solicitar cambios</button>
-            <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" id="vs1Regen">Generar otra propuesta</button>
-          </div>
-        </div>`;
-      $('vs1Approve').onclick = () => toast('Propuesta aprobada (registro pendiente Fase C)');
-      $('vs1RequestChanges').onclick = () => toast('Solicitud registrada (integración pendiente Fase C)');
-      $('vs1Regen').onclick = () => loadProposal();
+      storeProposalsPending(resp.data);
+      if (!renderProposalUI()) throw new Error('Sin propuestas');
     } catch (e) {
       toast(e.message, true);
     }
+  }
+
+  function initLogoLinks() {
+    const home = `/accio/plan/${encodeURIComponent(TENANT_ID)}/`;
+    document.querySelectorAll('.vs1-logo').forEach((a) => { a.href = home; });
   }
 
   function initNav() {
     document.querySelectorAll('.vs1-nav-item[data-nav]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const nav = btn.dataset.nav;
-        if (nav === 'workspace') { showScreen('workspace'); loadWorkspace(); }
-        else if (nav === 'plan') goWizard();
-        else if (nav === 'context') { showScreen('context'); loadContext(); }
-        else if (nav === 'proposals') { showScreen('proposal'); loadProposal(); }
-        else if (nav === 'connectors') location.href = `/accio/dashboard/${TENANT_ID}/#conectores`;
-        else if (nav === 'config') location.href = `/accio/dashboard/${TENANT_ID}/#configuracion`;
+        if (nav === 'plan') {
+          navigateTo('plan', { planView: activePlan ? 'resumen' : 'crear' });
+        } else {
+          navigateTo(nav);
+        }
       });
     });
+    document.querySelectorAll('.ws-area-nav-item[data-plan-view]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const sub = btn.dataset.planView;
+        if (sub === 'crear') goWizard();
+        else showPlanSubview(sub);
+      });
+    });
+  }
+
+  async function initAppSelect() {
+    const sel = $('vs1AppSelect');
+    if (!sel) return;
+    try {
+      const r = await fetch(`/accio/${encodeURIComponent(TENANT_ID)}/apps`, { credentials: 'include' });
+      const data = await r.json().catch(() => ({}));
+      const apps = data.ok ? (data.apps || []) : [];
+      if (!apps.length) {
+        sel.innerHTML = `<option value="${esc(APP_ID)}">${esc(APP_ID)}</option>`;
+        sel.disabled = true;
+        return;
+      }
+      sel.innerHTML = apps.map((a) =>
+        `<option value="${esc(a.app_id)}"${a.app_id === APP_ID ? ' selected' : ''}>${esc(a.name || a.app_id)}</option>`
+      ).join('');
+      sel.onchange = () => {
+        localStorage.setItem(`accio_app_${TENANT_ID}`, sel.value);
+        location.reload();
+      };
+    } catch (_) {
+      sel.innerHTML = `<option>${esc(APP_ID)}</option>`;
+    }
   }
 
   function initTenantSelect() {
@@ -858,7 +1443,6 @@
   }
 
   function initWizardNav() {
-    $('vs1BackWorkspace').onclick = () => { showScreen('workspace'); loadWorkspace(); };
     $('vs1WizardPrev').onclick = () => {
       if (wizardStep > 0) { wizardStep -= 1; renderWizardStep(); }
     };
@@ -877,23 +1461,29 @@
   }
 
   function initTopActions() {
-    $('vs1GenProposalBtn').onclick = () => { showScreen('proposal'); loadProposal(); };
-    $('vs1ViewCtxBtn').onclick = () => { showScreen('context'); loadContext(); };
-    $('vs1ExportBtn').onclick = () => toast('Exportación disponible en Fase C');
+    const genBtn = $('vs1GenProposalBtn');
+    if (genBtn) genBtn.onclick = () => { navigateTo('proposals'); loadProposal(); };
   }
 
   async function bootstrap() {
+    initBranding();
+    initLogoLinks();
     initTenantSelect();
+    await initAppSelect();
     initNav();
     initWizardNav();
     initTopActions();
-    showScreen('workspace');
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && $('vs1ReviewModal') && !$('vs1ReviewModal').hidden) closeReviewModal();
+    });
+    navigateTo('workspace');
     await loadWorkspace();
     const hash = location.hash.replace('#', '');
     if (hash === 'crear') goWizard();
-    if (hash === 'contexto') { showScreen('context'); loadContext(); }
-    if (hash === 'propuestas') { showScreen('proposal'); loadProposal(); }
+    if (hash === 'contexto') navigateTo('context');
+    if (hash === 'propuestas') navigateTo('proposals');
   }
 
   bootstrap();
+  window.__vs1GoActivate = goActivate;
 })();

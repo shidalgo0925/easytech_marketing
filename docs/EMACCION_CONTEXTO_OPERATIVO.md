@@ -38,8 +38,8 @@ Cada **app** tiene (objetivo): cola, campañas, flyers, knowledge — hoy la app
 ```
 GET /accio/login/          → Login plataforma (email + contraseña)
         │
-        ├─ 1 empresa  → /accio/dashboard/{id}/
-        └─ N empresas → /accio/empresas/  → elegir → POST /accio/auth/empresas/{id}/entrar
+        ├─ 1 empresa  → /accio/plan/{id}/   (Inicio)
+        └─ N empresas → /accio/empresas/  → elegir → POST /accio/auth/empresas/{id}/entrar → /accio/plan/{id}/
 ```
 
 | Ruta | Uso |
@@ -47,9 +47,10 @@ GET /accio/login/          → Login plataforma (email + contraseña)
 | `/accio/producto/` | **Landing producto EM+Acción** (pública) |
 | `/accio/login/` | Login sin empresa en URL |
 | `/accio/empresas/` | Selector de empresa |
-| `/accio/dashboard/` | Redirige a empresa en sesión o easytech si tiene acceso |
-| `/accio/dashboard/{tenant_id}/` | Dashboard operativo |
-| `/accio/plan/{tenant_id}/` | **Vertical Slice 1** — módulo Plan (5 pantallas) |
+| `/accio/dashboard/` | Vista **Operaciones** (legacy): redirige a dashboard del tenant en sesión |
+| `/accio/dashboard/{tenant_id}/` | Operaciones avanzadas (cola, CRM, conectores, config) |
+| `/accio/plan/` | **Home** — redirige a plan del tenant en sesión |
+| `/accio/plan/{tenant_id}/` | **Inicio** — módulo Plan VS1 (5 pantallas) |
 | `/accio/{tenant_id}/legal/` | Documentos legales por tenant |
 | `/accio/login/{tenant_id}/` | Login legacy por empresa (compat) |
 
@@ -86,7 +87,7 @@ Página comercial oficial — **no** landing por tenant. Spec: `docs/LANDING_EMA
 
 | Pestaña | Contenido |
 |---------|-----------|
-| Resumen | KPIs, cola posts, leads Odoo, órdenes |
+| Operaciones | KPIs, cola posts, leads Odoo, órdenes (vista avanzada; home = `/accio/plan/`) |
 | Campañas | `campaigns.json` |
 | Calendario | `calendar.json` |
 | Métricas | Odoo + LinkedIn |

@@ -352,4 +352,4 @@ Calendario: `Marketing/CALENDARIO_PUBLICACION.md`
 | [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md) | Estado código vs plan |
 | [CONTEXTO.md](CONTEXTO.md) | Operación diaria |
 | [sessions/2026-06-29-vs1-ux.md](sessions/2026-06-29-vs1-ux.md) | Bitácora VS1 UX |
-| `docs/ACCIO_AI_PROVIDER_MANAGER.md` | *(pendiente sprint)* Contrato env + LiteLLM CODITO |
+| [ACCIO_AI_PROVIDER_MANAGER.md](ACCIO_AI_PROVIDER_MANAGER.md) | Contrato env + LiteLLM CODITO |
