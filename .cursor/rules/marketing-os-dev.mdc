@@ -1,5 +1,5 @@
 ---
-description: Constitución Marketing OS v1.0 — leer antes que visión; Principio 19 pre-código
+description: Constitución Marketing OS v1.0 — capas, dominio, Principio 19
 alwaysApply: true
 ---
 
@@ -7,20 +7,24 @@ alwaysApply: true
 
 **Orden:** Constitución → Vision v2.2 → Domain Model → Arquitectura → Roadmap → Código
 
-`docs/MARKETING_OS_CONSTITUTION.md` (20 principios)
+`docs/MARKETING_OS_CONSTITUTION.md` · `docs/MARKETING_OS_ARCHITECTURE.md`
 
-**Fase conceptual cerrada.** Sprint 1 ✅ Domain Model v1.0. Sprint 2 = Arquitectura (`MARKETING_OS_ARCHITECTURE` — pendiente).
+**Docs cerrados:** Domain Model v1.0 ✅ · Arquitectura v1.0 ✅
+
+## Patrón código (obligatorio)
+
+Copiar slice `marketing_plan_{domain,application,infrastructure,api}/`:
+
+HTTP → Application use case → Domain Service → Repository port → Adapter
+
+**Prohibido:** Domain Service desde routes · nuevos `*_store.py` flat
 
 ## Principio 19 — antes de programar
 
 1. ¿Vender más? 2. Pilar 3. Entidad 4. Evento 5. Corporate Memory 6. KPI 7. Automatización 8. Reutilizable 9. Configurable 10. ¿Respeta Constitución?
 
-Negativo → reevaluar.
+## GO por fase migración
 
-## Principios 3, 5, 12
+M0 infra DB · M1 Memory · M2 Brain · … ver `MARKETING_OS_MIGRATION_PLAN.md`
 
-Buscar antes de crear · todo aprende → Memory · memoria no se borra
-
-## NO GO hasta Arquitectura v1.0
-
-Código de pilares · UI nueva · IA · CODITO · features
+Sin GO explícito → no implementar.

@@ -1,5 +1,8 @@
 # EM+Acción — Arquitectura objetivo
 
+> **Implementación Marketing OS (capas, código, migración):** ver [MARKETING_OS_ARCHITECTURE.md](MARKETING_OS_ARCHITECTURE.md).  
+> Este documento conserva el **flujo comercial** histórico (engines E–P).
+
 **Versión:** 1.0 · **Fecha:** 2026-06-22  
 **Estado:** Documento de diseño — no todo implementado
 

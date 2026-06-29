@@ -1,9 +1,10 @@
 # Marketing OS — Principios de Arquitectura
 
-**Este documento está consolidado en la Constitución v1.0.**
+**Consolidado en dos documentos:**
 
-Los 20 principios (misión, conocimiento, buscar antes de crear, multiempresa, ROI, desarrollo responsable, etc.) viven en un solo lugar:
+| Documento | Contenido |
+|-----------|-----------|
+| [MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md) | 20 principios inmutables — **leer primero** |
+| [MARKETING_OS_ARCHITECTURE.md](MARKETING_OS_ARCHITECTURE.md) | Capas, módulos, APIs, migración — **implementación** |
 
-→ **[MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md)**
-
-**Jerarquía:** [Visión v2.2](EMACCION_PRODUCT_VISION_v2.2.md) (POR QUÉ) → Constitución (CÓMO PENSAMOS + CÓMO CONSTRUIMOS) → [Domain Model](MARKETING_OS_DOMAIN_MODEL.md)
+**Jerarquía:** Constitución → Visión v2.2 → Domain Model → **Arquitectura** → Roadmap → Código

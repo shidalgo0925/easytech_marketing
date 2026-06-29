@@ -14,9 +14,9 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 | 1 | **Constitución** | [MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md) v1.0 | ✅ |
 | 2 | **Product Vision** | [EMACCION_PRODUCT_VISION_v2.2.md](EMACCION_PRODUCT_VISION_v2.2.md) | CONGELADO |
 | 3 | **Domain Model** | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | ✅ v1.0 |
-| 4 | **Arquitectura** | *(Sprint 2 — GO)* | 📋 |
+| 4 | **Arquitectura** | [MARKETING_OS_ARCHITECTURE.md](MARKETING_OS_ARCHITECTURE.md) | ✅ v1.0 |
 | 5 | **Roadmap** | Este documento · Sprints | Activo |
-| 6 | **Código** | `Motor_Tecnico/` | Post-arquitectura |
+| 6 | **Código** | `Motor_Tecnico/` | Sprint 3+ (GO por fase) |
 
 **Regla:** fase conceptual **cerrada** tras commit Constitución. Solo entregables técnicos verificables por sprint.
 
@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **Fase conceptual:** cerrada · **Sprint activo:** Sprint 2 (Arquitectura de implementación)
+**Actualizado:** 2026-06-26 · **Sprint activo:** Sprint 3 (M0+M1 Corporate Memory — requiere GO)
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -53,19 +53,30 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 ---
 
-## Sprint 2 — Arquitectura de implementación (GO)
+## Sprint 2 — Arquitectura de implementación ✅
 
-**Objetivo:** documentar **cómo** el código implementa el dominio v1.0 — sin features nuevas aún.
+**Spec:** [MARKETING_OS_SPRINT2_ARCHITECTURE.md](MARKETING_OS_SPRINT2_ARCHITECTURE.md) — cerrado 2026-06-26
 
-| Entregable | Criterio |
-|------------|----------|
-| Capas (UI → App → Domain → Infra) | Diagrama + responsabilidades |
-| Repositorios y adapters legacy | JSON → `marketing_os.db` por agregado |
-| APIs REST v2 propuestas | Recursos alineados a entidades |
-| Plan migración incremental | Orden: Memory → Brain → Publications |
-| Principio 19 en cada módulo | Checklist por pilar |
+| Entregable | Doc | Estado |
+|------------|-----|--------|
+| Capas + módulos | [MARKETING_OS_ARCHITECTURE.md](MARKETING_OS_ARCHITECTURE.md) | ✅ |
+| ADR capas | [adr/0003-marketing-os-layered-architecture.md](adr/0003-marketing-os-layered-architecture.md) | ✅ |
+| Plan migración | [MARKETING_OS_MIGRATION_PLAN.md](MARKETING_OS_MIGRATION_PLAN.md) | ✅ |
+| Recursos API | [MARKETING_OS_API_RESOURCES.md](MARKETING_OS_API_RESOURCES.md) | ✅ |
 
-**Regla:** NO GO código de pilares hasta Arquitectura v1.0 aprobada.
+---
+
+## Sprint 3 — Implementación M0 + M1 (Corporate Memory)
+
+**Requiere GO explícito** — primer código de plataforma post-documentación.
+
+| Fase | Entregable | Criterio |
+|------|------------|----------|
+| **M0** | `platform_infrastructure/` + `marketing_os.db` | Schema DDL aplicado; tests smoke |
+| **M1** | `memory_{domain,application,infrastructure,api}/` | Eventos → `memory_events`; import audit opcional |
+
+**Patrón:** MarketingPlan slice · [ARCHITECTURE](MARKETING_OS_ARCHITECTURE.md) §4  
+**Regla:** Principio 19 · sin features fuera de M0/M1
 
 ---
 
@@ -98,15 +109,14 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 ## Prioridad actual (jun 2026)
 
 ```
-Constitución v1.0 ✅
-Domain Model v1.0 + BD conceptual ✅
-Sprint 2 — Arquitectura de implementación (GO)
-Sprint 3+ — Código por pilares (post-Arquitectura)
+Constitución ✅ · Domain Model ✅ · Arquitectura ✅
+Sprint 3 — M0 + M1 Corporate Memory (GO por fase)
+Sprint 4+ — M2 Brain, M3 Brand, M4 Publications…
 ```
 
-**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell; embrión de Marketing Console.
+**Regla activa:** código solo con GO explícito por fase M*. Patrón: MarketingPlan slice.
 
-**Regla activa:** NO GO código de pilares hasta Arquitectura v1.0 aprobada.
+**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell; embrión de Marketing Console.
 
 **Forma de trabajo:** entregables verificables · Principio 19 · sin docs conceptuales nuevos.
 
@@ -425,6 +435,10 @@ Calendario: `Marketing/CALENDARIO_PUBLICACION.md`
 
 | Doc | Contenido |
 |-----|-----------|
+| [MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md) | Reglas inmutables |
+| [MARKETING_OS_ARCHITECTURE.md](MARKETING_OS_ARCHITECTURE.md) | Capas e implementación |
+| [MARKETING_OS_MIGRATION_PLAN.md](MARKETING_OS_MIGRATION_PLAN.md) | Migración M0–M11 |
+| [MARKETING_OS_API_RESOURCES.md](MARKETING_OS_API_RESOURCES.md) | Recursos `/api/v1` |
 | [VERTICAL_SLICE_1.md](VERTICAL_SLICE_1.md) | Slice técnico |
 | [MARKETING_PLAN_DOMAIN_v1.1.md](MARKETING_PLAN_DOMAIN_v1.1.md) | Dominio congelado (Principio 5 — IA agnóstica) |
 | [API_CONTRACT_V1.md](API_CONTRACT_V1.md) | Contrato API pública |
