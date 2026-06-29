@@ -42,35 +42,17 @@ def _write_json(path: Path, data: dict[str, Any]) -> None:
 
 
 def load_business_context(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
-    path = _paths(tenant_id)["business_context"]
-    if not path.is_file():
-        return {}
-    return _read_json(path)
+    from Motor_Tecnico.accio_engine.company_brain_infrastructure.facade import load_business_context as _load
+
+    return _load(tenant_id)
 
 
 def save_business_context(payload: dict[str, Any], tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
-    path = _paths(tenant_id)["business_context"]
-    current = load_business_context(tenant_id)
-    allowed = {
-        "empresa",
-        "industria",
-        "pais",
-        "publico_objetivo",
-        "productos_servicios",
-        "diferenciadores",
-        "problemas_que_resuelve",
-        "tono_comunicacion",
-        "objetivos_comerciales",
-        "cta_principal",
-        "contacto",
-    }
-    for key in allowed:
-        if key in payload:
-            current[key] = payload[key]
-    current["version"] = current.get("version", 1)
-    current["updated_at"] = datetime.now(PANAMA).strftime("%Y-%m-%d")
-    _write_json(path, current)
-    return current
+    from Motor_Tecnico.accio_engine.company_brain_infrastructure.facade import (
+        save_business_context as _save,
+    )
+
+    return _save(payload, tenant_id, actor_id="legacy_api")
 
 
 def load_editorial_rules(tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:

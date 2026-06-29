@@ -1,4 +1,4 @@
-"""SQLite platform database — Marketing OS M0."""
+"""SQLite platform database — Marketing OS M0+."""
 
 from __future__ import annotations
 
@@ -6,10 +6,10 @@ import os
 import sqlite3
 from pathlib import Path
 
+from .schema_v2_company_brain import _COMPANY_PROFILES_DDL
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 DEFAULT_DB_PATH = BASE_DIR / "Marketing" / "platform" / "marketing_os.db"
-
-SCHEMA_VERSION = 1
 
 _MEMORY_EVENTS_DDL = """
 CREATE TABLE IF NOT EXISTS memory_events (
@@ -38,6 +38,11 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 );
 """
 
+_SCHEMA_SCRIPTS: dict[int, str] = {
+    1: _MEMORY_EVENTS_DDL,
+    2: _COMPANY_PROFILES_DDL,
+}
+
 
 def get_db_path() -> Path:
     raw = os.environ.get("ACCIO_PLATFORM_DB", "").strip()
@@ -55,6 +60,19 @@ def memory_sql_enabled() -> bool:
     return memory_store_mode() in {"sql", "dual"}
 
 
+def brain_store_mode() -> str:
+    """json | sql | dual — default json until migrated."""
+    return os.environ.get("ACCIO_BRAIN_STORE", "json").strip().lower() or "json"
+
+
+def brain_sql_enabled() -> bool:
+    return brain_store_mode() in {"sql", "dual"}
+
+
+def brain_json_enabled() -> bool:
+    return brain_store_mode() in {"json", "dual"}
+
+
 def get_connection(*, readonly: bool = False) -> sqlite3.Connection:
     path = get_db_path()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -70,18 +88,20 @@ def ensure_schema(conn: sqlite3.Connection | None = None) -> None:
     if own:
         conn = get_connection()
     try:
-        conn.executescript(_MEMORY_EVENTS_DDL)
-        row = conn.execute(
-            "SELECT version FROM schema_migrations WHERE version = ?",
-            (SCHEMA_VERSION,),
-        ).fetchone()
-        if row is None:
-            from datetime import datetime, timezone
+        from datetime import datetime, timezone
 
-            conn.execute(
-                "INSERT INTO schema_migrations(version, applied_at) VALUES (?, ?)",
-                (SCHEMA_VERSION, datetime.now(timezone.utc).isoformat()),
-            )
+        now = datetime.now(timezone.utc).isoformat()
+        for version in sorted(_SCHEMA_SCRIPTS):
+            conn.executescript(_SCHEMA_SCRIPTS[version])
+            row = conn.execute(
+                "SELECT version FROM schema_migrations WHERE version = ?",
+                (version,),
+            ).fetchone()
+            if row is None:
+                conn.execute(
+                    "INSERT INTO schema_migrations(version, applied_at) VALUES (?, ?)",
+                    (version, now),
+                )
         conn.commit()
     finally:
         if own:

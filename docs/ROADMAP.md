@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **Sprint 3:** M0+M1 Corporate Memory ✅ · **Siguiente:** M2 Company Brain (GO)
+**Actualizado:** 2026-06-29 · **M2 Company Brain** ✅ · **Siguiente:** M3 Brands (GO)
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -78,11 +78,23 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 ---
 
-## Sprint 4 — M2 Company Brain (requiere GO)
+## Sprint 4 — M2 Company Brain ✅
+
+**Spec:** [MARKETING_OS_SPRINT4_COMPANY_BRAIN.md](MARKETING_OS_SPRINT4_COMPANY_BRAIN.md) — cerrado 2026-06-29
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M2 | `company_brain_*` + API + facade | ✅ |
+| M2 | `company_profiles` schema v2 | ✅ |
+| M2 | `migrate_business_context_to_brain.py` | ✅ |
+
+---
+
+## Sprint 5 — M3 Brands (requiere GO)
 
 | Fase | Entregable |
 |------|------------|
-| M2 | `knowledge_*` (brain) + `company_profiles` + API `company-brain` |
+| M3 | `apps/registry.json` → `brands` + `legacy_app_id` |
 
 ---
 
@@ -94,8 +106,8 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 
 | Pilar (visión) | Fases del ciclo | En código hoy |
 |----------------|-----------------|---------------|
-| 1 Company Brain | Observar · Aprender | Parcial (`business_context`, tenants) |
-| 2 Corporate Memory | Observar · Aprender · Medir | ❌ No existe como pilar |
+| 1 Company Brain | Observar · Aprender | 🔄 M2 (`company_profiles` + API) |
+| 2 Corporate Memory | Observar · Aprender · Medir | 🔄 M1 (`memory_events`) |
 | 3 Product Knowledge Base | Observar · Crear · Aprender | Parcial (Knowledge Engine) |
 | 4 Brand Center | Crear | Parcial (branding tenant) |
 | 5 Asset Manager | Crear · Ejecutar | Parcial (`flyers/`, cola) |
@@ -115,9 +127,8 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 ## Prioridad actual (jun 2026)
 
 ```
-Constitución ✅ · Domain Model ✅ · Arquitectura ✅
-Sprint 3 M0+M1 Corporate Memory ✅
-M2 Company Brain — próximo (GO)
+Sprint 3 M0+M1 Memory ✅ · M2 Company Brain ✅
+M3 Brands — próximo (GO)
 ```
 
 **Regla activa:** código solo con GO explícito por fase M*.

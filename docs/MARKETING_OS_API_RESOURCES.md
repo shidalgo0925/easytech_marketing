@@ -42,9 +42,9 @@ Dominio congelado v1.1 — sin expandir campos.
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `.../company-brain` | Perfil institucional |
-| PATCH | `.../company-brain` | Actualización parcial (Empresa Viva) |
-| GET | `tenants/{tenant_id}/company-brain` | Scope tenant (sin app) |
+| GET | `.../company-brain` | ✅ M2 Sprint 4 |
+| PATCH | `.../company-brain` | ✅ M2 — actualización parcial |
+| GET | `tenants/{tenant_id}/company-brain` | ✅ alias tenant scope |
 
 ### Corporate Memory (M1)
 
