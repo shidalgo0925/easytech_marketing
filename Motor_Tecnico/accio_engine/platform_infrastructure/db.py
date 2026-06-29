@@ -7,6 +7,7 @@ import sqlite3
 from pathlib import Path
 
 from .schema_v2_company_brain import _COMPANY_PROFILES_DDL
+from .schema_v3_brands import _BRANDS_DDL
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 DEFAULT_DB_PATH = BASE_DIR / "Marketing" / "platform" / "marketing_os.db"
@@ -41,6 +42,7 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 _SCHEMA_SCRIPTS: dict[int, str] = {
     1: _MEMORY_EVENTS_DDL,
     2: _COMPANY_PROFILES_DDL,
+    3: _BRANDS_DDL,
 }
 
 
@@ -71,6 +73,19 @@ def brain_sql_enabled() -> bool:
 
 def brain_json_enabled() -> bool:
     return brain_store_mode() in {"json", "dual"}
+
+
+def brand_store_mode() -> str:
+    """json | sql | dual — default json until migrated."""
+    return os.environ.get("ACCIO_BRAND_STORE", "json").strip().lower() or "json"
+
+
+def brand_sql_enabled() -> bool:
+    return brand_store_mode() in {"sql", "dual"}
+
+
+def brand_json_enabled() -> bool:
+    return brand_store_mode() in {"json", "dual"}
 
 
 def get_connection(*, readonly: bool = False) -> sqlite3.Connection:

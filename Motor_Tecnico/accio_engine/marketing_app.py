@@ -183,6 +183,10 @@ def default_app_id(tenant_id: str) -> str:
 
 
 def list_apps(tenant_id: str, *, active_only: bool = True) -> list[MarketingApp]:
+    from Motor_Tecnico.accio_engine.brand_infrastructure.facade import brand_store_active, list_marketing_apps
+
+    if brand_store_active():
+        return list_marketing_apps(tenant_id, active_only=active_only)
     reg = load_registry(tenant_id)
     items: list[MarketingApp] = []
     for raw in reg.get("apps", []):
@@ -193,6 +197,10 @@ def list_apps(tenant_id: str, *, active_only: bool = True) -> list[MarketingApp]
 
 
 def get_app(tenant_id: str, app_id: str) -> MarketingApp:
+    from Motor_Tecnico.accio_engine.brand_infrastructure.facade import brand_store_active, get_marketing_app
+
+    if brand_store_active():
+        return get_marketing_app(tenant_id, normalize_app_id(app_id))
     aid = normalize_app_id(app_id)
     for app in list_apps(tenant_id, active_only=False):
         if app.app_id == aid:

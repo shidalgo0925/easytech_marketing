@@ -98,7 +98,14 @@ Dominio congelado v1.1 — sin expandir campos.
 | PATCH | `.../knowledge/articles/{slug}` | Editar |
 | POST | `.../knowledge/articles/{slug}/publish` | published |
 
-### Brand Guide (M3)
+### Brands / Marcas (M3) ✅
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `tenants/{tenant_id}/brands` | Lista marcas |
+| GET | `tenants/{tenant_id}/brands/{brand_id}` | Detalle (`brand_id` = `app_id`) |
+
+### Brand Guide (Brand Center — futuro)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|

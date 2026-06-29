@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-29 · **M2 Company Brain** ✅ · **Siguiente:** M3 Brands (GO)
+**Actualizado:** 2026-06-29 · **M3 Brands** ✅ · **Siguiente:** M4 Publications (GO)
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -90,11 +90,23 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 ---
 
-## Sprint 5 — M3 Brands (requiere GO)
+## Sprint 5 — M3 Brands ✅
+
+**Spec:** [MARKETING_OS_SPRINT5_BRANDS.md](MARKETING_OS_SPRINT5_BRANDS.md) — cerrado 2026-06-29
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M3 | `brand_*` + API + facade `marketing_app` | ✅ |
+| M3 | `brands` schema v3 | ✅ |
+| M3 | `migrate_registry_to_brands.py` | ✅ |
+
+---
+
+## Sprint 6 — M4 Publications (requiere GO)
 
 | Fase | Entregable |
 |------|------------|
-| M3 | `apps/registry.json` → `brands` + `legacy_app_id` |
+| M4 | `content_queue.json` → `publications` |
 
 ---
 
@@ -109,7 +121,7 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 | 1 Company Brain | Observar · Aprender | 🔄 M2 (`company_profiles` + API) |
 | 2 Corporate Memory | Observar · Aprender · Medir | 🔄 M1 (`memory_events`) |
 | 3 Product Knowledge Base | Observar · Crear · Aprender | Parcial (Knowledge Engine) |
-| 4 Brand Center | Crear | Parcial (branding tenant) |
+| 4 Brand Center | Crear | 🔄 M3 (`brands` + API) |
 | 5 Asset Manager | Crear · Ejecutar | Parcial (`flyers/`, cola) |
 | 6 Marketing Brain | Analizar · Planificar | Parcial (planner, propuestas) |
 | 7 Roadmap Engine | Planificar | Esbozo (workspace, banner) |
@@ -127,8 +139,8 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 ## Prioridad actual (jun 2026)
 
 ```
-Sprint 3 M0+M1 Memory ✅ · M2 Company Brain ✅
-M3 Brands — próximo (GO)
+Documentación ✅ · M0 Memory ✅ · M1 Memory ✅ · M2 Brain ✅ · M3 Brands ✅
+M4 Publications — próximo (GO)
 ```
 
 **Regla activa:** código solo con GO explícito por fase M*.
