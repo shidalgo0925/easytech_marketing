@@ -9,7 +9,7 @@ alwaysApply: true
 
 `docs/MARKETING_OS_CONSTITUTION.md` (20 principios)
 
-**Fase conceptual cerrada.** No más docs de visión. Sprint 1 = Domain Model v1.0 + BD conceptual (`MARKETING_OS_DOMAIN_PERSISTENCE.md`).
+**Fase conceptual cerrada.** Sprint 1 ✅ Domain Model v1.0. Sprint 2 = Arquitectura (`MARKETING_OS_ARCHITECTURE` — pendiente).
 
 ## Principio 19 — antes de programar
 
@@ -21,6 +21,6 @@ Negativo → reevaluar.
 
 Buscar antes de crear · todo aprende → Memory · memoria no se borra
 
-## NO GO hasta Domain Model v1.0
+## NO GO hasta Arquitectura v1.0
 
-Código · UI · IA · CODITO · features
+Código de pilares · UI nueva · IA · CODITO · features

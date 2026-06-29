@@ -1,9 +1,10 @@
 # Marketing OS — Modelo del Dominio
 
-**Versión:** 0.1 (borrador Sprint 1)  
-**Estado:** 🔄 En revisión — no implementar código hasta v1.0 aprobado  
+**Versión:** 1.0 · Sprint 1 cerrado  
+**Estado:** ✅ Aprobado — NO implementar código hasta capa Arquitectura (Sprint 2)  
 **Sprint:** [MARKETING_OS_SPRINT1_DOMAIN_MODEL.md](MARKETING_OS_SPRINT1_DOMAIN_MODEL.md)  
-**Visión:** [EMACCION_PRODUCT_VISION_v2.2.md](EMACCION_PRODUCT_VISION_v2.2.md)
+**Constitución:** [MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md)  
+**Persistencia:** [MARKETING_OS_DOMAIN_PERSISTENCE.md](MARKETING_OS_DOMAIN_PERSISTENCE.md)
 
 > Convención: identificadores en inglés en dominio; etiquetas UI en español.
 
@@ -11,25 +12,25 @@
 
 ## Reconciliación con código actual
 
-| Dominio (objetivo) | Código hoy | Notas |
-|--------------------|------------|-------|
-| `Tenant` | `tenant_id` | Aislamiento total |
-| `Marca` | `app_id` | No renombrar hasta migración explícita |
-| `Empresa` | ≈ tenant en PYME | Opcional como agregado intermedio |
-| `Product` | `products.json` / slug | Por tenant o marca |
-| `Publication` | `content_queue` posts | Estados editoriales existentes |
-| `Campaign` | `campaigns` | Parcial |
-| `CompanyBrain` | `business_context.json` | Semilla |
-| `ProductKnowledge` | KB articles | `knowledge/*.md` |
-| `MarketingPlan` | dominio v1.1 | **Congelado** — subdominio Planificar |
-| `Recommendation` | — | No existe |
-| `CorporateMemory` | `assistant_audit.jsonl` | Sin modelo |
+| Dominio | Código hoy | Tabla objetivo |
+|---------|------------|----------------|
+| `Tenant` | `tenant_id` | `tenants` |
+| `Marca` | `app_id` | `brands.legacy_app_id` |
+| `Empresa` | ≈ tenant PYME | `companies` |
+| `Product` | `products.json` | `products` |
+| `Publication` | `content_queue` | `publications` |
+| `Campaign` | `campaigns/` | `campaigns` |
+| `CompanyBrain` | `business_context.json` | `company_profiles` |
+| `ProductKnowledge` | `knowledge/*.md` | `product_knowledge` + `knowledge_articles` |
+| `MarketingPlan` | dominio v1.1 JSON | sin tabla v1.0 |
+| `CorporateMemory` | `assistant_audit.jsonl` | `memory_events` |
+| `Recommendation` | — | `recommendations` |
 
 ---
 
 ## 1. Catálogo de entidades
 
-Plantilla por entidad: **Responsabilidad · Propietario · Relaciones · Campos · Estado · Eventos**
+Plantilla: **Responsabilidad · Propietario · Relaciones · Campos · Estado · Eventos · Ciclo**
 
 ### 1.1 Organización
 
@@ -37,22 +38,20 @@ Plantilla por entidad: **Responsabilidad · Propietario · Relaciones · Campos 
 
 | Atributo | Valor |
 |----------|-------|
-| **Descripción** | Cliente SaaS de la plataforma EM+Acción |
-| **Responsabilidad** | Límite de seguridad, usuarios, datos, billing |
+| **Responsabilidad** | Límite SaaS: seguridad, usuarios, billing, aislamiento |
 | **Propietario** | Plataforma / super_admin |
-| **Relaciones** | 1→N Empresa, Usuario, CorporateMemory |
-| **Campos** | `tenant_id`, `display_name`, `status`, `created_at`, `settings` |
+| **Relaciones** | 1→N Company, User, MemoryEvent |
+| **Campos** | `tenant_id`, `display_name`, `status`, `settings`, `created_at` |
 | **Estado** | active · suspended · provisioning |
 | **Eventos** | `TenantCreated`, `TenantSuspended` |
 
-#### Empresa
+#### Empresa (`Company`)
 
 | Atributo | Valor |
 |----------|-------|
-| **Descripción** | Organización operativa dentro del tenant |
-| **Responsabilidad** | Agrupa marcas; comparte Corporate Memory |
+| **Responsabilidad** | Organización operativa; agrupa marcas; comparte Memory |
 | **Propietario** | Admin tenant |
-| **Relaciones** | N→1 Tenant; 1→N Marca; 1→1 CompanyBrain |
+| **Relaciones** | N→1 Tenant; 1→N Brand; 1→1 CompanyBrain |
 | **Campos** | `company_id`, `tenant_id`, `legal_name`, `country`, `timezone` |
 | **Estado** | active · archived |
 | **Eventos** | `CompanyProfileUpdated` |
@@ -61,21 +60,29 @@ Plantilla por entidad: **Responsabilidad · Propietario · Relaciones · Campos 
 
 | Atributo | Valor |
 |----------|-------|
-| **Descripción** | Línea de negocio / identidad comercial promovible |
-| **Responsabilidad** | Scope de campañas, brand, KB producto |
+| **Responsabilidad** | Scope campañas, branding, KB producto |
 | **Propietario** | Gerente Marketing |
-| **Relaciones** | N→1 Empresa; 1→1 BrandGuide; 1→N Product, Campaign |
-| **Campos** | `brand_id` (≈ `app_id`), `name`, `slug`, `tone`, `target_audience` |
+| **Relaciones** | N→1 Company; 1→1 BrandGuide; 1→N Product, Campaign, Publication |
+| **Campos** | `brand_id`, `slug`, `name`, `tone`, `target_audience`, `legacy_app_id` |
 | **Estado** | active · paused · archived |
 | **Eventos** | `BrandCreated`, `BrandPaused` |
 
-#### Usuario · Rol · Equipo
+#### Usuario (`User`)
 
-| Entidad | Responsabilidad |
-|---------|-----------------|
-| **Usuario** | Actor autenticado; pertenece a tenant |
-| **Rol** | Conjunto permisos + vista Roadmap (Director, Marketing, Vendedor…) |
-| **Equipo** | Agrupación usuarios por función comercial/marketing |
+| Atributo | Valor |
+|----------|-------|
+| **Responsabilidad** | Actor autenticado |
+| **Propietario** | Admin tenant |
+| **Relaciones** | N→1 Tenant; N↔N Role |
+| **Campos** | `user_id`, `email`, `display_name`, `status` |
+| **Eventos** | `UserInvited` |
+
+#### Rol (`Role`) · Equipo (`Team`)
+
+| Entidad | Responsabilidad | Eventos |
+|---------|-----------------|---------|
+| **Role** | Permisos + vista Console por rol | — |
+| **Team** | Agrupación usuarios por función | — |
 
 ---
 
@@ -85,11 +92,10 @@ Plantilla por entidad: **Responsabilidad · Propietario · Relaciones · Campos 
 
 | Atributo | Valor |
 |----------|-------|
-| **Descripción** | Perfil institucional de la empresa |
-| **Responsabilidad** | Verdad curada: misión, mercado, competencia, objetivos |
-| **Propietario** | Admin / Marketing (edición); sistema (lectura) |
-| **Relaciones** | 1→1 Empresa |
-| **Campos** | `history`, `mission`, `vision`, `values`, `market`, `competitors[]`, `branches[]`, `team[]`, `objectives[]`, `valid_from`, `source`, `last_synced_at` |
+| **Responsabilidad** | Verdad curada institucional |
+| **Propietario** | Admin/Marketing edita; todos leen |
+| **Relaciones** | 1→1 Company |
+| **Campos** | `history`, `mission`, `vision`, `values`, `market`, `competitors`, `branches`, `team`, `objectives`, `valid_from`, `source`, `last_synced_at` |
 | **Estado** | draft · published |
 | **Eventos** | `CompanyBrainUpdated`, `ObjectiveChanged` |
 | **Ciclo** | Observar · Aprender |
@@ -98,50 +104,91 @@ Plantilla por entidad: **Responsabilidad · Propietario · Relaciones · Campos 
 
 | Atributo | Valor |
 |----------|-------|
-| **Descripción** | Memoria viva transversal — todo lo ocurrido y aprendido |
-| **Responsabilidad** | Indexar eventos; nunca perder contexto |
-| **Propietario** | Sistema (escritura); todos los servicios (lectura) |
-| **Relaciones** | N→1 Tenant/Empresa; referencia cualquier entidad |
-| **Campos** | `memory_id`, `event_type`, `actor`, `timestamp`, `entity_refs[]`, `payload`, `summary` |
-| **Estado** | immutable (append-only) |
-| **Eventos** | Todos los eventos de dominio terminan aquí |
-| **Ciclo** | Observar · Aprender |
+| **Responsabilidad** | Memoria viva append-only de todo lo ocurrido |
+| **Propietario** | Sistema escribe; todos leen |
+| **Relaciones** | N→1 Tenant; refs cualquier entidad vía `entity_refs` |
+| **Campos** | `event_id`, `event_type`, `actor`, `timestamp`, `entity_refs`, `payload`, `summary` |
+| **Estado** | immutable |
+| **Eventos** | Recibe **todos** los eventos de dominio |
+| **Ciclo** | Observar · Medir · Aprender |
 
-#### ProductKnowledge · KnowledgeArticle · FAQ · Competitor · CaseStudy
+#### ProductKnowledge
 
-| Entidad | Responsabilidad |
-|---------|-----------------|
-| **ProductKnowledge** | Agregado raíz conocimiento por producto/marca |
-| **KnowledgeArticle** | Artículo curado (markdown estructurado) |
-| **FAQ** | Pregunta/respuesta oficial |
-| **Competitor** | Ficha competidor vinculada a producto |
-| **CaseStudy** | Caso de éxito con métricas y CTA |
+| Atributo | Valor |
+|----------|-------|
+| **Responsabilidad** | Agregado raíz KB por producto/marca |
+| **Propietario** | Marketing |
+| **Relaciones** | N→1 Brand; 1→N KnowledgeArticle, FAQ, CaseStudy |
+| **Campos** | `knowledge_id`, `title`, `body_markdown`, `valid_from`, `source`, `last_synced_at` |
+| **Estado** | draft · published · archived |
+| **Eventos** | `ProductKnowledgeUpdated` |
+| **Regla** | IA consulta antes de Crear (Principio 3) |
 
-**Regla:** IA consulta ProductKnowledge antes de Crear contenido.
+#### KnowledgeArticle · FAQ · Competitor · CaseStudy
+
+| Entidad | Responsabilidad | Eventos |
+|---------|-----------------|---------|
+| **KnowledgeArticle** | Artículo curado markdown | `KnowledgeArticlePublished` |
+| **FAQ** | P/R oficial producto | — |
+| **Competitor** | Ficha competidor | `CompetitorIntelUpdated` |
+| **CaseStudy** | Caso éxito + métricas + CTA | `CaseStudyAdded` |
 
 ---
 
-### 1.3 Branding
+### 1.3 Brand Center
 
-**Brand** (identidad) · **BrandGuide** (manual) · **Logo** · **ColorPalette** · **Typography** · **Template**
+#### BrandGuide
 
-Todas N→1 Marca. Fuente única para generación creativa.
+| Atributo | Valor |
+|----------|-------|
+| **Responsabilidad** | Manual de marca unificado |
+| **Propietario** | Marketing / Diseño |
+| **Relaciones** | 1→1 Brand |
+| **Campos** | `manual_md`, `logo_uri`, `colors`, `typography`, `templates` |
+| **Eventos** | `BrandingChanged` |
+
+#### Logo · ColorPalette · Typography · Template
+
+Value objects o JSON dentro de `brand_guidelines`. Fuente única para generación creativa.
 
 ---
 
-### 1.4 Activos
+### 1.4 Activos (`Asset` / `MediaAsset`)
 
-**Asset** (raíz) · **Image** · **Video** · **PDF** · **Flyer** · **Presentation** · **LandingAsset**
+| Atributo | Valor |
+|----------|-------|
+| **Responsabilidad** | Archivo reutilizable con metadatos completos |
+| **Propietario** | Marketing / Diseño |
+| **Relaciones** | N→1 Brand; opcional Product, Campaign |
+| **Campos** | `asset_id`, `asset_type`, `uri`, `language`, `author_id`, `version`, `tags`, `channel` |
+| **Estado** | draft · approved · in_use · deprecated · archived |
+| **Eventos** | `FlyerGenerated` (tipo flyer) |
 
-Metadatos obligatorios: empresa, marca, producto, idioma, autor, versión, estado, etiquetas, campaña, fecha, canal.
+Subtipos: **Image**, **Video**, **PDF**, **Flyer**, **Presentation**, **LandingAsset** — discriminador `asset_type`.
 
 ---
 
 ### 1.5 Productos
 
-**Product** · **ProductCategory** · **Promotion** · **Offer** · **CTA**
+#### Product
 
-Product N→1 Marca; N↔N Campaign.
+| Atributo | Valor |
+|----------|-------|
+| **Responsabilidad** | Oferta comercial promovible |
+| **Propietario** | Marketing / Admin |
+| **Relaciones** | N→1 Brand; N↔N Campaign; 1→N ProductKnowledge, Offer |
+| **Campos** | `product_id`, `slug`, `name`, `description`, `category_id` |
+| **Estado** | active · paused · archived |
+| **Eventos** | `ProductUpdated` |
+
+#### ProductCategory · Promotion · Offer · CTA
+
+| Entidad | Responsabilidad | Eventos |
+|---------|-----------------|---------|
+| **ProductCategory** | Taxonomía producto | — |
+| **Promotion** | Ventana promocional | `PromotionStarted`, `PromotionEnded` |
+| **Offer** | Precio/condición | `PriceChanged` |
+| **CTA** | Texto/destino acción | — |
 
 ---
 
@@ -151,91 +198,142 @@ Product N→1 Marca; N↔N Campaign.
 
 | Atributo | Valor |
 |----------|-------|
-| **Descripción** | Iniciativa de marketing con objetivo y canal |
-| **Responsabilidad** | Agrupa contenido y mide resultados |
-| **Propietario** | Gerente Marketing (crea); sistema (métricas) |
-| **Relaciones** | N→1 Marca; N→1 Product (opcional); 1→N Publication, Asset |
+| **Responsabilidad** | Iniciativa con objetivo, canal y métricas |
+| **Propietario** | Marketing crea; Director aprueba |
+| **Relaciones** | N→1 Brand; N→0..1 Product; 1→N Publication, Asset |
 | **Campos** | `campaign_id`, `name`, `objective`, `channel`, `budget`, `start_at`, `end_at` |
-| **Estado** | Ver § Estados |
-| **Eventos** | `CampaignCreated`, `CampaignApproved`, `CampaignPublished`, `CampaignCompleted` |
-| **Ciclo** | Planificar · Crear · Ejecutar · Medir |
+| **Estado** | §5 Campaign |
+| **Eventos** | `CampaignCreated` … `CampaignCompleted` |
+| **Ciclo** | Todas |
 
-#### Publication · Content · Channel · EditorialCalendar · CampaignObjective · CampaignStage
+#### Publication
 
-Ver glosario. **Publication** = unidad publicable en cola/redes.
+| Atributo | Valor |
+|----------|-------|
+| **Responsabilidad** | Unidad publicable en cola/redes |
+| **Propietario** | Marketing / Community Manager |
+| **Relaciones** | N→1 Brand; N→0..1 Campaign, Product, Flyer |
+| **Campos** | `publication_id`, `channel`, `title`, `body`, `scheduled_at`, `external_post_id` |
+| **Estado** | §5 Publication |
+| **Eventos** | `PublicationDraftCreated` … `PublicationFailed` |
+
+#### Content · Channel · EditorialCalendar · CampaignObjective · CampaignStage
+
+| Entidad | Responsabilidad |
+|---------|-----------------|
+| **Content** | Cuerpo creativo antes de publicar |
+| **Channel** | LinkedIn, Facebook, email, web… |
+| **EditorialCalendar** | Vista temporal acciones por marca |
+| **CampaignObjective** | KPI objetivo de campaña |
+| **CampaignStage** | Etapa dentro de campaña |
 
 ---
 
 ### 1.7 Comercial
 
-**Lead** · **Opportunity** · **Customer** · **Contact** · **SalesPipeline**
+#### Lead
 
-Alimentan Observar y Medir; conversiones → Corporate Memory.
+| Atributo | Valor |
+|----------|-------|
+| **Responsabilidad** | Contacto potencial detectado |
+| **Propietario** | Ventas / Conector |
+| **Relaciones** | N→1 Tenant; opcional Brand |
+| **Eventos** | `LeadCreated`, `LeadAssigned`, `LeadStaleDetected` |
+| **Ciclo** | Observar · Medir |
+
+#### Opportunity · Customer · Contact · SalesPipeline
+
+| Entidad | Responsabilidad | Eventos clave |
+|---------|-----------------|---------------|
+| **Opportunity** | Oportunidad calificada | `OpportunityIdentified` |
+| **Customer** | Cliente convertido | `CustomerConverted`, `CustomerLost` |
+| **Contact** | Persona en CRM | `ConversationLogged` |
+| **SalesPipeline** | Embudo etapas | — |
 
 ---
 
 ### 1.8 Automatización
 
-**Workflow** · **Trigger** · **Action** · **Approval** · **Task** · **Scheduler**
-
-**Approval** obligatoria antes de efectos externos (publicar, enviar, CRM).
+| Entidad | Responsabilidad | Eventos |
+|---------|-----------------|---------|
+| **Workflow** | Definición secuencia | — |
+| **Trigger** | Condición disparo | `WorkflowTriggered` |
+| **Action** | Efecto externo | `ActionExecuted`, `ActionFailed` |
+| **Approval** | Gate humano | `ApprovalRequested`, `ApprovalGranted`, `ApprovalDenied` |
+| **Task** | Tarea asignable | `TaskCreated` |
+| **Scheduler** | Programación temporal | — |
 
 ---
 
-### 1.9 Analítica
+### 1.9 Analítica y Roadmap
+
+#### DailyRoadmap
+
+| Atributo | Valor |
+|----------|-------|
+| **Responsabilidad** | Contenedor día/semana de recomendaciones |
+| **Propietario** | Roadmap Engine |
+| **Relaciones** | N→1 Company; 1→N Recommendation |
+| **Campos** | `roadmap_id`, `roadmap_date`, `generated_at` |
 
 #### Recommendation
 
 | Atributo | Valor |
 |----------|-------|
-| **Descripción** | Propuesta accionable del Roadmap Engine |
-| **Responsabilidad** | Traducir análisis en trabajo asignable |
-| **Propietario** | Roadmap Engine (crea); rol asignado (ejecuta) |
-| **Relaciones** | N→1 DailyRoadmap; refs Campaign, Lead, Publication… |
-| **Campos** | `action`, `assignee_role`, `priority`, `expected_impact`, `status`, `dependencies[]`, `due_at`, `justification_refs[]` |
-| **Estado** | pending · in_progress · done · rejected · snoozed |
-| **Eventos** | `RecommendationCreated`, `RecommendationAccepted`, `RecommendationRejected` |
-| **Ciclo** | Planificar → Ejecutar |
+| **Responsabilidad** | Propuesta accionable con responsable |
+| **Propietario** | Roadmap Engine crea; assignee ejecuta |
+| **Relaciones** | N→1 Brand, DailyRoadmap; refs Campaign, Lead… |
+| **Campos** | `action`, `assignee_role`, `priority`, `expected_impact`, `status`, `dependencies`, `justification_refs`, `due_at` |
+| **Estado** | §5 Recommendation |
+| **Eventos** | `RecommendationCreated` … `RecommendationCompleted` |
+| **Ciclo** | Planificar → Ejecutar → Aprender |
 
 #### KPI · Metric · ROI · Insight · Experiment
 
-ROI responde: *¿qué nos hizo vender más?*
+| Entidad | Responsabilidad | Eventos |
+|---------|-----------------|---------|
+| **Metric** | Medición puntual | `MetricRecorded` |
+| **ROI** | Evaluación retorno | `ROIAssessed` |
+| **Insight** | Conclusión analítica | `InsightGenerated` |
+| **Experiment** | Prueba A/B o hipótesis | `ExperimentStarted`, `ExperimentConcluded` |
+| **KPI** | Indicador objetivo | — |
 
 ---
 
-## 2. Relaciones (cadena principal)
+## 2. Relaciones y cardinalidad
 
 ```
-Tenant
-  └── Empresa
-        ├── CompanyBrain
-        ├── CorporateMemory (compartida entre marcas)
-        └── Marca (Brand)
-              ├── BrandGuide / Assets de marca
-              ├── ProductKnowledge
-              ├── Product
-              ├── Campaign
-              │     ├── Publication / Content
-              │     └── Asset (Flyer…)
-              └── Resultado (Metric → ROI)
-                    └── CorporateMemory
+Tenant 1──N Company 1──N Brand 1──N Product 1──N Campaign 1──N Publication
+Tenant 1──N MemoryEvent
+Company 1──1 CompanyBrain
+Company 1──N DailyRoadmap 1──N Recommendation
+Brand 1──1 BrandGuide
+Brand 1──N ProductKnowledge 1──N KnowledgeArticle
+Publication 1──N Metric
+Campaign N──0..1 Product
+Lead 0..1──1 Customer
 ```
 
 ```mermaid
 erDiagram
-  Tenant ||--o{ Empresa : has
-  Empresa ||--|| CompanyBrain : has
-  Empresa ||--o{ CorporateMemory : accumulates
-  Empresa ||--o{ Marca : owns
-  Marca ||--o{ Product : offers
-  Marca ||--o{ Campaign : runs
+  Tenant ||--o{ Company : has
+  Company ||--|| CompanyProfile : has
+  Company ||--o{ Brand : owns
+  Company ||--o{ DailyRoadmap : generates
+  Tenant ||--o{ MemoryEvent : accumulates
+  Brand ||--|| BrandGuideline : has
+  Brand ||--o{ Product : offers
+  Brand ||--o{ Campaign : runs
+  Brand ||--o{ Publication : queues
   Product ||--o{ ProductKnowledge : documents
   Campaign ||--o{ Publication : contains
-  Campaign ||--o{ Asset : uses
+  Campaign }o--o| Product : targets
+  Campaign ||--o{ MediaAsset : uses
   Publication ||--o{ Metric : produces
-  Metric }o--|| ROI : feeds
-  Recommendation }o--|| Marca : scoped_to
-  CorporateMemory }o--o{ Recommendation : records
+  DailyRoadmap ||--o{ Recommendation : contains
+  Recommendation }o--|| Brand : scoped_to
+  Lead ||--o| Customer : converts_to
+  MemoryEvent }o--o{ Recommendation : records
 ```
 
 ---
@@ -246,31 +344,47 @@ erDiagram
 |-----------------|:---:|:----:|:----:|:-----:|:----:|:---:|:------:|
 | Lead, Customer, Contact | ✓ | | | | | ✓ | ✓ |
 | Opportunity, SalesPipeline | ✓ | ✓ | ✓ | | | ✓ | ✓ |
-| Insight, Experiment | | ✓ | ✓ | | | ✓ | ✓ |
-| MarketingPlan (v1.1) | | ✓ | ✓ | | | | |
-| Recommendation, EditorialCalendar | | ✓ | ✓ | | ✓ | | |
-| ProductKnowledge, Brand*, Template | ✓ | | | ✓ | | | ✓ |
-| Asset, Flyer, Content, Publication | | | ✓ | ✓ | ✓ | | |
+| Insight, Experiment, ROI | | ✓ | ✓ | | | ✓ | ✓ |
+| MarketingPlan (v1.1 JSON) | | ✓ | ✓ | | | | |
+| DailyRoadmap, Recommendation, EditorialCalendar | | ✓ | ✓ | | ✓ | | ✓ |
+| ProductKnowledge, BrandGuide, Template | ✓ | | | ✓ | | | ✓ |
+| MediaAsset, Flyer, Content, Publication | | | ✓ | ✓ | ✓ | | |
 | Campaign | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Workflow, Action, Approval | | | ✓ | | ✓ | | |
-| KPI, Metric, ROI | | ✓ | | | | ✓ | ✓ |
+| Workflow, Action, Approval, Task | | | ✓ | | ✓ | | |
+| KPI, Metric | | ✓ | | | | ✓ | ✓ |
 | CompanyBrain | ✓ | | | | | | ✓ |
 | CorporateMemory | ✓ | | | | | ✓ | ✓ |
 
 ---
 
-## 4. Ownership (resumen)
+## 4. Ownership (matriz completa)
 
 | Entidad | Crea | Modifica | Aprueba | Consume | Aprende |
 |---------|------|----------|---------|---------|---------|
-| CompanyBrain | Admin | Marketing | Admin | Todos servicios | CorporateMemory |
-| ProductKnowledge | Marketing | Marketing | Admin | Crear (IA) | CorporateMemory |
-| Campaign | Marketing | Marketing | Director/Mkt | Automation | CorporateMemory, ROI |
-| Publication | Marketing/IA | Marketing | Community Mgr | Publisher | CorporateMemory |
-| Recommendation | Roadmap Engine | Assignee | Assignee | Console | CorporateMemory |
-| Lead | Conector/CRM | Ventas | — | Roadmap | CorporateMemory |
-
-*Matriz completa: completar en v1.0.*
+| Tenant | super_admin | super_admin | — | Todos | Memory |
+| Company | Admin | Admin | Admin | Todos | Memory |
+| Brand | Admin | Marketing | Admin | Console, Automation | Memory |
+| User | Admin | Admin / self | — | Console | Memory |
+| CompanyBrain | Admin | Marketing | Admin | Todos servicios, IA | Memory |
+| CorporateMemory | Sistema | — | — | Brain, ROI, Console | — |
+| ProductKnowledge | Marketing | Marketing | Admin | Crear (IA), Console | Memory |
+| BrandGuide | Diseño | Diseño | Marketing | Crear (IA) | Memory |
+| MediaAsset | Marketing/IA | Marketing | Marketing | Campaign, Publisher | Memory |
+| Product | Admin | Marketing | Admin | Campaign, KB | Memory |
+| Campaign | Marketing | Marketing | Director/Mkt | Automation, ROI | Memory |
+| Publication | Marketing/IA | Marketing | Community Mgr | Publisher | Memory |
+| Lead | Conector/CRM | Ventas | — | Roadmap, CRM | Memory |
+| Opportunity | Ventas/Insight | Ventas | Director | Roadmap | Memory |
+| Customer | CRM | Ventas | — | ROI | Memory |
+| Recommendation | Roadmap Engine | Assignee | Assignee | Console | Memory |
+| DailyRoadmap | Roadmap Engine | — | — | Console | Memory |
+| Approval | Automation/UI | Decider | Decider | Automation | Memory |
+| Workflow | Admin | Admin | — | Automation | Memory |
+| Metric | Conector/Sistema | — | — | ROI, Dashboard | Memory |
+| ROI | ROI Engine | — | Director | Roadmap | Memory |
+| Insight | Marketing Brain | — | — | Roadmap | Memory |
+| Experiment | Marketing | Marketing | Director | — | Memory |
+| MarketingPlan | Usuario/API | Usuario | Usuario | Roadmap Engine | Memory |
 
 ---
 
@@ -278,91 +392,132 @@ erDiagram
 
 ### Campaign
 
-```
-draft → in_review → approved → scheduled → published → completed → archived
-```
+`draft → in_review → approved → scheduled → published → completed → archived`
 
 ### Publication
 
-```
-draft → pending_approval → approved → scheduled → published → failed → archived
-```
+`draft → pending_approval → approved → scheduled → published → failed → archived`
 
 ### Recommendation
 
-```
-pending → in_progress → done | rejected | snoozed
-```
+`pending → in_progress → done | rejected | snoozed`
 
 ### Approval
 
-```
-requested → approved | rejected (con actor + timestamp + reason)
-```
+`requested → approved | rejected` (actor + timestamp + reason obligatorio en reject)
 
-### Asset
+### MediaAsset
 
-```
-draft → approved → in_use → deprecated → archived
-```
+`draft → approved → in_use → deprecated → archived`
+
+### ProductKnowledge / CompanyBrain
+
+`draft → published → archived`
 
 ---
 
 ## 6. Auditoría
 
-Todo cambio de estado en agregados core registra:
+Todo cambio de estado en agregados core → `AuditRecorded` en CorporateMemory:
 
 | Campo | Descripción |
 |-------|-------------|
 | `actor_id` | Usuario o `system` |
-| `timestamp` | UTC |
+| `timestamp` | UTC ISO-8601 |
 | `action` | verbo dominio |
-| `entity_ref` | tipo + id |
+| `entity_ref` | `{type, id}` |
 | `result` | success / failure |
-| `reason` | opcional, obligatorio en rechazos |
+| `reason` | obligatorio en rechazos |
 | `origin` | ui · api · automation · connector |
 
-→ Append a **CorporateMemory** como `AuditRecorded`.
+---
+
+## 7. Conocimiento vs memoria
+
+| | Conocimiento | Memoria |
+|---|--------------|---------|
+| **Qué es** | Verdad curada actual | Historial de lo ocurrido |
+| **Mutabilidad** | Editable con versionado | Append-only |
+| **Agregados** | CompanyBrain, ProductKnowledge, BrandGuide | CorporateMemory (`memory_events`) |
+| **Consulta IA** | Principio 3 — buscar primero | Contexto histórico, aprendizaje |
+| **Tablas** | `company_profiles`, `product_knowledge`, … | `memory_events` |
+| **Borrado** | Archivar (`archived`) | **Prohibido** (Principio 12) |
 
 ---
 
-## 7. Persistencia conceptual
+## 8. Flujo: Recomendación (Observar → Aprender)
 
-**Fase 1 (actual):** JSON por tenant/marca en filesystem — migrar hacia agregados nombrados.
+```
+1. OBSERVAR
+   LeadCreated / MetricRecorded / CommentReceived
+        → memory_events
 
-**Fase 2 (propuesta):** SQLite/Postgres con:
+2. ANALIZAR
+   Marketing Brain / ROI Engine leen Memory + CompanyBrain + KB
+        → InsightGenerated, ROIAssessed
+        → memory_events
 
-- `tenant_id` en **todas** las tablas
-- `brand_id` en entidades de marketing
-- CorporateMemory: tabla append-only `memory_events`
-- Índices por `entity_type`, `entity_id`, `event_type`, `timestamp`
+3. PLANIFICAR
+   Roadmap Engine.generateDailyRoadmap(company, date)
+        → DailyRoadmap + RecommendationCreated (assignee, priority, justification_refs)
+        → memory_events
 
-No optimizar índices en Sprint 1 — solo consistencia referencial.
+4. CREAR (si la recomendación implica contenido)
+   Usuario acepta → PublicationDraftCreated / FlyerGenerated
+   (Principio 3: consulta KB + BrandGuide antes de IA)
+
+5. EJECUTAR
+   ApprovalGranted → PublicationPublished / ActionExecuted
+        → memory_events
+
+6. MEDIR
+   MetricRecorded vinculado a publication/campaign
+        → memory_events
+
+7. APRENDER
+   ExperimentConcluded / RecommendationCompleted
+   CorporateMemory alimenta próximo ciclo Observar
+```
 
 ---
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Una **campaña** pertenece a exactamente una **marca**.
-2. Un **producto** puede participar en N **campañas**.
-3. Todo **contenido** pertenece a una **campaña** y/o **producto**.
-4. Toda **publicación** genera **métricas** (aunque sea cero inicial).
-5. Toda **métrica** alimenta **Corporate Memory**.
-6. Toda **recomendación** tiene **responsable** y **prioridad**.
-7. Ninguna **acción externa** (publicar, enviar CRM) sin **Approval** cuando la política lo exige.
-8. **MarketingPlan** v1.1 permanece declarativo — no contiene instrucciones de ejecución.
-9. **Empresa Viva:** entidades de conocimiento llevan `valid_from`, `source`, `last_synced_at`.
+2. Un **producto** participa en N **campañas**; campaña tiene 0..1 producto foco.
+3. Todo **contenido publicable** es **Publication** con marca obligatoria.
+4. Toda **publicación** genera **métricas** (aunque cero inicial).
+5. Toda **métrica** → Corporate Memory.
+6. Toda **recomendación** tiene `assignee_role` y `priority`.
+7. Acción externa (publicar, CRM) requiere **Approval** si política tenant lo exige.
+8. **MarketingPlan** v1.1 declarativo — sin campos operativos.
+9. **Empresa Viva:** conocimiento lleva `valid_from`, `source`, `last_synced_at`.
 10. **Multi-tenant:** ningún dato cruza `tenant_id`.
+11. **Buscar antes de crear** (Principio 3): orden CompanyBrain → Memory → KB → Brand → Asset.
+12. **Memoria no se borra** — solo append y archive flags en agregados editables.
 
 ---
 
-## 9. Convivencia MarketingPlan v1.1
+## 10. Convivencia MarketingPlan v1.1
 
-`MarketingPlan` es agregado **Planificar** — congelado en [MARKETING_PLAN_DOMAIN_v1.1.md](MARKETING_PLAN_DOMAIN_v1.1.md).
+Agregado **Planificar** congelado: [MARKETING_PLAN_DOMAIN_v1.1.md](MARKETING_PLAN_DOMAIN_v1.1.md).
 
-- No añadir campos operativos al Plan.
-- Roadmap Engine **consume** plan activo; no lo muta directamente.
-- Propuestas IA → `Recommendation` o propuestas Plan según capa.
+- Sin tabla en persistencia v1.0 — JSON `marketing_plans/*.json`.
+- Roadmap Engine **lee** plan activo; no muta el Plan.
+- Propuestas IA del slice Plan → capa aplicación Plan; recomendaciones operativas → entidad `Recommendation`.
+
+---
+
+## 11. Criterio de aceptación Sprint 1
+
+| # | Pregunta | Respuesta en |
+|---|----------|--------------|
+| 1 | ¿Entidades del Marketing OS? | §1 Catálogo |
+| 2 | ¿Relaciones? | §2 ER |
+| 3 | ¿Conocimiento vs memoria? | §7 |
+| 4 | ¿Flujo recomendación? | §8 |
+| 5 | ¿Tablas por entidad? | [PERSISTENCE](MARKETING_OS_DOMAIN_PERSISTENCE.md) |
+| 6 | ¿Multi-tenant? | `tenant_id` everywhere; §9 regla 10 |
 
 ---
 
@@ -371,3 +526,4 @@ No optimizar índices en Sprint 1 — solo consistencia referencial.
 - [MARKETING_OS_DOMAIN_EVENTS.md](MARKETING_OS_DOMAIN_EVENTS.md)
 - [MARKETING_OS_DOMAIN_SERVICES.md](MARKETING_OS_DOMAIN_SERVICES.md)
 - [MARKETING_OS_GLOSSARY.md](MARKETING_OS_GLOSSARY.md)
+- [adr/0002-marketing-os-persistence-store.md](adr/0002-marketing-os-persistence-store.md)

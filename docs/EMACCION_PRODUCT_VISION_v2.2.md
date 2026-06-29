@@ -398,7 +398,7 @@ Si el equipo usa este documento antes de escribir código, las decisiones técni
 |-----------|--------|
 | Product Vision v2.2 | ✅ **CONGELADO** |
 | [Constitución v1.0](MARKETING_OS_CONSTITUTION.md) | ✅ Reglas inmutables |
-| Domain Model + BD | Sprint 1 técnico |
+| Domain Model + BD | ✅ v1.0 Sprint 1 |
 | Nuevos docs de visión | ❌ **Prohibido** |
 
 **No modificar** sin abrir **Product Vision v2.3+** con aprobación explícita.

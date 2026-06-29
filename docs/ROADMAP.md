@@ -13,8 +13,8 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 |---|------|-----------|--------|
 | 1 | **Constitución** | [MARKETING_OS_CONSTITUTION.md](MARKETING_OS_CONSTITUTION.md) v1.0 | ✅ |
 | 2 | **Product Vision** | [EMACCION_PRODUCT_VISION_v2.2.md](EMACCION_PRODUCT_VISION_v2.2.md) | CONGELADO |
-| 3 | **Domain Model** | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | Sprint 1 → v1.0 |
-| 4 | **Arquitectura** | *(post Domain Model v1.0)* | ⏳ |
+| 3 | **Domain Model** | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | ✅ v1.0 |
+| 4 | **Arquitectura** | *(Sprint 2 — GO)* | 📋 |
 | 5 | **Roadmap** | Este documento · Sprints | Activo |
 | 6 | **Código** | `Motor_Tecnico/` | Post-arquitectura |
 
@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **Fase conceptual:** cerrada (post-Constitución) · **Sprint activo:** Sprint 1 técnico (Domain Model + BD)
+**Actualizado:** 2026-06-26 · **Fase conceptual:** cerrada · **Sprint activo:** Sprint 2 (Arquitectura de implementación)
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -38,25 +38,34 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 ---
 
-## Sprint 1 — Domain Model + BD conceptual (GO — 100% técnico)
+## Sprint 1 — Domain Model + BD conceptual ✅
 
-**Spec:** [MARKETING_OS_SPRINT1_DOMAIN_MODEL.md](MARKETING_OS_SPRINT1_DOMAIN_MODEL.md)
+**Spec:** [MARKETING_OS_SPRINT1_DOMAIN_MODEL.md](MARKETING_OS_SPRINT1_DOMAIN_MODEL.md) — cerrado 2026-06-26
 
-**Objetivo:** convertir la visión en **plataforma** — objetos del dominio + persistencia conceptual. **Cero** documentos conceptuales nuevos.
+| Entregable | Doc | Estado |
+|------------|-----|--------|
+| Domain Model v1.0 | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | ✅ |
+| BD conceptual + DDL | [MARKETING_OS_DOMAIN_PERSISTENCE.md](MARKETING_OS_DOMAIN_PERSISTENCE.md) | ✅ |
+| Eventos v1.0 | [MARKETING_OS_DOMAIN_EVENTS.md](MARKETING_OS_DOMAIN_EVENTS.md) | ✅ |
+| Servicios dominio | [MARKETING_OS_DOMAIN_SERVICES.md](MARKETING_OS_DOMAIN_SERVICES.md) | ✅ |
+| Glosario v1.0 | [MARKETING_OS_GLOSSARY.md](MARKETING_OS_GLOSSARY.md) | ✅ |
+| ADR persistencia | [adr/0002-marketing-os-persistence-store.md](adr/0002-marketing-os-persistence-store.md) | ✅ |
 
-| Entregable | Doc | Criterio verificable |
-|------------|-----|----------------------|
-| Domain Model **v1.0** aprobado | [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) | Dev nuevo responde 6 preguntas aceptación |
-| ER + cardinalidad | §2 Domain Model | Diagrama revisado |
-| Catálogo eventos v1.0 | [MARKETING_OS_DOMAIN_EVENTS.md](MARKETING_OS_DOMAIN_EVENTS.md) | Todo evento → Corporate Memory |
-| Servicios dominio (contratos) | [MARKETING_OS_DOMAIN_SERVICES.md](MARKETING_OS_DOMAIN_SERVICES.md) | 1 servicio por agregado core |
-| **BD conceptual** | [MARKETING_OS_DOMAIN_PERSISTENCE.md](MARKETING_OS_DOMAIN_PERSISTENCE.md) | Tablas/agregados, FKs, tenant_id |
-| Glosario v1.0 | [MARKETING_OS_GLOSSARY.md](MARKETING_OS_GLOSSARY.md) | Términos alineados a entidades |
-| Código · UI · IA | — | ❌ **PROHIBIDO** en Sprint 1 |
+---
 
-**Pre-requisito:** Constitución v1.0 commiteada.  
-**Post-Sprint 1:** capa **Arquitectura** (cómo implementa el dominio).  
-**Constitución:** Principio 19 antes de cualquier código posterior.
+## Sprint 2 — Arquitectura de implementación (GO)
+
+**Objetivo:** documentar **cómo** el código implementa el dominio v1.0 — sin features nuevas aún.
+
+| Entregable | Criterio |
+|------------|----------|
+| Capas (UI → App → Domain → Infra) | Diagrama + responsabilidades |
+| Repositorios y adapters legacy | JSON → `marketing_os.db` por agregado |
+| APIs REST v2 propuestas | Recursos alineados a entidades |
+| Plan migración incremental | Orden: Memory → Brain → Publications |
+| Principio 19 en cada módulo | Checklist por pilar |
+
+**Regla:** NO GO código de pilares hasta Arquitectura v1.0 aprobada.
 
 ---
 
@@ -89,15 +98,15 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 ## Prioridad actual (jun 2026)
 
 ```
-Constitución v1.0 ✅ — fase conceptual cerrada
-Sprint 1 — Domain Model v1.0 + BD conceptual (GO técnico)
-Sprint 2 — Arquitectura de implementación
-Sprint 3+ — Código por pilares
+Constitución v1.0 ✅
+Domain Model v1.0 + BD conceptual ✅
+Sprint 2 — Arquitectura de implementación (GO)
+Sprint 3+ — Código por pilares (post-Arquitectura)
 ```
 
 **Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell; embrión de Marketing Console.
 
-**Regla activa:** NO GO código hasta Domain Model v1.0 + persistencia conceptual aprobados.
+**Regla activa:** NO GO código de pilares hasta Arquitectura v1.0 aprobada.
 
 **Forma de trabajo:** entregables verificables · Principio 19 · sin docs conceptuales nuevos.
 

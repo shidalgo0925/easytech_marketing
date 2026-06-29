@@ -1,6 +1,6 @@
 # ADR-0001: Sprint 0 — Dominio Marketing OS
 
-**Estado:** Propuesto (Sprint 0 en curso)  
+**Estado:** Aceptado (Sprint 0 cerrado · Sprint 1 completado)  
 **Fecha:** 2026-06-26  
 **Contexto:** [EMACCION_PRODUCT_VISION_v2.2.md](../EMACCION_PRODUCT_VISION_v2.2.md) · [MARKETING_OS_DOMAIN_SPRINT0.md](../MARKETING_OS_DOMAIN_SPRINT0.md)
 
@@ -38,13 +38,13 @@ EM+Acción evoluciona de aplicación de marketing a **Marketing OS** (plataforma
 - Pausa features visibles (CODITO, Roadmap proactivo) hasta cierre dominio
 - Esfuerzo documental upfront
 
-### Pendiente de definir en Sprint 0
+### Completado en Sprint 1
 
-- [ ] ER cardinalidad completa
-- [ ] Matriz ownership
-- [ ] Propuesta persistencia (JSON fase 1 vs SQLite/Postgres)
-- [ ] Lista servicios de dominio
-- [ ] APIs propuestas (recursos REST v2)
+- [x] ER cardinalidad completa — [DOMAIN_MODEL](../MARKETING_OS_DOMAIN_MODEL.md) §2
+- [x] Matriz ownership — §4
+- [x] Persistencia — [ADR-0002](0002-marketing-os-persistence-store.md) + [PERSISTENCE](../MARKETING_OS_DOMAIN_PERSISTENCE.md)
+- [x] Servicios de dominio — [DOMAIN_SERVICES](../MARKETING_OS_DOMAIN_SERVICES.md)
+- [ ] APIs propuestas (recursos REST v2) — Sprint 2
 
 ---
 
