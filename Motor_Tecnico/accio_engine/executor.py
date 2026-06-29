@@ -111,6 +111,14 @@ def _resolve_app_id(tenant_id: str, app_id: str | None) -> str:
 
 
 def load_content_queue(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine.publication_infrastructure.facade import (
+        load_content_queue as facade_load,
+        publication_store_active,
+    )
+
+    if publication_store_active():
+        return facade_load(tenant_id, app_id)
+
     from Motor_Tecnico.accio_engine import marketing_app
 
     path = marketing_app.queue_file_path(tenant_id, app_id)
@@ -131,6 +139,15 @@ def load_content_queue_for_app(tenant_id: str = DEFAULT_TENANT, app_id: str | No
 def save_content_queue(
     data: dict[str, Any], tenant_id: str = DEFAULT_TENANT, app_id: str | None = None
 ) -> None:
+    from Motor_Tecnico.accio_engine.publication_infrastructure.facade import (
+        publication_store_active,
+        save_content_queue as facade_save,
+    )
+
+    if publication_store_active():
+        facade_save(data, tenant_id, app_id)
+        return
+
     from Motor_Tecnico.accio_engine import marketing_app
 
     path = marketing_app.queue_file_path(tenant_id, app_id)

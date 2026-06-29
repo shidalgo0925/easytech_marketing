@@ -161,6 +161,14 @@ def _flyer_num_from_post(post: dict[str, Any], manifest: dict[str, Any]) -> int 
 
 
 def _load_manifest(tenant_id: str) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine.media_asset_infrastructure.facade import (
+        asset_store_active,
+        load_flyers_manifest,
+    )
+
+    if asset_store_active():
+        return load_flyers_manifest(tenant_id)
+
     path = _paths(tenant_id)["flyers_manifest"]
     if not path.exists():
         return {"flyers": [], "extras": []}
@@ -168,11 +176,18 @@ def _load_manifest(tenant_id: str) -> dict[str, Any]:
 
 
 def load_campaigns(tenant_id: str = DEFAULT_TENANT, app_id: str | None = None) -> list[dict[str, Any]]:
+    from Motor_Tecnico.accio_engine.campaign_infrastructure.facade import (
+        campaign_defs_by_post_id,
+        campaign_store_active,
+    )
+
     paths = _paths(tenant_id, app_id)
     manifest = _load_manifest(tenant_id)
     topic_by_num = {f["num"]: f.get("topic", "") for f in manifest.get("flyers", [])}
     defs: dict[str, dict[str, Any]] = {}
-    if paths["campaigns"].exists():
+    if campaign_store_active():
+        defs = campaign_defs_by_post_id(tenant_id, app_id)
+    elif paths["campaigns"].exists():
         data = json.loads(paths["campaigns"].read_text(encoding="utf-8"))
         for camp in data.get("campaigns", []):
             if camp.get("post_id"):

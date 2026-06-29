@@ -59,6 +59,19 @@ def _default_products(tenant_id: str) -> dict[str, Any]:
 
 
 def load_products(tenant_id: str) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine.product_infrastructure.facade import (
+        load_products as facade_load,
+        product_store_active,
+        save_products as facade_save,
+    )
+
+    if product_store_active():
+        data = facade_load(tenant_id)
+        if not data.get("products"):
+            data = _default_products(tenant_id)
+            facade_save(tenant_id, data)
+        return data
+
     path = _path(tenant_id, "products.json")
     data = _read_json(path, None)
     if not data:
@@ -88,6 +101,13 @@ def save_products(tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
             }
         )
     data = {"version": 1, "updated_at": _utc_now(), "products": cleaned}
+    from Motor_Tecnico.accio_engine.product_infrastructure.facade import (
+        product_store_active,
+        save_products as facade_save,
+    )
+
+    if product_store_active():
+        return facade_save(tenant_id, data)
     _write_json(_path(tenant_id, "products.json"), data)
     return data
 

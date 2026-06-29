@@ -31,10 +31,19 @@
 | **M7** | Campaign | `campaigns.json` | `campaigns` | Vinculado a publications |
 | **M8** | MediaAsset | `flyers/` | `media_assets` | Manifest flyers → assets |
 | **M9** | Lead | `leads.json` | `leads` | Dashboard métricas desde DB |
-| **M10** | Recommendation | — (nuevo) | `recommendations` | Roadmap Engine V1 |
-| **M11** | MarketingPlan | `marketing_plans/*.json` | Mantener JSON o tabla dedicada | Decisión en M11 — dominio congelado |
+| **—** | *Fin capa conocimiento* | — | — | M0–M9 completos |
+| **M10** | **Decision Engine** | — (nuevo) | `daily_roadmaps` + `recommendations` | Roadmap diario + aprobación; **reglas, sin IA** |
+| **M11** | Marketing Brain | — | — | IA enriquece Decision Engine; no reemplaza estructura |
 
-**Orden obligatorio M1→M2→M3** antes de M4 (publications necesitan brand scope). M4–M9 pueden solaparse por pilar con GO explícito.
+**Orden obligatorio M1→M2→M3** antes de M4 (publications necesitan brand scope). M4–M9 cierran conocimiento. **M10+ = decisiones.**
+
+### Gate post-M9
+
+Antes de cualquier tabla o módulo nuevo:
+
+> ¿Almacena **conocimiento** o registra/toma una **decisión**?
+
+Si es conocimiento → no iniciar (capa M0–M9 cerrada). Si es decisión → Decision Engine M10+.
 
 ---
 
@@ -80,6 +89,27 @@ Publisher (`executor.py`) migra último: lee `PublicationRepository.list_schedul
 
 Import one-shot + dual-write en comandos de aplicación. Sin eliminar JSON hasta flag `ACCIO_LEGACY_JSON=false` por tenant.
 
+### M10 — Decision Engine (no es migración legacy)
+
+Ver [MARKETING_OS_SPRINT12_DECISION_ENGINE.md](MARKETING_OS_SPRINT12_DECISION_ENGINE.md).
+
+```
+KnowledgeSnapshot (M1–M9 repos)
+        → Roadmap Builder (reglas)
+        → Priority Engine
+        → Recommendation + DailyRoadmap (persist)
+        → Approval Queue → Memory events
+        → (futuro) Automation Engine
+```
+
+Sub-fases: M10.1 Builder → M10.2 Priority → M10.3 Recommendation → M10.4 Daily Planner → M10.5 Approval.
+
+**Caso piloto:** `brand_publication_gap` en easytech / en1.
+
+### M11 — Marketing Brain
+
+IA sobre salida M10. MarketingPlan v1.1 sigue congelado; Brain lee, no muta.
+
 ---
 
 ## Flags de entorno (propuestos)
@@ -102,6 +132,7 @@ Import one-shot + dual-write en comandos de aplicación. Sin eliminar JSON hasta
 | Pérdida audit histórico | M1 import + no DELETE memory_events |
 | `app.py` monolito | Nuevas rutas solo en `*_api/routes.py` |
 | Plan v1.1 roto | M11 fuera de scope hasta dominio Plan abra v1.2 |
+| M10 parece “otra tabla” | Gate conocimiento vs decisión; spec Sprint 12 |
 
 ---
 

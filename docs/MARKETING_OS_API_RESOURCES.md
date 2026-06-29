@@ -121,16 +121,20 @@ Dominio congelado v1.1 — sin expandir campos.
 | GET | `.../assets/{id}` | Detalle |
 | POST | `.../assets/{id}/approve` | approved |
 
-### Recommendations (M10)
+### Decision Engine (M10)
+
+Roadmap diario + recomendaciones priorizadas. Spec: [MARKETING_OS_SPRINT12_DECISION_ENGINE.md](MARKETING_OS_SPRINT12_DECISION_ENGINE.md)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `tenants/{tenant_id}/roadmaps/{date}` | DailyRoadmap + items |
-| POST | `tenants/{tenant_id}/roadmaps/{date}/generate` | Generar (sistema) |
-| GET | `.../recommendations` | Inbox por rol |
-| POST | `.../recommendations/{id}/accept` | |
-| POST | `.../recommendations/{id}/reject` | body: `reason` |
-| POST | `.../recommendations/{id}/complete` | body: `outcome` |
+| POST | `tenants/{tenant_id}/roadmaps/{date}/generate` | Generar roadmap (reglas) |
+| GET | `tenants/{tenant_id}/roadmaps/{date}` | DailyRoadmap + recommendations |
+| GET | `tenants/{tenant_id}/roadmaps/today` | Alias fecha tenant |
+| GET | `tenants/{tenant_id}/recommendations` | Inbox (`status`, `brand_id`) |
+| GET | `tenants/{tenant_id}/recommendations/{id}` | Detalle |
+| POST | `tenants/{tenant_id}/recommendations/{id}/approve` | M10.5 |
+| POST | `tenants/{tenant_id}/recommendations/{id}/reject` | body: `reason` |
+| POST | `tenants/{tenant_id}/recommendations/{id}/snooze` | body: `until` |
 
 ### Leads (M9)
 

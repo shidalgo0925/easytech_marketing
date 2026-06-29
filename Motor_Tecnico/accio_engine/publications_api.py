@@ -71,6 +71,14 @@ def _public_url(post: dict[str, Any], platform: str) -> str | None:
 
 
 def _campaign_for_post(post_id: str, tenant_id: str, app_id: str) -> str:
+    from Motor_Tecnico.accio_engine.campaign_infrastructure.facade import (
+        campaign_id_for_post,
+        campaign_store_active,
+    )
+
+    if campaign_store_active():
+        return campaign_id_for_post(tenant_id, app_id, post_id)
+
     paths = marketing_app.effective_app_paths(tenant_id, app_id)
     camp_path = paths.get("campaigns")
     if not camp_path or not camp_path.is_file():

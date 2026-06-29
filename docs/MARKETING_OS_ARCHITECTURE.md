@@ -236,8 +236,8 @@ Nuevas pantallas consumen `/api/v1`, no JSON directo.
 | 3 Product KB | knowledge_domain (articles) | M6 |
 | 4 Brand Center | brand_domain | M3 |
 | 5 Asset Manager | asset_domain | M8 |
-| 6 Marketing Brain | analytics + roadmap | M10 |
-| 7 Roadmap Engine | recommendation_domain | M10 |
+| 6 Marketing Brain | analytics + roadmap | M11 (IA) |
+| 7 Roadmap Engine / Decision Engine | decision_engine_domain | M10 |
 | 8 AI Provider | ai_provider/ | infra |
 | 9 Automation Engine | automation_domain | post-M4 |
 | 10 ROI Engine | analytics_domain | post-M7 |
@@ -255,8 +255,9 @@ Requiere **GO explícito** por fase:
 3. M2  Company Brain
 4. M3  Brands
 5. M4  Publications (cola editorial)
-6. M5–M9  según MIGRATION_PLAN
-7. M10 Roadmap + Recommendations
+6. M5–M9  conocimiento (cerrado)
+7. M10 Decision Engine (M10.1–M10.5) — ver SPRINT12 spec
+8. M11 Marketing Brain (IA)
 ```
 
 **Principio 19** obligatorio en cada PR de implementación.

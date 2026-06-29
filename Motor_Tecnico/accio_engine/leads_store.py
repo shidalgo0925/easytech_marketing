@@ -21,6 +21,11 @@ def leads_path(tenant_id: str) -> Path:
 
 
 def load_leads(tenant_id: str) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine.lead_infrastructure.facade import lead_store_active, load_leads as facade_load
+
+    if lead_store_active():
+        return facade_load(tenant_id)
+
     path = leads_path(tenant_id)
     if not path.is_file():
         return {"version": 1, "leads": []}
@@ -28,6 +33,12 @@ def load_leads(tenant_id: str) -> dict[str, Any]:
 
 
 def save_leads(data: dict[str, Any], tenant_id: str) -> None:
+    from Motor_Tecnico.accio_engine.lead_infrastructure.facade import lead_store_active, save_leads as facade_save
+
+    if lead_store_active():
+        facade_save(data, tenant_id)
+        return
+
     path = leads_path(tenant_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -49,6 +60,8 @@ def record_lead(
     contact: dict[str, Any] | None = None,
     meta: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine.lead_infrastructure.facade import append_lead, lead_store_active
+
     entry = {
         "id": f"lead_{uuid.uuid4().hex[:12]}",
         "tenant_id": tenant_id,
@@ -66,6 +79,9 @@ def record_lead(
         "meta": meta or {},
         "created_at": _utc_now(),
     }
+    if lead_store_active():
+        return append_lead(tenant_id, entry)
+
     data = load_leads(tenant_id)
     data.setdefault("leads", []).append(entry)
     save_leads(data, tenant_id)
@@ -78,6 +94,11 @@ def list_leads(
     app_id: str | None = None,
     limit: int = 50,
 ) -> list[dict[str, Any]]:
+    from Motor_Tecnico.accio_engine.lead_infrastructure.facade import lead_store_active, list_leads as facade_list
+
+    if lead_store_active():
+        return facade_list(tenant_id, app_id=app_id, limit=limit)
+
     items = load_leads(tenant_id).get("leads", [])
     if app_id:
         items = [x for x in items if x.get("app_id") == app_id]

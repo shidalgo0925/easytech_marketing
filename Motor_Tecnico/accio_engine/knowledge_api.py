@@ -87,6 +87,14 @@ def _parse_md_sections(text: str) -> dict[str, str]:
 
 
 def load_article(slug: str, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine.knowledge_article_infrastructure.facade import (
+        knowledge_store_active,
+        load_article as facade_load,
+    )
+
+    if knowledge_store_active():
+        return facade_load(slug, tenant_id)
+
     paths = _paths(tenant_id)
     manifest = load_knowledge_manifest(tenant_id)
     entry = next((a for a in manifest.get("articles", []) if a.get("slug") == slug), None)
@@ -104,6 +112,14 @@ def load_article(slug: str, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
 
 
 def list_knowledge(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
+    from Motor_Tecnico.accio_engine.knowledge_article_infrastructure.facade import (
+        knowledge_store_active,
+        list_knowledge as facade_list,
+    )
+
+    if knowledge_store_active():
+        return facade_list(tenant_id)
+
     paths = _paths(tenant_id)
     manifest = load_knowledge_manifest(tenant_id)
     items = []
@@ -124,7 +140,14 @@ def list_knowledge(tenant_id: str = DEFAULT_TENANT) -> list[dict[str, Any]]:
 
 
 def save_article(tenant_id: str, payload: dict[str, Any], *, slug: str | None = None) -> dict[str, Any]:
-    """Crea o actualiza un artículo de knowledge base."""
+    from Motor_Tecnico.accio_engine.knowledge_article_infrastructure.facade import (
+        knowledge_store_active,
+        save_article as facade_save,
+    )
+
+    if knowledge_store_active():
+        return facade_save(tenant_id, payload, slug=slug)
+
     paths = _paths(tenant_id)
     manifest = load_knowledge_manifest(tenant_id)
     articles: list[dict[str, Any]] = list(manifest.get("articles") or [])
@@ -162,6 +185,14 @@ def save_article(tenant_id: str, payload: dict[str, Any], *, slug: str | None = 
 
 
 def delete_article(slug: str, tenant_id: str = DEFAULT_TENANT) -> dict[str, Any]:
+    from Motor_Tecnico.accio_engine.knowledge_article_infrastructure.facade import (
+        delete_article as facade_delete,
+        knowledge_store_active,
+    )
+
+    if knowledge_store_active():
+        return facade_delete(slug, tenant_id)
+
     paths = _paths(tenant_id)
     manifest = load_knowledge_manifest(tenant_id)
     articles = list(manifest.get("articles") or [])

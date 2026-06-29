@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-29 · **M3 Brands** ✅ · **Siguiente:** M4 Publications (GO)
+**Actualizado:** 2026-06-26 · **M10 Decision Engine** spec GO · **Implementar:** M10.1
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -102,11 +102,101 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 ---
 
-## Sprint 6 — M4 Publications (requiere GO)
+## Sprint 6 — M4 Publications ✅
+
+**Spec:** [MARKETING_OS_SPRINT6_PUBLICATIONS.md](MARKETING_OS_SPRINT6_PUBLICATIONS.md) — cerrado 2026-06-26
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M4 | `publication_*` + API + facade `executor` | ✅ |
+| M4 | `publications` schema v4 | ✅ |
+| M4 | `migrate_content_queue_to_publications.py` | ✅ |
+
+---
+
+## Sprint 7 — M5 Products ✅
+
+**Spec:** [MARKETING_OS_SPRINT7_PRODUCTS.md](MARKETING_OS_SPRINT7_PRODUCTS.md) — cerrado 2026-06-26
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M5 | `product_*` + API + facade `settings_center` | ✅ |
+| M5 | `products` schema v5 | ✅ |
+| M5 | `migrate_products_to_sql.py` | ✅ |
+
+---
+
+## Sprint 8 — M6 ProductKnowledge ✅
+
+**Spec:** [MARKETING_OS_SPRINT8_KNOWLEDGE.md](MARKETING_OS_SPRINT8_KNOWLEDGE.md) — cerrado 2026-06-26
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M6 | `knowledge_article_*` + API + facade `knowledge_api` | ✅ |
+| M6 | `knowledge_articles` schema v6 | ✅ |
+| M6 | `migrate_knowledge_to_sql.py` | ✅ |
+
+---
+
+## Sprint 9 — M7 Campaigns ✅
+
+**Spec:** [MARKETING_OS_SPRINT9_CAMPAIGNS.md](MARKETING_OS_SPRINT9_CAMPAIGNS.md) — cerrado 2026-06-26
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M7 | `campaign_*` + API + facade `dashboard_data` | ✅ |
+| M7 | `campaigns` schema v7 | ✅ |
+| M7 | `migrate_campaigns_to_sql.py` | ✅ |
+
+---
+
+## Sprint 10 — M8 MediaAssets ✅
+
+**Spec:** [MARKETING_OS_SPRINT10_MEDIA_ASSETS.md](MARKETING_OS_SPRINT10_MEDIA_ASSETS.md) — cerrado 2026-06-26
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M8 | `media_asset_*` + API + facade `dashboard_data` | ✅ |
+| M8 | `media_assets` schema v8 | ✅ |
+| M8 | `migrate_flyers_to_media_assets.py` | ✅ |
+
+---
+
+## Sprint 11 — M9 Leads ✅
+
+**Spec:** [MARKETING_OS_SPRINT11_LEADS.md](MARKETING_OS_SPRINT11_LEADS.md) — cerrado 2026-06-26
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| M9 | `lead_*` + API + facade `leads_store` | ✅ |
+| M9 | `leads` schema v9 | ✅ |
+| M9 | `migrate_leads_to_sql.py` | ✅ |
+
+---
+
+## Sprint 12 — M10 Decision Engine (GO documental ✅)
+
+**Spec:** [MARKETING_OS_SPRINT12_DECISION_ENGINE.md](MARKETING_OS_SPRINT12_DECISION_ENGINE.md) — GO 2026-06-26
+
+> **Cambio de naturaleza:** M10 ya no es “tabla recommendations”. Es el **Decision Engine V1** — reglas, prioridad, roadmap del día, cola de aprobación. **Sin IA** (IA → M11 Marketing Brain).
+
+| Sub-fase | Entregable | Estado |
+|----------|------------|--------|
+| M10.1 | Roadmap Builder + regla `brand_publication_gap` | 📋 spec |
+| M10.2 | Priority Engine | 📋 spec |
+| M10.3 | Recommendation Engine + persistencia | 📋 spec |
+| M10.4 | Daily Planner (`daily_roadmaps`) | 📋 spec |
+| M10.5 | Approval Queue | 📋 spec |
+
+**Gate:** no más tablas de conocimiento sin preguntar *¿almacena conocimiento o toma decisiones?*
+
+---
+
+## Sprint 13 — M11 Marketing Brain (requiere GO)
 
 | Fase | Entregable |
 |------|------------|
-| M4 | `content_queue.json` → `publications` |
+| M11 | IA sobre Decision Engine (enriquece, no reemplaza) |
 
 ---
 
@@ -123,8 +213,8 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 | 3 Product Knowledge Base | Observar · Crear · Aprender | Parcial (Knowledge Engine) |
 | 4 Brand Center | Crear | 🔄 M3 (`brands` + API) |
 | 5 Asset Manager | Crear · Ejecutar | Parcial (`flyers/`, cola) |
-| 6 Marketing Brain | Analizar · Planificar | Parcial (planner, propuestas) |
-| 7 Roadmap Engine | Planificar | Esbozo (workspace, banner) |
+| 6 Marketing Brain | Analizar · Planificar | Parcial → **M11** (IA) |
+| 7 Roadmap Engine | Planificar | **M10 Decision Engine** (GO spec) |
 | 8 AI Provider Manager | Crear | En curso (`ai_provider/`) |
 | 9 Automation Engine | Ejecutar | Parcial (publicador, órdenes) |
 | 10 ROI Engine | Medir · Aprender | ❌ Fragmentado (métricas básicas) |
@@ -139,15 +229,16 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 ## Prioridad actual (jun 2026)
 
 ```
-Documentación ✅ · M0 Memory ✅ · M1 Memory ✅ · M2 Brain ✅ · M3 Brands ✅
-M4 Publications — próximo (GO)
+Capa conocimiento M0–M9 ✅ código local (sin commit)
+M10 Decision Engine ✅ spec GO — implementar M10.1 primero
+M11 Marketing Brain — después de M10.5
 ```
 
-**Regla activa:** código solo con GO explícito por fase M*.
+**Regla activa:** gate conocimiento vs decisión · código M10 solo con GO por sub-fase.
 
-**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — un solo shell; embrión de Marketing Console.
+**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — Console muestra DailyRoadmap + Recommendations.
 
-**Forma de trabajo:** entregables verificables · Principio 19 · sin docs conceptuales nuevos.
+**Forma de trabajo:** M10 = producto · reglas antes de IA · Memory en cada transición.
 
 ---
 
