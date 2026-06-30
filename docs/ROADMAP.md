@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-30 · **Código:** M0–M11 ✅ · Content Engine ✅ · **VS2 Primera campaña publicada** ✅ · **Siguiente:** Analytics / Automation (post-demo)
+**Actualizado:** 2026-06-30 · **Bloque 1** cimentación prod ✅ · **VS2** ✅ · **Siguiente:** Bloque 2 IA prod → Bloque 3–6 plan completo
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -249,14 +249,14 @@ Fuente: [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md)
 
 | # | Prioridad | Entregable |
 |---|-----------|------------|
-| 🔴 1 | Ops | Migrar M4–M9 prod + `marketing_os.db` |
-| 🔴 2 | Ops | `ACCIO_*_STORE=dual` + restart servicio |
-| 🔴 3 | Código | **M10.5** Approval Queue |
-| 🔴 4 | Infra | **AI Provider Manager** (LiteLLM/CODITO → Ollama) |
-| 🔴 5 | Código | **M11** Marketing Brain |
+| 🔴 1 | Ops | Migrar M4–M9 prod + `marketing_os.db` | ✅ [BLOQUE1](BLOQUE1_CIMENTACION_PROD.md) |
+| 🔴 2 | Ops | `ACCIO_*_STORE=dual` + restart servicio | ✅ |
+| 🔴 3 | Código | **M10.5** Approval Queue | ✅ |
+| 🔴 4 | Infra | **AI Provider Manager** (LiteLLM/CODITO → Ollama) | 🔄 código ✅ · prod ⏳ |
+| 🔴 5 | Código | **M11** Marketing Brain | ✅ |
 | 🟠 6 | Knowledge | Matriz producto-sector-necesidad |
 | 🟠 7 | Código | **Opportunity Engine** + Intelligence Layer | ✅ |
-| 🟡 8 | UI | Workspace/Console + panel «¿Por qué?» | 🔄 |
+| 🟡 8 | UI | Workspace/Console + VS2 publicación | ✅ |
 | 🟡 9 | Código | **M12** Business Intelligence + Analytics |
 | 🟢 10 | Futuro | **M13** Automation Brain + Learning continuo |
 

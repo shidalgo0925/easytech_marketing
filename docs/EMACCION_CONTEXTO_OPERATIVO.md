@@ -284,7 +284,7 @@ Sitio referencia: https://relaticpanama.org/
 | M12 Business Intelligence | 📋 | ROI, CTA, horario, producto |
 | M13 Automation Brain | 📋 | ejecutar post-aprobación |
 
-**Prioridad inmediata (v3):** Demo VS2 en prod · luego M12 BI o conectores adicionales.
+**Prioridad inmediata (v3):** Bloque 1 cimentación prod ✅ · **Siguiente:** Bloque 2 IA prod (CODITO) → Bloques 3–6 plan completo.
 
 ---
 

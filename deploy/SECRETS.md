@@ -31,9 +31,27 @@ Guardar **fuera del repositorio** (gestor de contraseñas, vault, backup cifrado
 ## Backup recomendado
 
 ```bash
-# En el VPS (copia cifrada local, NO a GitHub)
+# Secretos (.env, deploy/secrets)
+./scripts/backup_secrets.sh
+
+# Base Marketing OS (marketing_os.db)
+./scripts/backup_marketing_os_db.sh
+
+# Copia manual rápida
 cp /opt/easytech_marketing/.env ~/backups/easymarketingone.env.$(date +%Y%m%d)
 chmod 600 ~/backups/easymarketingone.env.*
 ```
+
+## Marketing OS (Bloque 1)
+
+| Variable | Uso |
+|----------|-----|
+| `ACCIO_PLATFORM_DB` | Ruta SQLite plataforma (default: `Marketing/platform/marketing_os.db`) |
+| `ACCIO_MEMORY_STORE` | `sql` en prod |
+| `ACCIO_BRAIN_STORE` … `ACCIO_LEAD_STORE` | `dual` — JSON legacy + SQLite |
+
+Config prod estructural: `deploy/secrets/.env.prod` (sin API keys). Secretos en `.env` raíz.
+
+Migración: `./scripts/run_marketing_os_migrations.sh` · Verificación: `./scripts/verify_marketing_os_prod.py`
 
 Rotar `ACCIO_API_KEY` y API key Odoo si se expusieron en chat.
