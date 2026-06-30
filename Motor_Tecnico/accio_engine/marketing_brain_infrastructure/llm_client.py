@@ -10,6 +10,7 @@ from Motor_Tecnico.accio_engine.ai_provider import manager as ai_provider
 from Motor_Tecnico.accio_engine.decision_engine_domain.model import Recommendation
 from Motor_Tecnico.accio_engine.marketing_brain_domain.errors import EnrichmentParseError, LLMUnavailable
 from Motor_Tecnico.accio_engine.marketing_brain_domain.model import RecommendationEnrichment
+from Motor_Tecnico.accio_engine.marketing_context_engine import get_marketing_context_builder
 
 
 def _extract_json(text: str) -> dict[str, Any]:
@@ -42,22 +43,31 @@ class AiProviderMarketingBrainLLM:
         system = (
             "Eres el Marketing Brain de EM+Acción — Director de Marketing B2B Panamá/LATAM. "
             "Enriquece la recomendación operativa sin cambiar su acción ni prioridad. "
+            "Usa el marketing_context para alinear tono, CTA y sector. "
             "Responde SOLO JSON válido con claves: reason, description, confidence (0-1), narrative."
+        )
+        marketing_context = get_marketing_context_builder().build_for_llm(
+            recommendation.tenant_id,
+            purpose="enrich",
+            app_id=recommendation.brand_id,
         )
         user = json.dumps(
             {
-                "tenant_id": recommendation.tenant_id,
-                "brand_id": recommendation.brand_id,
-                "title": recommendation.title,
-                "action": recommendation.action,
-                "reason": recommendation.reason,
-                "description": recommendation.description,
-                "priority": recommendation.priority,
-                "priority_score": recommendation.priority_score,
-                "owner_role": recommendation.owner_role,
-                "source": recommendation.source,
-                "confidence": recommendation.confidence,
-                "justification_refs": recommendation.justification_refs,
+                "marketing_context": marketing_context,
+                "recommendation": {
+                    "tenant_id": recommendation.tenant_id,
+                    "brand_id": recommendation.brand_id,
+                    "title": recommendation.title,
+                    "action": recommendation.action,
+                    "reason": recommendation.reason,
+                    "description": recommendation.description,
+                    "priority": recommendation.priority,
+                    "priority_score": recommendation.priority_score,
+                    "owner_role": recommendation.owner_role,
+                    "source": recommendation.source,
+                    "confidence": recommendation.confidence,
+                    "justification_refs": recommendation.justification_refs,
+                },
             },
             ensure_ascii=False,
         )

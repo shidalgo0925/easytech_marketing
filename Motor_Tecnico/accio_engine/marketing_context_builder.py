@@ -58,8 +58,14 @@ def build_marketing_context(
     actor_id: str = "system",
     actor_role: str = "admin",
 ) -> dict[str, Any]:
-    """Business Context + App Profile + KB + Plan activo → contexto final."""
-    business = knowledge_api.load_business_context(tenant_id)
+    """Business Context + App Profile + KB + Plan activo → contexto final (VS1 compat)."""
+    from Motor_Tecnico.accio_engine.marketing_context_engine import get_marketing_context_builder
+    from Motor_Tecnico.accio_engine.marketing_plan_application.context import ApplicationContext
+    from Motor_Tecnico.accio_engine.marketing_plan_application.query_inputs import GetActiveMarketingPlanQuery
+    from Motor_Tecnico.accio_engine.marketing_plan_api.composition import marketing_plan_use_cases
+    from Motor_Tecnico.accio_engine.marketing_plan_api.dto import plan_to_response
+
+    base = get_marketing_context_builder().build(tenant_id, app_id=app_id)
     app_profile = _load_app_profile(tenant_id, app_id)
     knowledge = _load_knowledge_excerpt(tenant_id, app_id)
 
@@ -79,11 +85,10 @@ def build_marketing_context(
         active_plan = None
 
     return {
-        "tenant_id": tenant_id,
-        "app_id": app_id,
-        "business_context": business,
+        **base,
+        "business_context": base.get("company_brain") or knowledge_api.load_business_context(tenant_id),
         "app_profile": app_profile,
         "knowledge_base": knowledge,
         "marketing_plan_active": active_plan,
-        "builder_version": "v1-slice",
+        "builder_version": "v1-slice+mce",
     }

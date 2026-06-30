@@ -44,6 +44,50 @@ class AIProviderTests(unittest.TestCase):
         with mock.patch.dict(os.environ, {"AI_ASSISTANT_ENABLED": "false"}, clear=True):
             self.assertFalse(ai_provider.assistant_enabled())
 
+    def test_provider_disabled(self):
+        with mock.patch.dict(os.environ, {"ACCIO_AI_PROVIDER": "disabled", "ACCIO_AI_ENABLED": "true"}, clear=True):
+            self.assertFalse(ai_provider.llm_available("easytech"))
+            status = ai_provider.provider_status()
+        self.assertEqual(status["provider"], "disabled")
+        self.assertIsNotNone(status.get("unavailable_reason"))
+
+    @mock.patch("Motor_Tecnico.accio_engine.ai_provider.manager.litellm_client.chat_completions")
+    def test_complete_normalized(self, chat):
+        env = {
+            "ACCIO_AI_BASE_URL": "http://codito:4000",
+            "ACCIO_AI_ENABLED": "true",
+        }
+        chat.return_value = {
+            "choices": [{"message": {"role": "assistant", "content": "OK"}}],
+            "usage": {"prompt_tokens": 3, "completion_tokens": 2},
+            "model": "qwen2.5-coder:14b",
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            result = ai_provider.complete("easytech", [{"role": "user", "content": "test"}])
+        self.assertEqual(result.content, "OK")
+        self.assertEqual(result.provider, "litellm")
+
+    @mock.patch("Motor_Tecnico.accio_engine.ai_provider.manager._openai_complete")
+    @mock.patch("Motor_Tecnico.accio_engine.ai_provider.manager._litellm_complete")
+    def test_openai_fallback_on_litellm_failure(self, litellm_complete, openai_complete):
+        env = {
+            "ACCIO_AI_BASE_URL": "http://codito:4000",
+            "ACCIO_AI_ENABLED": "true",
+            "OPENAI_API_KEY": "sk-testkey123456789",
+            "ACCIO_AI_OPENAI_FALLBACK": "true",
+        }
+        litellm_complete.side_effect = RuntimeError("litellm down")
+        openai_complete.return_value = (
+            {"role": "assistant", "content": "fallback"},
+            "gpt-4o-mini",
+            {"prompt_tokens": 1, "completion_tokens": 1},
+            "openai",
+        )
+        with mock.patch.dict(os.environ, env, clear=True):
+            result = ai_provider.complete("easytech", [{"role": "user", "content": "test"}])
+        self.assertEqual(result.provider, "openai")
+        self.assertEqual(result.content, "fallback")
+
     @mock.patch("Motor_Tecnico.accio_engine.ai_provider.manager.litellm_client.ping")
     def test_provider_status_reachable(self, ping):
         env = {"ACCIO_AI_BASE_URL": "http://codito:4000", "ACCIO_AI_PROVIDER": "litellm"}

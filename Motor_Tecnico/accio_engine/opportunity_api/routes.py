@@ -134,11 +134,17 @@ def register_opportunity_api(app, auth_decorator) -> None:
             actor_id=_actor_id(),
         )
         payload = {
+            "detected": result.status.detected,
+            "promoted": result.status.promoted,
+            "roadmap_generated": result.status.roadmap_generated,
+            "llm_enriched": result.status.llm_enriched,
+            "llm_skipped": result.status.llm_skipped,
+            "llm_skip_reason": result.status.llm_skip_reason,
+            "errors": list(result.status.errors),
             "promoted_count": result.promote.promoted_count,
             "skipped_count": result.promote.skipped_count,
             "created_count": result.promote.detection.created_count,
             "roadmap": _roadmap_response(result.roadmap),
-            "llm_skipped": result.llm_skipped,
         }
         if result.enrichment is not None:
             payload["enrichment"] = {

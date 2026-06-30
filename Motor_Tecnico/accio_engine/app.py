@@ -35,6 +35,7 @@ from Motor_Tecnico.accio_engine.decision_engine_api import register_decision_eng
 from Motor_Tecnico.accio_engine.marketing_brain_api import register_marketing_brain_api  # noqa: E402
 from Motor_Tecnico.accio_engine.opportunity_api import register_opportunity_api  # noqa: E402
 from Motor_Tecnico.accio_engine.knowledge_matrix_api import register_knowledge_matrix_api  # noqa: E402
+from Motor_Tecnico.accio_engine.marketing_context_engine.routes import register_marketing_context_api  # noqa: E402
 from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, TenantNotFoundError, list_tenants, resolve_tenant  # noqa: E402
 
 ACCIO_ENV = load_accio_env(BASE_DIR)
@@ -1979,6 +1980,10 @@ def assistant_status(tenant_id: str):
             "provider": prov.get("provider"),
             "provider_configured": prov.get("configured", False),
             "provider_reachable": prov.get("reachable", False),
+            "provider_enabled": prov.get("enabled", True),
+            "active_provider": prov.get("active_provider"),
+            "openai_fallback": prov.get("openai_fallback", False),
+            "unavailable_reason": prov.get("unavailable_reason"),
             "model": model,
             "ai_config": ai_cfg,
             # Deprecated — mantener false para clientes legacy
@@ -2135,6 +2140,7 @@ register_decision_engine_api(app, require_api_key)
 register_marketing_brain_api(app, require_api_key)
 register_opportunity_api(app, require_api_key)
 register_knowledge_matrix_api(app, require_api_key)
+register_marketing_context_api(app, require_api_key)
 
 
 # --- Legacy routes (default easytech) ---

@@ -272,10 +272,81 @@ Sitio referencia: https://relaticpanama.org/
 | M10.2 Priority Engine | ✅ | `PriorityScorer` |
 | M10.3 Recommendations | ✅ | schema v10 · `GET /api/v1/tenants/{id}/recommendations` |
 | M10.4 Daily Planner | ✅ | schema v11 · `POST/GET .../roadmaps/{date}` |
-| M10.5 Approval Queue | 📋 | approve / reject / snooze |
-| AI Provider Manager | 📋 🔴 | gate M11 — LiteLLM/CODITO |
-| M11 Marketing Brain | 📋 | IA enriquece recomendaciones |
+| M10.5 Approval Queue | ✅ | approve / reject / snooze |
+| AI Provider Manager | ✅ código · ⏳ CODITO prod | `ai_provider/` · `scripts/validate_codito_ai.py` |
+| Marketing Context Engine | ✅ | `marketing_context_engine/` · `GET .../marketing-context` |
+| M11 Marketing Brain | ✅ | IA enriquece con `MarketingContextBuilder` |
+| Opportunity Engine F1–F4 | ✅ | detect → promote → roadmap → enrich |
 | M12 Business Intelligence | 📋 | ROI, CTA, horario, producto |
 | M13 Automation Brain | 📋 | ejecutar post-aprobación |
 
-**Prioridad inmediata (v3):** migraciones prod M4–M9 → M10.5 → AI Provider → M11 → Opportunity Engine.
+**Prioridad inmediata (v3):** conectar CODITO (`ACCIO_AI_BASE_URL`) → validar enrich en prod → **Campaign Engine**.
+
+---
+
+## 12. AI Provider + Marketing Context Engine (2026-06-30)
+
+### AI Provider Manager
+
+Capa única de salida LLM: `Motor_Tecnico/accio_engine/ai_provider/`. Ningún módulo debe llamar OpenAI/Ollama/LiteLLM directamente.
+
+| Variable | Uso |
+|----------|-----|
+| `ACCIO_AI_PROVIDER` | `litellm` \| `openai` \| `disabled` |
+| `ACCIO_AI_ENABLED` | `true`/`false` (alias `AI_ASSISTANT_ENABLED`) |
+| `ACCIO_AI_BASE_URL` | URL LiteLLM en CODITO (ej. `http://HOST:4000`) |
+| `ACCIO_AI_MODEL` | Modelo (ej. `qwen2.5-coder:14b`) |
+| `ACCIO_AI_API_KEY` | Opcional para LiteLLM |
+| `ACCIO_AI_TIMEOUT` | Segundos (default 90) |
+| `ACCIO_AI_OPENAI_FALLBACK` | Si LiteLLM falla y hay `OPENAI_API_KEY` |
+| `OPENAI_API_KEY` | Fallback opcional (no UI tenant) |
+
+**Estado endpoint:** `GET /accio/{tenant}/assistant/status` — devuelve `llm_available`, `provider`, `unavailable_reason`, `active_provider`.
+
+### Validación CODITO (2026-06-30)
+
+Comando ejecutado en ARROZCONPOLLO:
+
+```bash
+./venv/bin/python scripts/validate_codito_ai.py
+```
+
+| Campo | Valor observado |
+|-------|-----------------|
+| `ACCIO_AI_PROVIDER` | `litellm` |
+| `ACCIO_AI_BASE_URL` | **(vacío)** |
+| `ACCIO_AI_MODEL` | `gpt-4o-mini` |
+| API key | no configurada |
+| Resultado | **FAIL** — exit code 1 |
+
+**Diagnóstico:** el código del Provider Manager está desplegado, pero el VPS no tiene URL de CODITO en `.env`. Sin `ACCIO_AI_BASE_URL`, el pipeline responde `llm_skipped=true` con causa `ACCIO_AI_BASE_URL not configured` — no rompe el flujo.
+
+**Siguiente acción requerida (ops):**
+
+1. Definir en `/opt/easytech_marketing/.env`:
+   ```bash
+   ACCIO_AI_BASE_URL=http://<CODITO_HOST>:4000
+   ACCIO_AI_MODEL=qwen2.5-coder:14b
+   ACCIO_AI_ENABLED=true
+   ```
+2. Re-ejecutar `scripts/validate_codito_ai.py` (debe exit 0).
+3. `sudo systemctl restart easytech-accio-engine`
+4. En `/accio/plan/easytech/` → **Pipeline completo** → verificar `llm_enriched > 0`.
+
+**Alternativa fallback:** `OPENAI_API_KEY=sk-…` + `ACCIO_AI_OPENAI_FALLBACK=true` (solo si CODITO no disponible).
+
+### Marketing Context Engine
+
+Fuente única de contexto estructurado por tenant:
+
+- Módulo: `marketing_context_engine/builder.py` → `MarketingContextBuilder`
+- API: `GET /api/v1/tenants/{tenant}/marketing-context?purpose=llm|full`
+- Consumidores: M11 Marketing Brain (enrich), futuros Campaign/Content/Automation
+
+Incluye: company brain, brands, productos, knowledge matrix, oportunidades, recomendaciones pendientes, roadmap del día, editorial **3 valor + 1 venta**, CTA **DIAGNÓSTICO**, guía `https://n8n.etsrv.site/guia/`.
+
+### Pipeline operativo
+
+`POST /api/v1/tenants/{tenant}/opportunities/run-pipeline`
+
+Respuesta incluye: `detected`, `promoted`, `roadmap_generated`, `llm_enriched`, `llm_skipped`, `llm_skip_reason`, `errors`.

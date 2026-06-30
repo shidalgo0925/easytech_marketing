@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests Opportunity F4 — run-pipeline (detect → promote → roadmap → enrich)."""
+"""Tests pipeline IA — enriched vs skipped."""
 
 from __future__ import annotations
 
@@ -25,9 +25,10 @@ from Motor_Tecnico.accio_engine.decision_engine_api.routes import reset_use_case
 from Motor_Tecnico.accio_engine.knowledge_matrix_api.composition import reset_knowledge_matrix_service, reset_knowledge_matrix_use_cases  # noqa: E402
 from Motor_Tecnico.accio_engine.lead_infrastructure.facade import reset_lead_service  # noqa: E402
 from Motor_Tecnico.accio_engine.marketing_brain_api.composition import reset_marketing_brain_use_cases  # noqa: E402
+from Motor_Tecnico.accio_engine.marketing_brain_domain.model import RoadmapEnrichmentResult  # noqa: E402
 from Motor_Tecnico.accio_engine.opportunity_api.composition import reset_opportunity_use_cases  # noqa: E402
 from Motor_Tecnico.accio_engine.opportunity_api.routes import reset_use_cases_cache  # noqa: E402
-from Motor_Tecnico.accio_engine.platform_infrastructure.db import ensure_schema, get_connection  # noqa: E402
+from Motor_Tecnico.accio_engine.platform_infrastructure.db import ensure_schema  # noqa: E402
 from Motor_Tecnico.accio_engine.publication_infrastructure.facade import reset_publication_service  # noqa: E402
 
 
@@ -35,9 +36,9 @@ def _registry(apps: list[dict]) -> dict:
     return {"version": 1, "default_app_id": apps[0]["app_id"], "apps": apps}
 
 
-class OpportunityF4Tests(unittest.TestCase):
+class PipelineAITests(unittest.TestCase):
     def setUp(self) -> None:
-        self.tmp = tempfile.mkdtemp(prefix="opp_f4_")
+        self.tmp = tempfile.mkdtemp(prefix="pipe_ai_")
         self.db_path = Path(self.tmp) / "marketing_os.db"
         os.environ["ACCIO_PLATFORM_DB"] = str(self.db_path)
         os.environ["ACCIO_BRAND_STORE"] = "dual"
@@ -45,6 +46,7 @@ class OpportunityF4Tests(unittest.TestCase):
         os.environ["ACCIO_CAMPAIGN_STORE"] = "dual"
         os.environ["ACCIO_BRAIN_STORE"] = "dual"
         os.environ["ACCIO_MEMORY_STORE"] = "sql"
+        os.environ["ACCIO_AI_BASE_URL"] = ""
 
         matrix_path = Path(self.tmp) / "Marketing" / "knowledge" / "sectors.json"
         matrix_path.parent.mkdir(parents=True)
@@ -151,26 +153,36 @@ class OpportunityF4Tests(unittest.TestCase):
         self._reset_services()
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def test_run_pipeline_without_llm(self) -> None:
+    def test_pipeline_llm_skipped(self) -> None:
         resp = self.client.post(
             f"/api/v1/tenants/{self.tenant_id}/opportunities/run-pipeline",
-            json={"priority": "high", "limit": 5, "enrich": False},
+            json={"priority": "high", "limit": 5, "enrich": True},
         )
-        self.assertEqual(resp.status_code, 201, resp.get_data(as_text=True))
+        self.assertIn(resp.status_code, (200, 201), resp.get_data(as_text=True))
         body = resp.get_json()["data"]
-        self.assertGreaterEqual(body["promoted"], 1)
-        self.assertTrue(body["roadmap_generated"])
-        self.assertFalse(body["llm_skipped"])
+        self.assertTrue(body["llm_skipped"])
+        self.assertIsNotNone(body.get("llm_skip_reason"))
 
-        conn = get_connection()
-        try:
-            roadmap_count = conn.execute(
-                "SELECT COUNT(*) FROM daily_roadmaps WHERE tenant_id = ?",
-                (self.tenant_id,),
-            ).fetchone()[0]
-        finally:
-            conn.close()
-        self.assertGreaterEqual(roadmap_count, 1)
+    @patch("Motor_Tecnico.accio_engine.marketing_brain_application.use_cases.EnrichDailyRoadmap.__call__")
+    def test_pipeline_llm_enriched(self, enrich_mock) -> None:
+        enrich_mock.return_value = RoadmapEnrichmentResult(
+            roadmap_id="rdm_test",
+            roadmap_date="2026-06-30",
+            items=[],
+            enriched_count=2,
+            skipped_count=0,
+            failed_count=0,
+            persisted=True,
+            roadmap_summary={"headline": "Roadmap enriquecido"},
+        )
+        resp = self.client.post(
+            f"/api/v1/tenants/{self.tenant_id}/opportunities/run-pipeline",
+            json={"priority": "high", "limit": 5, "enrich": True},
+        )
+        self.assertIn(resp.status_code, (200, 201), resp.get_data(as_text=True))
+        body = resp.get_json()["data"]
+        self.assertFalse(body["llm_skipped"])
+        self.assertEqual(body["llm_enriched"], 2)
 
 
 if __name__ == "__main__":

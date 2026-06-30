@@ -243,10 +243,10 @@
       }
       const active = data.llm_available && data.assistant_enabled;
       if (iaLabel) {
-        if (!data.assistant_enabled) iaLabel.textContent = 'IA off';
+        if (!data.assistant_enabled || data.provider === 'disabled') iaLabel.textContent = 'IA off';
         else if (active) iaLabel.textContent = 'IA activa';
-        else if (!data.provider_configured) iaLabel.textContent = 'IA sin motor';
-        else if (!data.provider_reachable) iaLabel.textContent = 'IA no alcanzable';
+        else if (!data.provider_configured && !data.openai_fallback) iaLabel.textContent = 'IA sin motor';
+        else if (!data.provider_reachable && !data.llm_available) iaLabel.textContent = 'IA no alcanzable';
         else iaLabel.textContent = 'IA inactiva';
       }
       if (iaInd) {
@@ -875,12 +875,20 @@
             body: JSON.stringify({ priority: 'high', limit: 10, enrich: true }),
           });
           const d = resp.data || {};
-          const enrichNote = d.llm_skipped ? ' · IA no disponible' : (d.enrichment ? ` · ${d.enrichment.enriched_count} enriquecidas` : '');
-          toast(`Pipeline: ${d.promoted_count} promovidas · roadmap listo${enrichNote}`);
+          let enrichNote = '';
+          if (d.llm_enriched > 0) enrichNote = ` · ${d.llm_enriched} enriquecidas`;
+          else if (d.llm_skipped) enrichNote = ` · IA omitida (${d.llm_skip_reason || 'sin motor'})`;
+          else if (d.errors?.length) enrichNote = ` · error IA`;
+          toast(`Pipeline: ${d.promoted} promovidas · ${d.detected} detectadas${enrichNote}`);
           const summaryEl = $('vs1RoadmapSummary');
-          if (summaryEl && d.roadmap?.summary) {
-            summaryEl.hidden = false;
-            summaryEl.textContent = d.roadmap.summary.headline || `Roadmap ${d.roadmap.roadmap_date}`;
+          if (summaryEl) {
+            if (d.roadmap?.summary?.headline || d.roadmap?.roadmap_date) {
+              summaryEl.hidden = false;
+              summaryEl.textContent = d.roadmap.summary?.headline || `Roadmap ${d.roadmap.roadmap_date}`;
+            } else if (d.llm_skipped) {
+              summaryEl.hidden = false;
+              summaryEl.textContent = `IA omitida: ${d.llm_skip_reason || 'proveedor no disponible'}`;
+            }
           }
           await loadDecisionConsole();
         } catch (e) { toast(e.message, true); }

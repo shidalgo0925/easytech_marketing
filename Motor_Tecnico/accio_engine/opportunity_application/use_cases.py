@@ -200,11 +200,22 @@ class DetectAndPromoteOpportunities:
 
 
 @dataclass(frozen=True)
+class MarketingPipelineStatus:
+    detected: int
+    promoted: int
+    roadmap_generated: bool
+    llm_enriched: int
+    llm_skipped: bool
+    llm_skip_reason: str | None
+    errors: tuple[dict[str, str], ...] = ()
+
+
+@dataclass(frozen=True)
 class MarketingPipelineResult:
     promote: DetectAndPromoteResult
     roadmap: DailyRoadmapBundle
     enrichment: RoadmapEnrichmentResult | None
-    llm_skipped: bool
+    status: MarketingPipelineStatus
 
 
 class RunMarketingPipeline:
@@ -244,6 +255,8 @@ class RunMarketingPipeline:
 
         enrichment: RoadmapEnrichmentResult | None = None
         llm_skipped = False
+        llm_skip_reason: str | None = None
+        errors: list[dict[str, str]] = []
         if enrich:
             try:
                 enrichment = self._enrich_roadmap(
@@ -258,10 +271,27 @@ class RunMarketingPipeline:
                 if exc.code != "llm_unavailable":
                     raise ApplicationError(exc.code, exc.message, exc.http_status) from exc
                 llm_skipped = True
+                llm_skip_reason = exc.message
+                errors.append({"code": exc.code, "message": exc.message})
+
+        from Motor_Tecnico.accio_engine.ai_provider import llm_unavailable_reason
+
+        if enrich and llm_skipped and not llm_skip_reason:
+            llm_skip_reason = llm_unavailable_reason() or "llm_unavailable"
+
+        status = MarketingPipelineStatus(
+            detected=promote.detection.created_count,
+            promoted=promote.promoted_count,
+            roadmap_generated=True,
+            llm_enriched=enrichment.enriched_count if enrichment else 0,
+            llm_skipped=llm_skipped if enrich else False,
+            llm_skip_reason=llm_skip_reason if enrich and llm_skipped else None,
+            errors=tuple(errors),
+        )
 
         return MarketingPipelineResult(
             promote=promote,
             roadmap=bundle,
             enrichment=enrichment,
-            llm_skipped=llm_skipped,
+            status=status,
         )

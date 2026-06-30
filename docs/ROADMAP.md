@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-30 · **Plan Maestro v3** adoptado como prioridad estratégica · **Código:** M10.1–M10.4 ✅ · **Siguiente:** prod M4–M9 → M10.5 → AI Provider → M11
+**Actualizado:** 2026-06-30 · **Código:** M10.5 ✅ · M11 ✅ · Opportunity F1–F4 ✅ · **AI Provider + Marketing Context Engine** en curso · **Siguiente:** conectar CODITO → Campaign Engine
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -271,9 +271,26 @@ M10.5 → AI Provider → M11 → Opportunity → Campaign → M12 BI → M13 Au
 
 ---
 
-## Próximo sprint — Accio AI Provider Manager (acotado)
+## Próximo sprint — Accio AI Provider Manager + Marketing Context Engine
 
-**Objetivo:** chat y propuestas IA del asistente EM+Acción usando **LiteLLM en CODITO → Ollama local**, sin dependencia de OpenAI.
+**Objetivo:** activar IA real en el pipeline de oportunidades con degradación controlada y contexto único reutilizable.
+
+**Estado código (2026-06-30):**
+
+| Entregable | Estado | Ubicación |
+|------------|--------|-----------|
+| AI Provider Manager | ✅ | `Motor_Tecnico/accio_engine/ai_provider/` |
+| LiteLLM/CODITO (principal) | ✅ código · ⏳ conectividad prod | `litellm.py` |
+| OpenAI fallback opcional | ✅ | `openai_client.py` + `ACCIO_AI_OPENAI_FALLBACK` |
+| Proveedor `disabled` | ✅ | `ACCIO_AI_PROVIDER=disabled` |
+| Respuesta normalizada | ✅ | `AICompletionResult` |
+| `/accio/{tenant}/assistant/status` | ✅ | `app.py` |
+| Marketing Context Engine | ✅ | `marketing_context_engine/` |
+| M11 usa contexto unificado | ✅ | `marketing_brain_infrastructure/llm_client.py` |
+| Pipeline `run-pipeline` con status IA | ✅ | `POST .../opportunities/run-pipeline` |
+| Validación CODITO | ⏳ | `scripts/validate_codito_ai.py` |
+
+**Bloqueante prod:** `ACCIO_AI_BASE_URL` vacío en `.env` del VPS — ver `docs/EMACCION_CONTEXTO_OPERATIVO.md` §12.
 
 **Arquitectura acordada:**
 
@@ -300,19 +317,18 @@ Ollama / qwen2.5-coder (14B o 7B)
 | Nuevos modelos / fine-tuning | Solo usar modelo ya disponible en CODITO |
 | Fase M (Community Manager IA) | Depende de este sprint, no es el sprint |
 
-### Estado al corte (2026-06-26)
+### Estado al corte (2026-06-30)
 
 | Capa | Estado | Notas |
 |------|--------|-------|
-| `ai_provider/` (config, litellm, manager) | 🔄 Esqueleto | `Motor_Tecnico/accio_engine/ai_provider/` |
-| `assistant_llm.py` | 🔄 Parcial | Fachada hacia manager; falta cerrar integración |
-| `assistant_service.py` | 🔄 Parcial | Mensajes agnósticos; aún alias `_call_openai` |
-| `marketing_planner.py` | 🔄 Parcial | Usa `chat_completion` del manager |
-| `/assistant/status` + UI | ❌ Pendiente | Sigue `has_openai_key` / «Sin OpenAI Key» |
-| `.env` producción | ❌ Pendiente | Falta `ACCIO_AI_BASE_URL` (CODITO no resolvió desde ARROZCONPOLLO) |
-| Script validación CODITO | ❌ Pendiente | `scripts/validate_codito_ai.py` |
-| Tests `test_ai_provider.py` | ❌ Pendiente | Actualizar `test_assistant_v1.py` |
-| Deprecar `scripts/setup_openai_ia.py` | ❌ Pendiente | Obsoleto con nueva arquitectura |
+| `ai_provider/` (config, litellm, openai, manager, types) | ✅ | Provider `disabled`, fallback OpenAI, `AICompletionResult` |
+| `marketing_context_engine/` | ✅ | `MarketingContextBuilder` + API |
+| `assistant_llm.py` | ✅ | Fachada hacia manager |
+| `marketing_brain` llm_client | ✅ | Usa contexto unificado |
+| `/assistant/status` + UI `plan_slice.js` | ✅ | `unavailable_reason`, estados IA |
+| `scripts/validate_codito_ai.py` | ✅ | Ejecutado — FAIL por URL vacía |
+| Tests `test_ai_provider.py`, `test_marketing_context_builder.py`, `test_pipeline_ai.py` | ✅ | |
+| `.env` producción `ACCIO_AI_BASE_URL` | ⏳ | Bloqueante enrich real en prod |
 
 ### Backlog sprint (orden sugerido)
 
