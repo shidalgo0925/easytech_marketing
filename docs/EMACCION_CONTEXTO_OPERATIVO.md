@@ -276,12 +276,13 @@ Sitio referencia: https://relaticpanama.org/
 | AI Provider Manager | ✅ código · ⏳ CODITO prod | `ai_provider/` · `scripts/validate_codito_ai.py` |
 | Marketing Context Engine | ✅ | `marketing_context_engine/` · `GET .../marketing-context` |
 | Marketing Intelligence Layer | ✅ | `docs/MARKETING_INTELLIGENCE_LAYER.md` · scorer + composer + explain |
+| Campaign Engine | ✅ | `docs/CAMPAIGN_ENGINE.md` · planner + builder + explain |
 | M11 Marketing Brain | ✅ | IA enriquece con contexto + estructura composed |
 | Opportunity Engine F1–F4 | ✅ | detect → promote → roadmap → enrich |
 | M12 Business Intelligence | 📋 | ROI, CTA, horario, producto |
 | M13 Automation Brain | 📋 | ejecutar post-aprobación |
 
-**Prioridad inmediata (v3):** conectar CODITO (`ACCIO_AI_BASE_URL`) → validar enrich en prod → **Campaign Engine**.
+**Prioridad inmediata (v3):** Content Engine + Publisher (post-Campaign Engine).
 
 ---
 
@@ -351,6 +352,16 @@ Incluye: company brain, brands, productos, knowledge matrix, oportunidades, reco
 `POST /api/v1/tenants/{tenant}/opportunities/run-pipeline`
 
 Respuesta incluye: `detected`, `promoted`, `roadmap_generated`, `llm_enriched`, `llm_skipped`, `llm_skip_reason`, `errors`.
+
+### Campaign Engine (2026-06-30)
+
+Documento: `docs/CAMPAIGN_ENGINE.md`
+
+- **CampaignPlanner** + **CampaignBuilder** — recomendación aprobada → campaña estructurada
+- **Campaign Explain** — trazabilidad completa
+- API: `/api/v1/tenants/{id}/campaigns/*`
+- Consola: sección **Campañas** en `/accio/plan/`
+- Schema v14: `campaign_channels`, `campaign_kpis`, `campaign_history`
 
 ### Marketing Intelligence Layer (2026-06-30)
 

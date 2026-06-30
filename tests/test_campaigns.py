@@ -76,7 +76,15 @@ class CampaignsTest(unittest.TestCase):
         reset_use_cases_cache()
         reset_campaign_service()
 
-        tenant_obj = type("T", (), {"tenant_id": self.tenant_id, "root": self.tenant_root})()
+        tenant_obj = type(
+            "T",
+            (),
+            {
+                "tenant_id": self.tenant_id,
+                "root": self.tenant_root,
+                "content_queue_path": self.tenant_root / "content_queue.json",
+            },
+        )()
 
         def _effective_paths(tid, app_id=None):
             from Motor_Tecnico.accio_engine import marketing_app
@@ -115,6 +123,7 @@ class CampaignsTest(unittest.TestCase):
             patch("Motor_Tecnico.accio_engine.tenant.effective_paths", _effective_paths),
             patch("Motor_Tecnico.accio_engine.dashboard_data.effective_paths", _effective_paths),
             patch("Motor_Tecnico.accio_engine.dashboard_data._paths", _effective_paths),
+            patch("Motor_Tecnico.accio_engine.media_asset_infrastructure.json_repository.effective_paths", _effective_paths),
             patch("Motor_Tecnico.accio_engine.marketing_app.resolve_tenant", return_value=tenant_obj),
             patch("Motor_Tecnico.accio_engine.marketing_app.effective_app_paths", _app_paths),
             patch("Motor_Tecnico.accio_engine.marketing_app.default_app_id", return_value="default"),

@@ -84,19 +84,6 @@ def campaign_to_row(campaign: Campaign) -> dict[str, Any]:
 
 
 def row_to_campaign(row: Any) -> Campaign:
-    return Campaign(
-        tenant_id=row["tenant_id"],
-        campaign_id=row["campaign_id"],
-        brand_id=row["brand_id"],
-        name=row["name"],
-        post_id=row["post_id"] or "",
-        product_ref=row["product_ref"] or "",
-        channel=row["channel"] or "",
-        status=row["status"],
-        objective=row["objective"] or "",
-        start_at=row["start_at"] or "",
-        end_at=row["end_at"] or "",
-        payload=json.loads(row["payload_json"] or "{}"),
-        created_at=row["created_at"],
-        updated_at=row["updated_at"],
-    )
+    from Motor_Tecnico.accio_engine.campaign_infrastructure.engine_mapper import row_to_campaign as _engine_row
+
+    return _engine_row(row)

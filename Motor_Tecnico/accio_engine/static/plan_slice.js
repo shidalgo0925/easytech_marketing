@@ -534,6 +534,7 @@
       renderPendingAttention(pendingAssistantOrders, []);
     }
     await loadDecisionConsole();
+    await loadCampaignConsole();
   }
 
   function pickNextAction(posts, ctxPct) {
@@ -868,6 +869,130 @@
         renderDecisionList(recList, [], e.message);
       }
     }
+  }
+
+  async function loadCampaignConsole() {
+    const approvedList = $('vs1ApprovedRecList');
+    const campList = $('vs1CampaignList');
+    const filterEl = $('vs1CampaignFilter');
+    if (!approvedList || !campList) return;
+    const statusFilter = filterEl ? filterEl.value : '';
+
+    try {
+      const [recResp, campResp] = await Promise.all([
+        tenantV1Api('/recommendations?status=approved&limit=20'),
+        tenantV1Api(`/campaigns${statusFilter ? `?status=${encodeURIComponent(statusFilter)}` : ''}`),
+      ]);
+      const approved = recResp.data || [];
+      const campaigns = campResp.data || [];
+
+      renderDecisionList(
+        approvedList,
+        approved.map((r) => {
+          const id = esc(r.recommendation_id);
+          return `<article class="vs1-decision-item" data-rec-id="${id}">
+            <p class="vs1-decision-item-title">${priorityPill(r.priority)}${esc(r.title)}</p>
+            <p class="vs1-decision-item-meta">${esc(r.brand_id)} · score ${esc(String(Math.round((r.priority_score || 0) * 100)))}</p>
+            <div class="vs1-decision-item-actions">
+              <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="create-campaign" data-id="${id}">Crear campaña</button>
+            </div>
+          </article>`;
+        }),
+        'Sin recomendaciones aprobadas. Aprueba acciones en la cola de arriba.',
+      );
+
+      renderDecisionList(
+        campList,
+        campaigns.filter((c) => c.is_engine_campaign !== false).map((c) => {
+          const id = esc(c.campaign_id);
+          return `<article class="vs1-decision-item" data-camp-id="${id}">
+            <p class="vs1-decision-item-title">${priorityPill(c.priority)}${esc(c.title || c.name)}</p>
+            <p class="vs1-decision-item-meta">${esc(c.status)} · ${esc(c.campaign_type || '—')} · score ${esc(String(c.origin_score ?? '—'))}</p>
+            <p class="vs1-decision-item-meta">${esc(c.target_audience || '')}</p>
+            <div class="vs1-decision-item-actions">
+              <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="explain-camp" data-id="${id}">¿Por qué?</button>
+              <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="enrich-camp" data-id="${id}">IA</button>
+              <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="approve-camp" data-id="${id}">Aprobar</button>
+            </div>
+          </article>`;
+        }),
+        'Sin campañas. Crea una desde una recomendación aprobada.',
+      );
+
+      approvedList.querySelectorAll('[data-action="create-campaign"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/campaigns/from-recommendation/${encodeURIComponent(btn.dataset.id)}`, {
+              method: 'POST',
+              body: '{}',
+            });
+            toast('Campaña creada');
+            await loadCampaignConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+
+      campList.querySelectorAll('[data-action="explain-camp"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try { await openCampaignExplain(btn.dataset.id); } catch (e) { toast(e.message, true); }
+        };
+      });
+      campList.querySelectorAll('[data-action="enrich-camp"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/campaigns/${encodeURIComponent(btn.dataset.id)}/enrich`, { method: 'POST', body: '{}' });
+            toast('Campaña enriquecida');
+            await loadCampaignConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+      campList.querySelectorAll('[data-action="approve-camp"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/campaigns/${encodeURIComponent(btn.dataset.id)}/approve`, { method: 'POST', body: '{}' });
+            toast('Campaña aprobada');
+            await loadCampaignConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+
+      if (filterEl && !filterEl.dataset.bound) {
+        filterEl.dataset.bound = '1';
+        filterEl.onchange = () => loadCampaignConsole();
+      }
+    } catch (e) {
+      if (e.message !== 'Sesión expirada') {
+        renderDecisionList(approvedList, [], 'Campañas no disponibles.');
+        renderDecisionList(campList, [], e.message);
+      }
+    }
+  }
+
+  async function openCampaignExplain(campaignId) {
+    const body = $('vs1ExplainBody');
+    const modal = $('vs1ExplainModal');
+    const title = $('vs1ExplainTitle');
+    if (!body || !modal) return;
+    if (title) title.textContent = '¿Por qué esta campaña?';
+    const resp = await tenantV1Api(`/campaigns/${encodeURIComponent(campaignId)}/explain`);
+    const data = resp.data || {};
+    const explain = data.explain || {};
+    const ai = data.llm_enrichment || explain.ai_enrichment || null;
+    const rules = (explain.rules_triggered || []).map((r) => `<li>${esc(r.rule_id || r.id || r.type || 'regla')}</li>`).join('');
+    const motor = (explain.motor_reasoning || []).map((r) => `<li>${esc(r)}</li>`).join('');
+    const objectives = (explain.objectives || []).map((o) => `<li>${esc(o)}</li>`).join('');
+    body.innerHTML = `
+      <div class="vs1-explain-grid">
+        <section><h4>Score origen</h4><p class="vs1-explain-score">${esc(String(explain.score ?? '—'))}</p></section>
+        <section><h4>Recomendación / oportunidad</h4><p>${esc(explain.recommendation_id || '—')} · ${esc(explain.opportunity_id || '—')}</p></section>
+        <section><h4>Objetivos</h4><ul>${objectives || '<li>—</li>'}</ul></section>
+        <section><h4>Reglas</h4><ul>${rules || '<li>—</li>'}</ul></section>
+        <section><h4>Motor</h4><ul>${motor || '<li>—</li>'}</ul></section>
+        <section><h4>IA</h4><p>${ai?.narrative ? esc(ai.narrative) : '<span class="vs1-muted">llm_skipped o sin IA.</span>'}</p></section>
+      </div>`;
+    modal.hidden = false;
+    $('vs1ExplainClose').onclick = () => { closeExplainModal(); if (title) title.textContent = 'Por qué recomendamos esto'; };
+    $('vs1ExplainBackdrop').onclick = () => { closeExplainModal(); if (title) title.textContent = 'Por qué recomendamos esto'; };
   }
 
   function closeExplainModal() {

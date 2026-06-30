@@ -28,7 +28,8 @@ from Motor_Tecnico.accio_engine.brand_api import register_brand_api  # noqa: E40
 from Motor_Tecnico.accio_engine.publication_api import register_publication_api  # noqa: E402
 from Motor_Tecnico.accio_engine.product_api import register_product_api  # noqa: E402
 from Motor_Tecnico.accio_engine.knowledge_article_api import register_knowledge_article_api  # noqa: E402
-from Motor_Tecnico.accio_engine.campaign_api import register_campaign_api  # noqa: E402
+from Motor_Tecnico.accio_engine.campaign_api.routes import register_campaign_api
+from Motor_Tecnico.accio_engine.campaign_api.engine_routes import register_campaign_engine_api
 from Motor_Tecnico.accio_engine.media_asset_api import register_media_asset_api  # noqa: E402
 from Motor_Tecnico.accio_engine.lead_api import register_lead_api  # noqa: E402
 from Motor_Tecnico.accio_engine.decision_engine_api import register_decision_engine_api  # noqa: E402
@@ -2135,6 +2136,7 @@ register_publication_api(app, require_api_key)
 register_product_api(app, require_api_key)
 register_knowledge_article_api(app, require_api_key)
 register_campaign_api(app, require_api_key)
+register_campaign_engine_api(app, require_api_key)
 register_media_asset_api(app, require_api_key)
 register_lead_api(app, require_api_key)
 register_decision_engine_api(app, require_api_key)

@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-30 · **Código:** M10.5 ✅ · M11 ✅ · Opportunity F1–F4 ✅ · Marketing Intelligence Layer ✅ · **Siguiente:** CODITO prod → Campaign Engine
+**Actualizado:** 2026-06-30 · **Código:** M0–M11 ✅ · Intelligence Layer ✅ · **Campaign Engine** ✅ · **Siguiente:** Content + Publisher
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -207,7 +207,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 | Módulo | Plan Maestro | Objetivo |
 |--------|--------------|----------|
 | — | Fase F Opportunity Engine | Detectar oportunidades de negocio | ✅ F1–F4 |
-| — | **Marketing Intelligence Layer** | Scorer + Composer + Explainability | ✅ [MARKETING_INTELLIGENCE_LAYER.md](MARKETING_INTELLIGENCE_LAYER.md) |
+| — | **Campaign Engine** (Fase H) | Recomendación aprobada → campaña estructurada | ✅ [CAMPAIGN_ENGINE.md](CAMPAIGN_ENGINE.md) |
 | **M12** | Fases M + O BI | Medir, explicar, tableros gerencia |
 | **M13** | Fase K Automation Brain | Ejecutar acciones post-aprobación |
 
@@ -442,7 +442,7 @@ VS1 no sustituye fases E–P; valida arquitectura y entrega el primer valor de p
 | **C** | Configuration Center | ✅ ~98% | Guía anti-JSON-manual |
 | **D** | Knowledge Engine | 🔄 ~50% | Matriz producto-sector |
 | **E** | Opportunity Engine + Intelligence Layer | ✅ F1–F4 + MIL | Alta (post-D) |
-| **F** | Campaign Engine | 📋 | Alta |
+| **F** | Campaign Engine | ✅ C1–C11 | Alta |
 | **G** | Image Engine | 📋 | Media |
 | **H** | Publisher | 🔄 LI+FB parcial | Media |
 | **I** | Landing Manager | 🔄 producto + Relatic | Alta |

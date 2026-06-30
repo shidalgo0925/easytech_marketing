@@ -142,6 +142,35 @@
             </div>
             <p class="vs1-ts" id="vs1RoadmapSummary" hidden></p>
           </section>
+
+          <section class="vs1-card vs1-campaign-console accio-card" id="vs1CampaignConsole">
+            <div class="vs1-decision-head accio-card-header">
+              <div>
+                <h2 class="vs1-section-head" style="margin:0">Campañas</h2>
+                <p class="vs1-muted" style="margin:4px 0 0">Recomendaciones aprobadas → campañas estructuradas</p>
+              </div>
+              <div class="vs1-decision-actions">
+                <select id="vs1CampaignFilter" class="vs1-select vs1-select--sm" aria-label="Filtrar campañas">
+                  <option value="">Todas</option>
+                  <option value="draft">Borrador</option>
+                  <option value="pending_approval">Pendientes</option>
+                  <option value="approved">Aprobadas</option>
+                  <option value="running">Activas</option>
+                  <option value="archived">Archivadas</option>
+                </select>
+              </div>
+            </div>
+            <div class="vs1-decision-grid panel-body accio-card-body">
+              <div class="vs1-decision-col">
+                <h3 class="vs1-decision-col-title">Recomendaciones aprobadas</h3>
+                <div id="vs1ApprovedRecList" class="vs1-decision-list"></div>
+              </div>
+              <div class="vs1-decision-col">
+                <h3 class="vs1-decision-col-title">Campañas</h3>
+                <div id="vs1CampaignList" class="vs1-decision-list"></div>
+              </div>
+            </div>
+          </section>
         </div>
 
         <!-- Plan (área estratégica) -->

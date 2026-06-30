@@ -209,12 +209,12 @@ La IA crea automáticamente: objetivos · KPIs · calendario · embudos · presu
 
 ---
 
-### Fase H — Campaign Engine
+### Fase H — Campaign Engine ✅ (2026-06-30)
 
-Generación automática de campañas completas.
+Recomendación aprobada → campaña estructurada con explain. Ver `docs/CAMPAIGN_ENGINE.md`.
 
 ```
-Campaña EN1 → Objetivo → Audiencia → Mensajes → Imágenes → Calendario → Automatizaciones
+Campaña → Objetivo → Audiencia → Canales → KPIs → (futuro) Contenido → Publisher
 ```
 
 ---

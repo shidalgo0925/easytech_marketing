@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from Motor_Tecnico.accio_engine.campaign_application.context import TenantAppContext
-from Motor_Tecnico.accio_engine.campaign_application.ports import AuthorizationPort
+from Motor_Tecnico.accio_engine.campaign_application.ports import AuthorizationPort, TenantAccessContext
 
 
 class CampaignRbacAdapter:
-    def require_permission(self, ctx: TenantAppContext, action: str) -> None:
+    def require_permission(self, ctx: TenantAccessContext, action: str) -> None:
         from Motor_Tecnico.accio_engine.app import _check_request_permission, _user_can_access_tenant
 
         if not _user_can_access_tenant(ctx.tenant_id):
