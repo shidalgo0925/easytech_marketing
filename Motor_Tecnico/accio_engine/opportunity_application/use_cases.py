@@ -17,7 +17,12 @@ from Motor_Tecnico.accio_engine.opportunity_infrastructure.memory_bridge import 
 from Motor_Tecnico.accio_engine.memory_domain.service import CorporateMemoryDomainService
 from Motor_Tecnico.accio_engine.platform_infrastructure.db import memory_sql_enabled
 from Motor_Tecnico.accio_engine.decision_engine_application.context import TenantContext as DecisionTenantContext
-from Motor_Tecnico.accio_engine.decision_engine_application.use_cases import CreateRecommendationFromCandidate
+from Motor_Tecnico.accio_engine.decision_engine_application.errors import ApplicationError as DecisionApplicationError
+from Motor_Tecnico.accio_engine.decision_engine_application.use_cases import CreateRecommendationFromCandidate, GenerateDailyRoadmap
+from Motor_Tecnico.accio_engine.decision_engine_domain.daily_roadmap_service import DailyRoadmapBundle
+from Motor_Tecnico.accio_engine.decision_engine_infrastructure.roadmap_mapper import tenant_today_iso
+from Motor_Tecnico.accio_engine.marketing_brain_application.use_cases import EnrichDailyRoadmap
+from Motor_Tecnico.accio_engine.marketing_brain_domain.model import RoadmapEnrichmentResult
 
 
 class DetectOpportunities:
@@ -191,4 +196,72 @@ class DetectAndPromoteOpportunities:
             promoted=promoted,
             promoted_count=len(promoted),
             skipped_count=skipped,
+        )
+
+
+@dataclass(frozen=True)
+class MarketingPipelineResult:
+    promote: DetectAndPromoteResult
+    roadmap: DailyRoadmapBundle
+    enrichment: RoadmapEnrichmentResult | None
+    llm_skipped: bool
+
+
+class RunMarketingPipeline:
+    """F4 — detectar, promover, generar roadmap del día y enriquecer con IA (si disponible)."""
+
+    def __init__(
+        self,
+        detect_and_promote: DetectAndPromoteOpportunities,
+        generate_roadmap: GenerateDailyRoadmap,
+        enrich_roadmap: EnrichDailyRoadmap,
+        authorization: AuthorizationPort,
+    ) -> None:
+        self._detect_and_promote = detect_and_promote
+        self._generate_roadmap = generate_roadmap
+        self._enrich_roadmap = enrich_roadmap
+        self._authorization = authorization
+
+    def __call__(
+        self,
+        ctx: TenantContext,
+        *,
+        priority: str | None = "high",
+        limit: int = 10,
+        enrich: bool = True,
+        actor_id: str = "system",
+    ) -> MarketingPipelineResult:
+        self._authorization.require_permission(ctx, "write")
+        promote = self._detect_and_promote(
+            ctx,
+            priority=priority,
+            limit=limit,
+            actor_id=actor_id,
+        )
+        de_ctx = DecisionTenantContext(tenant_id=ctx.tenant_id)
+        roadmap_date = tenant_today_iso()
+        bundle = self._generate_roadmap(de_ctx, roadmap_date, created_by=actor_id)
+
+        enrichment: RoadmapEnrichmentResult | None = None
+        llm_skipped = False
+        if enrich:
+            try:
+                enrichment = self._enrich_roadmap(
+                    de_ctx,
+                    roadmap_date,
+                    persist=True,
+                    skip_enriched=True,
+                    limit=max(1, min(limit, 20)),
+                    actor_id=actor_id,
+                )
+            except DecisionApplicationError as exc:
+                if exc.code != "llm_unavailable":
+                    raise ApplicationError(exc.code, exc.message, exc.http_status) from exc
+                llm_skipped = True
+
+        return MarketingPipelineResult(
+            promote=promote,
+            roadmap=bundle,
+            enrichment=enrichment,
+            llm_skipped=llm_skipped,
         )

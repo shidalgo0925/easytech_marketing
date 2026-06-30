@@ -863,9 +863,29 @@
   }
 
   function bindDecisionConsoleToolbar() {
+    const pipelineBtn = $('vs1PipelineRunBtn');
     const detectBtn = $('vs1OppDetectBtn');
     const promoteHighBtn = $('vs1OppPromoteHighBtn');
     const roadmapBtn = $('vs1RoadmapGenBtn');
+    if (pipelineBtn) {
+      pipelineBtn.onclick = async () => {
+        try {
+          const resp = await tenantV1Api('/opportunities/run-pipeline', {
+            method: 'POST',
+            body: JSON.stringify({ priority: 'high', limit: 10, enrich: true }),
+          });
+          const d = resp.data || {};
+          const enrichNote = d.llm_skipped ? ' · IA no disponible' : (d.enrichment ? ` · ${d.enrichment.enriched_count} enriquecidas` : '');
+          toast(`Pipeline: ${d.promoted_count} promovidas · roadmap listo${enrichNote}`);
+          const summaryEl = $('vs1RoadmapSummary');
+          if (summaryEl && d.roadmap?.summary) {
+            summaryEl.hidden = false;
+            summaryEl.textContent = d.roadmap.summary.headline || `Roadmap ${d.roadmap.roadmap_date}`;
+          }
+          await loadDecisionConsole();
+        } catch (e) { toast(e.message, true); }
+      };
+    }
     if (detectBtn) {
       detectBtn.onclick = async () => {
         try {

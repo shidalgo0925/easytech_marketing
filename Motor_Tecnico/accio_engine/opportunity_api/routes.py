@@ -114,6 +114,42 @@ def register_opportunity_api(app, auth_decorator) -> None:
             status=201 if result.promoted_count else 200,
         )
 
+    @app.post(f"{base}/run-pipeline")
+    @auth_decorator
+    @_handle
+    def api_run_marketing_pipeline(tenant_id: str):
+        from flask import request
+
+        from Motor_Tecnico.accio_engine.decision_engine_api.routes import _roadmap_response
+
+        body = request.get_json(silent=True) or {}
+        priority = body.get("priority", "high")
+        limit = min(int(body.get("limit", 10)), 20)
+        enrich = bool(body.get("enrich", True))
+        result = opportunity_use_cases().run_pipeline(
+            tenant_context(tenant_id),
+            priority=str(priority) if priority else None,
+            limit=limit,
+            enrich=enrich,
+            actor_id=_actor_id(),
+        )
+        payload = {
+            "promoted_count": result.promote.promoted_count,
+            "skipped_count": result.promote.skipped_count,
+            "created_count": result.promote.detection.created_count,
+            "roadmap": _roadmap_response(result.roadmap),
+            "llm_skipped": result.llm_skipped,
+        }
+        if result.enrichment is not None:
+            payload["enrichment"] = {
+                "enriched_count": result.enrichment.enriched_count,
+                "skipped_count": result.enrichment.skipped_count,
+                "failed_count": result.enrichment.failed_count,
+                "persisted": result.enrichment.persisted,
+            }
+        status = 201 if result.promote.promoted_count or result.roadmap.created else 200
+        return _success(payload, status=status)
+
     @app.get(f"{base}/<opportunity_id>")
     @auth_decorator
     @_handle

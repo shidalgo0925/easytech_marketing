@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-from Motor_Tecnico.accio_engine.decision_engine_api.composition import build_recommendation_service
+from Motor_Tecnico.accio_engine.decision_engine_api.composition import (
+    build_recommendation_service,
+    decision_engine_use_cases,
+)
 from Motor_Tecnico.accio_engine.decision_engine_application.use_cases import CreateRecommendationFromCandidate
 from Motor_Tecnico.accio_engine.decision_engine_infrastructure.application_adapters import DecisionEngineRbacAdapter
+from Motor_Tecnico.accio_engine.marketing_brain_api.composition import marketing_brain_use_cases
 from Motor_Tecnico.accio_engine.memory_api.composition import get_memory_domain_service
 from Motor_Tecnico.accio_engine.opportunity_application.context import TenantContext
 from Motor_Tecnico.accio_engine.opportunity_application.use_cases import (
@@ -12,6 +16,7 @@ from Motor_Tecnico.accio_engine.opportunity_application.use_cases import (
     GetOpportunity,
     ListOpportunities,
     PromoteOpportunity,
+    RunMarketingPipeline,
 )
 from Motor_Tecnico.accio_engine.opportunity_domain.promotion_service import OpportunityPromotionService
 from Motor_Tecnico.accio_engine.opportunity_domain.service import OpportunityDetectionService
@@ -57,6 +62,14 @@ class OpportunityUseCases:
         self.detect_and_promote = DetectAndPromoteOpportunities(
             self.detect_opportunities,
             self.promote_opportunity,
+            auth,
+        )
+        de = decision_engine_use_cases()
+        mb = marketing_brain_use_cases()
+        self.run_pipeline = RunMarketingPipeline(
+            self.detect_and_promote,
+            de.generate_daily_roadmap,
+            mb.enrich_daily_roadmap,
             auth,
         )
 
