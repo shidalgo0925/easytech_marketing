@@ -219,9 +219,11 @@ Campaña → Objetivo → Audiencia → Canales → KPIs → (futuro) Contenido 
 
 ---
 
-### Fase I — Content Engine
+### Fase I — Content Engine ✅
 
 Genera: posts · artículos · carruseles · videos · emails · WhatsApp · landings · scripts · presentaciones.
+
+**Estado código:** `content_engine_*` · schema v15 · API `/content/*` · consola `/accio/plan/` · doc [CONTENT_ENGINE.md](CONTENT_ENGINE.md).
 
 ---
 

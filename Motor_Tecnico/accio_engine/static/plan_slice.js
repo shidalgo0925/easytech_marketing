@@ -535,6 +535,7 @@
     }
     await loadDecisionConsole();
     await loadCampaignConsole();
+    await loadContentConsole();
   }
 
   function pickNextAction(posts, ctxPct) {
@@ -911,6 +912,7 @@
             <p class="vs1-decision-item-meta">${esc(c.target_audience || '')}</p>
             <div class="vs1-decision-item-actions">
               <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="explain-camp" data-id="${id}">¿Por qué?</button>
+              ${c.status === 'approved' ? `<button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" data-action="gen-content" data-id="${id}">Generar contenido</button>` : ''}
               <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="enrich-camp" data-id="${id}">IA</button>
               <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="approve-camp" data-id="${id}">Aprobar</button>
             </div>
@@ -952,6 +954,16 @@
             await tenantV1Api(`/campaigns/${encodeURIComponent(btn.dataset.id)}/approve`, { method: 'POST', body: '{}' });
             toast('Campaña aprobada');
             await loadCampaignConsole();
+            await loadContentConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+      campList.querySelectorAll('[data-action="gen-content"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/content/from-campaign/${encodeURIComponent(btn.dataset.id)}`, { method: 'POST', body: '{}' });
+            toast('Contenido generado');
+            await loadContentConsole();
           } catch (e) { toast(e.message, true); }
         };
       });
@@ -966,6 +978,69 @@
         renderDecisionList(campList, [], e.message);
       }
     }
+  }
+
+  async function loadContentConsole() {
+    const list = $('vs1ContentList');
+    if (!list) return;
+    try {
+      const resp = await tenantV1Api('/content?limit=20');
+      const rows = resp.data || [];
+      renderDecisionList(
+        list,
+        rows.map((c) => {
+          const id = esc(c.content_id);
+          return `<article class="vs1-decision-item">
+            <p class="vs1-decision-item-title">${esc(c.title)}</p>
+            <p class="vs1-decision-item-meta">${esc(c.status)} · ${esc(c.channel)} · ${esc(c.content_type)}</p>
+            <div class="vs1-decision-item-actions">
+              <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="explain-content" data-id="${id}">¿Por qué?</button>
+              <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="approve-content" data-id="${id}">Aprobar</button>
+            </div>
+          </article>`;
+        }),
+        'Sin contenido generado. Aprueba una campaña y usa «Generar contenido».',
+      );
+      list.querySelectorAll('[data-action="explain-content"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try { await openContentExplain(btn.dataset.id); } catch (e) { toast(e.message, true); }
+        };
+      });
+      list.querySelectorAll('[data-action="approve-content"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/content/${encodeURIComponent(btn.dataset.id)}/approve`, { method: 'POST', body: '{}' });
+            toast('Contenido aprobado');
+            await loadContentConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+    } catch (e) {
+      if (e.message !== 'Sesión expirada') renderDecisionList(list, [], e.message);
+    }
+  }
+
+  async function openContentExplain(contentId) {
+    const body = $('vs1ExplainBody');
+    const modal = $('vs1ExplainModal');
+    const title = $('vs1ExplainTitle');
+    if (!body || !modal) return;
+    if (title) title.textContent = '¿Por qué este contenido?';
+    const resp = await tenantV1Api(`/content/${encodeURIComponent(contentId)}/explain`);
+    const data = resp.data || {};
+    const explain = data.explain || {};
+    const motor = (explain.motor_reasoning || []).map((r) => `<li>${esc(r)}</li>`).join('');
+    body.innerHTML = `
+      <div class="vs1-explain-grid">
+        <section><h4>Campaña origen</h4><p>${esc(explain.campaign_id || '—')}</p></section>
+        <section><h4>Score campaña</h4><p class="vs1-explain-score">${esc(String(explain.origin_score ?? '—'))}</p></section>
+        <section><h4>Motor</h4><ul>${motor || '<li>—</li>'}</ul></section>
+        <section><h4>IA</h4><p>${data.llm_skipped ? '<span class="vs1-muted">llm_skipped</span>' : esc(data.llm_enrichment?.narrative || '—')}</p></section>
+      </div>`;
+    modal.hidden = false;
+    const reset = () => { closeExplainModal(); if (title) title.textContent = 'Por qué recomendamos esto'; };
+    $('vs1ExplainClose').onclick = reset;
+    $('vs1ExplainBackdrop').onclick = reset;
   }
 
   async function openCampaignExplain(campaignId) {

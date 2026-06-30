@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-30 · **Código:** M0–M11 ✅ · Intelligence Layer ✅ · **Campaign Engine** ✅ · **Siguiente:** Content + Publisher
+**Actualizado:** 2026-06-30 · **Código:** M0–M11 ✅ · Intelligence Layer ✅ · Campaign Engine ✅ · **Content Engine** ✅ · **Siguiente:** Publisher
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -208,6 +208,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 |--------|--------------|----------|
 | — | Fase F Opportunity Engine | Detectar oportunidades de negocio | ✅ F1–F4 |
 | — | **Campaign Engine** (Fase H) | Recomendación aprobada → campaña estructurada | ✅ [CAMPAIGN_ENGINE.md](CAMPAIGN_ENGINE.md) |
+| — | **Content Engine** (Fase I) | Campaña aprobada → pieza de contenido estructurada | ✅ [CONTENT_ENGINE.md](CONTENT_ENGINE.md) |
 | **M12** | Fases M + O BI | Medir, explicar, tableros gerencia |
 | **M13** | Fase K Automation Brain | Ejecutar acciones post-aprobación |
 
