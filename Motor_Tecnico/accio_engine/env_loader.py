@@ -12,25 +12,23 @@ VALID_ENVS = frozenset({"prod", "dev", "test"})
 
 
 def load_accio_env(base_dir: Path | None = None) -> str:
-    """Carga el primer .env encontrado según ACCIO_ENV. Devuelve el entorno activo."""
+    """Carga capas de .env en orden (cada archivo posterior sobrescribe)."""
     base = base_dir or Path(__file__).resolve().parent.parent.parent
     env = os.getenv("ACCIO_ENV", "prod").strip().lower()
     if env not in VALID_ENVS:
         env = "prod"
 
-    candidates = [
+    layers = [
         base / "deploy" / "secrets" / f".env.{env}",
         base / f".env.{env}",
         base / ".env",
     ]
-    loaded = False
-    for path in candidates:
-        if path.is_file():
+    seen: set[Path] = set()
+    for path in layers:
+        resolved = path.resolve()
+        if path.is_file() and resolved not in seen:
             load_dotenv(path, override=True)
-            loaded = True
-            break
-    if not loaded and env != "prod":
-        load_dotenv(base / ".env", override=True)
+            seen.add(resolved)
 
     os.environ["ACCIO_ENV"] = env
     return env

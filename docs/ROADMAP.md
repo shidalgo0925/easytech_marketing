@@ -252,7 +252,7 @@ Fuente: [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md)
 | 🔴 1 | Ops | Migrar M4–M9 prod + `marketing_os.db` | ✅ [BLOQUE1](BLOQUE1_CIMENTACION_PROD.md) |
 | 🔴 2 | Ops | `ACCIO_*_STORE=dual` + restart servicio | ✅ |
 | 🔴 3 | Código | **M10.5** Approval Queue | ✅ |
-| 🔴 4 | Infra | **AI Provider Manager** (LiteLLM/CODITO → Ollama) | 🔄 código ✅ · prod ⏳ |
+| 🔴 4 | Infra | **AI Provider Manager** (LiteLLM/CODITO → Ollama) | 🔄 tooling ✅ · **falta IP CODITO** |
 | 🔴 5 | Código | **M11** Marketing Brain | ✅ |
 | 🟠 6 | Knowledge | Matriz producto-sector-necesidad |
 | 🟠 7 | Código | **Opportunity Engine** + Intelligence Layer | ✅ |
