@@ -46,10 +46,9 @@ class AiProviderMarketingBrainLLM:
             "Usa el marketing_context para alinear tono, CTA y sector. "
             "Responde SOLO JSON válido con claves: reason, description, confidence (0-1), narrative."
         )
-        marketing_context = get_marketing_context_builder().build_for_llm(
+        marketing_context = get_marketing_context_builder().build_for_recommendation(
             recommendation.tenant_id,
-            purpose="enrich",
-            app_id=recommendation.brand_id,
+            recommendation,
         )
         user = json.dumps(
             {

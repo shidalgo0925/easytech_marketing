@@ -754,7 +754,12 @@
 
 .vs1-task-body { min-height: 120px; }
 
-/* Motor de decisiones — Console workspace */
+.vs1-modal-card--wide { max-width: 720px; }
+.vs1-explain-body { max-height: 70vh; overflow: auto; }
+.vs1-explain-grid { display: grid; gap: 16px; }
+.vs1-explain-grid section { border: 1px solid var(--accio-border, #e5e7eb); border-radius: 8px; padding: 12px; }
+.vs1-explain-grid h4 { margin: 0 0 8px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accio-muted, #6b7280); }
+.vs1-explain-score { font-size: 1.75rem; font-weight: 700; margin: 0; }
 .vs1-decision-console {
   margin-top: var(--space-xl);
 }

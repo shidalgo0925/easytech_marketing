@@ -299,7 +299,7 @@ Observar → Entender → Analizar → Descubrir oportunidades → Planificar �
 | Fase C Decision | M10 |
 | Fase D AI Layer | AI Provider Manager (transversal) |
 | Fase E Brain | M11 |
-| Fase F Opportunity | Opportunity Engine (nuevo slice) |
+| Fase F Opportunity | Opportunity Engine + **Marketing Intelligence Layer** (scorer, composer, explain) |
 | Fase J Approval | M10.5 |
 | Fase K Automation | M13 Automation Brain |
 | Fase M + O | M12 Business Intelligence |
@@ -318,7 +318,7 @@ Observar → Entender → Analizar → Descubrir oportunidades → Planificar �
 | 🔴 4 | Implementar **AI Provider Manager** (LiteLLM/CODITO → Ollama) | Pendiente |
 | 🔴 5 | Implementar **M11** Marketing Brain | Pendiente |
 | 🟠 6 | Completar matriz de conocimiento (Knowledge Engine) | Pendiente |
-| 🟠 7 | Desarrollar **Opportunity Engine** | Pendiente |
+| 🟠 7 | Desarrollar **Opportunity Engine** + Intelligence Layer | ✅ código |
 | 🟡 8 | Completar Workspace/Console unificado | Pendiente |
 | 🟡 9 | Analytics + **M12** Business Intelligence | Pendiente |
 | 🟢 10 | Learning continuo + **M13** automatización avanzada | Futuro |

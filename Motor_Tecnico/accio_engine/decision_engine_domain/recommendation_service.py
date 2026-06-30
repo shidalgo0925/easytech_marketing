@@ -41,6 +41,10 @@ class RecommendationDomainService:
         self._repo.save(recommendation)
         return recommendation
 
+    def save_recommendation(self, recommendation: Recommendation) -> Recommendation:
+        self._repo.update(recommendation)
+        return recommendation
+
     def get_recommendation(self, tenant_id: str, recommendation_id: str) -> Recommendation:
         row = self._repo.get(tenant_id, recommendation_id)
         if row is None:

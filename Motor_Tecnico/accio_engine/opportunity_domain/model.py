@@ -25,6 +25,8 @@ class OpportunityCandidate:
     source: str
     confidence: float = 1.0
     payload: dict[str, Any] = field(default_factory=dict)
+    score: float = 0.0
+    reasoning: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -47,6 +49,8 @@ class Opportunity:
     confidence: float
     detected_at: str
     updated_at: str
+    score: float = 0.0
+    reasoning: tuple[str, ...] = ()
     payload: dict[str, Any] = field(default_factory=dict)
 
     def to_api_dict(self) -> dict[str, Any]:
@@ -68,6 +72,8 @@ class Opportunity:
             "status": self.status,
             "source": self.source,
             "confidence": self.confidence,
+            "score": self.score,
+            "reasoning": list(self.reasoning),
             "payload": self.payload,
             "detected_at": self.detected_at,
             "updated_at": self.updated_at,

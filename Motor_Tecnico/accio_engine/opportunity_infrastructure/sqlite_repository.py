@@ -45,11 +45,11 @@ class SqliteOpportunityRepository:
                 INSERT INTO opportunities (
                   tenant_id, opportunity_id, signal_key, signal_type, brand_id,
                   title, description, sector, need, product_slug, channel, landing_url,
-                  priority, status, confidence, source, payload_json, detected_at, updated_at
+                  priority, status, confidence, score, reasoning_json, source, payload_json, detected_at, updated_at
                 ) VALUES (
                   :tenant_id, :opportunity_id, :signal_key, :signal_type, :brand_id,
                   :title, :description, :sector, :need, :product_slug, :channel, :landing_url,
-                  :priority, :status, :confidence, :source, :payload_json, :detected_at, :updated_at
+                  :priority, :status, :confidence, :score, :reasoning_json, :source, :payload_json, :detected_at, :updated_at
                 )
                 ON CONFLICT(tenant_id, signal_key) DO UPDATE SET
                   signal_type = excluded.signal_type,
@@ -63,6 +63,8 @@ class SqliteOpportunityRepository:
                   landing_url = excluded.landing_url,
                   priority = excluded.priority,
                   confidence = excluded.confidence,
+                  score = excluded.score,
+                  reasoning_json = excluded.reasoning_json,
                   source = excluded.source,
                   payload_json = excluded.payload_json,
                   updated_at = excluded.updated_at
@@ -121,7 +123,7 @@ class SqliteOpportunityRepository:
             if status:
                 sql += " AND status = ?"
                 params.append(status)
-            sql += " ORDER BY detected_at DESC LIMIT ?"
+            sql += " ORDER BY score DESC, detected_at DESC LIMIT ?"
             params.append(max(1, min(limit, 200)))
             rows = conn.execute(sql, params).fetchall()
             return [row_to_opportunity(row) for row in rows]

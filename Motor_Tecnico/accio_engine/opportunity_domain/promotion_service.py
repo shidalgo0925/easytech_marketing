@@ -30,8 +30,11 @@ class OpportunityPromotionService:
         self._repo = repository
 
     def to_candidate(self, tenant_id: str, opportunity_id: str) -> tuple[Opportunity, object]:
-        opp = self._require_status(tenant_id, opportunity_id, allowed=_PROMOTABLE_STATUSES, action="promover")
+        opp = self.require_promotable(tenant_id, opportunity_id)
         return opp, opportunity_to_candidate(opp)
+
+    def require_promotable(self, tenant_id: str, opportunity_id: str) -> Opportunity:
+        return self._require_status(tenant_id, opportunity_id, allowed=_PROMOTABLE_STATUSES, action="promover")
 
     def mark_promoted(
         self,

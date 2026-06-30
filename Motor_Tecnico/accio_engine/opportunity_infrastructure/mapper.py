@@ -18,8 +18,20 @@ def new_opportunity_id(signal_key: str) -> str:
     return f"opp_{safe}_{digest}"
 
 
-def candidate_to_opportunity(tenant_id: str, candidate: OpportunityCandidate) -> Opportunity:
+from Motor_Tecnico.accio_engine.marketing_intelligence_domain.model import OpportunityScoreResult
+
+
+def candidate_to_opportunity(
+    tenant_id: str,
+    candidate: OpportunityCandidate,
+    *,
+    score_result: OpportunityScoreResult | None = None,
+) -> Opportunity:
     now = _utc_now()
+    score = score_result.score if score_result else getattr(candidate, "score", 0.0)
+    reasoning = score_result.reasoning if score_result else getattr(candidate, "reasoning", ())
+    priority = score_result.priority if score_result else candidate.priority
+    confidence = score_result.confidence if score_result else candidate.confidence
     return Opportunity(
         tenant_id=tenant_id,
         opportunity_id=new_opportunity_id(candidate.signal_key),
@@ -33,12 +45,14 @@ def candidate_to_opportunity(tenant_id: str, candidate: OpportunityCandidate) ->
         product_slug=candidate.product_slug,
         channel=candidate.channel,
         landing_url=candidate.landing_url,
-        priority=candidate.priority,
+        priority=priority,
         status="detected",
         source=candidate.source,
-        confidence=candidate.confidence,
+        confidence=confidence,
         detected_at=now,
         updated_at=now,
+        score=score,
+        reasoning=tuple(reasoning),
         payload=dict(candidate.payload or {}),
     )
 
@@ -60,6 +74,8 @@ def opportunity_to_row(opportunity: Opportunity) -> dict[str, Any]:
         "priority": opportunity.priority,
         "status": opportunity.status,
         "confidence": opportunity.confidence,
+        "score": opportunity.score,
+        "reasoning_json": json.dumps(list(opportunity.reasoning or ()), ensure_ascii=False),
         "source": opportunity.source,
         "payload_json": json.dumps(opportunity.payload or {}, ensure_ascii=False),
         "detected_at": opportunity.detected_at,
@@ -85,6 +101,8 @@ def row_to_opportunity(row: Any) -> Opportunity:
         status=row["status"],
         source=row["source"],
         confidence=float(row["confidence"] or 1.0),
+        score=float(row["score"] if "score" in row.keys() else 0.0),
+        reasoning=tuple(json.loads(row["reasoning_json"] or "[]") if "reasoning_json" in row.keys() else []),
         detected_at=row["detected_at"],
         updated_at=row["updated_at"],
         payload=json.loads(row["payload_json"] or "{}"),

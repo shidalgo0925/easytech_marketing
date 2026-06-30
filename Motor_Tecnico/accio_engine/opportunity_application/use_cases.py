@@ -7,7 +7,11 @@ from Motor_Tecnico.accio_engine.opportunity_application.errors import Applicatio
 from Motor_Tecnico.accio_engine.opportunity_application.ports import AuthorizationPort
 from Motor_Tecnico.accio_engine.opportunity_domain.errors import OpportunityEngineError
 from Motor_Tecnico.accio_engine.opportunity_domain.model import Opportunity
+from Motor_Tecnico.accio_engine.decision_engine_domain.recommendation_service import RecommendationDomainService
 from Motor_Tecnico.accio_engine.opportunity_domain.promotion_service import OpportunityPromotionService, PromotionResult
+from Motor_Tecnico.accio_engine.opportunity_infrastructure.intelligence_bridge import OpportunityIntelligenceBridge
+from Motor_Tecnico.accio_engine.opportunity_infrastructure.intelligence_bridge import OpportunityIntelligenceBridge
+from Motor_Tecnico.accio_engine.opportunity_infrastructure.knowledge_reader import CompositeOpportunityKnowledgeReader
 from Motor_Tecnico.accio_engine.opportunity_domain.service import DetectionResult, OpportunityDetectionService
 from Motor_Tecnico.accio_engine.opportunity_infrastructure.memory_bridge import (
     record_opportunity_dismissed,
@@ -91,23 +95,35 @@ class PromoteOpportunity:
         self,
         promotion: OpportunityPromotionService,
         create_recommendation: CreateRecommendationFromCandidate,
+        intelligence: OpportunityIntelligenceBridge,
+        recommendations: RecommendationDomainService,
         authorization: AuthorizationPort,
         memory: CorporateMemoryDomainService | None = None,
     ) -> None:
         self._promotion = promotion
         self._create_recommendation = create_recommendation
+        self._intelligence = intelligence
+        self._recommendations = recommendations
         self._authorization = authorization
         self._memory = memory if memory_sql_enabled() else None
 
     def __call__(self, ctx: TenantContext, opportunity_id: str, *, actor_id: str = "system") -> PromotionResult:
         self._authorization.require_permission(ctx, "write")
         try:
-            _opp, candidate = self._promotion.to_candidate(ctx.tenant_id, opportunity_id)
+            opp = self._promotion.require_promotable(ctx.tenant_id, opportunity_id)
+            candidate, composed, score, explain = self._intelligence.compose_promotion(ctx.tenant_id, opp)
             recommendation = self._create_recommendation(
                 DecisionTenantContext(tenant_id=ctx.tenant_id),
                 candidate,
                 created_by=actor_id,
             )
+            recommendation = self._intelligence.attach_to_recommendation(
+                recommendation,
+                composed=composed,
+                explain=explain,
+                score=score,
+            )
+            self._recommendations.save_recommendation(recommendation)
             opportunity = self._promotion.mark_promoted(ctx.tenant_id, opportunity_id, recommendation)
         except OpportunityEngineError as exc:
             raise ApplicationError.from_domain(exc) from exc

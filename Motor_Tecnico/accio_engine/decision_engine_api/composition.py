@@ -100,5 +100,17 @@ def build_candidates_use_case() -> BuildRecommendationCandidates:
     return BuildRecommendationCandidates(roadmap_builder())
 
 
+def build_opportunity_detector_for_intelligence() -> OpportunityDetectionService:
+    from Motor_Tecnico.accio_engine.opportunity_domain.service import OpportunityDetectionService
+    from Motor_Tecnico.accio_engine.opportunity_infrastructure.knowledge_reader import CompositeOpportunityKnowledgeReader
+    from Motor_Tecnico.accio_engine.opportunity_infrastructure.sqlite_repository import SqliteOpportunityRepository
+
+    ensure_schema()
+    return OpportunityDetectionService(
+        SqliteOpportunityRepository(),
+        CompositeOpportunityKnowledgeReader(),
+    )
+
+
 def tenant_context(tenant_id: str) -> TenantContext:
     return TenantContext(tenant_id=tenant_id)

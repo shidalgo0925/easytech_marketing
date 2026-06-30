@@ -17,6 +17,7 @@ from .schema_v9_leads import _LEADS_DDL
 from .schema_v10_recommendations import _RECOMMENDATIONS_DDL
 from .schema_v11_daily_roadmaps import _DAILY_ROADMAPS_DDL
 from .schema_v12_opportunities import _OPPORTUNITIES_DDL
+from .schema_v13_intelligence import apply_schema_v13
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 DEFAULT_DB_PATH = BASE_DIR / "Marketing" / "platform" / "marketing_os.db"
@@ -61,6 +62,7 @@ _SCHEMA_SCRIPTS: dict[int, str] = {
     10: _RECOMMENDATIONS_DDL,
     11: _DAILY_ROADMAPS_DDL,
     12: _OPPORTUNITIES_DDL,
+    13: "",
 }
 
 
@@ -203,7 +205,11 @@ def ensure_schema(conn: sqlite3.Connection | None = None) -> None:
 
         now = datetime.now(timezone.utc).isoformat()
         for version in sorted(_SCHEMA_SCRIPTS):
-            conn.executescript(_SCHEMA_SCRIPTS[version])
+            script = _SCHEMA_SCRIPTS[version]
+            if script:
+                conn.executescript(script)
+            if version == 13:
+                apply_schema_v13(conn)
             row = conn.execute(
                 "SELECT version FROM schema_migrations WHERE version = ?",
                 (version,),

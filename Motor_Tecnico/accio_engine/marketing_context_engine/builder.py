@@ -51,11 +51,19 @@ class MarketingContextBuilder:
                 limit=limit,
             )
         ]
-        recommendations = [
+        recommendations_pending = [
             rec.to_api_dict()
             for rec in build_recommendation_service().list_recommendations(
                 tenant_id,
                 status="pending_approval",
+                limit=limit,
+            )
+        ]
+        approved_history = [
+            rec.to_api_dict()
+            for rec in build_recommendation_service().list_recommendations(
+                tenant_id,
+                status="approved",
                 limit=limit,
             )
         ]
@@ -70,6 +78,46 @@ class MarketingContextBuilder:
         except DailyRoadmapNotFound:
             roadmap_today = None
 
+        related_campaigns: list[dict[str, Any]] = []
+        recent_publications: list[dict[str, Any]] = []
+        for brand in brands[:6]:
+            brand_id = brand.legacy_app_id or brand.brand_id
+            from Motor_Tecnico.accio_engine.publication_infrastructure.facade import get_publication_service
+
+            pubs = get_publication_service().list_publications(tenant_id, brand_id=brand_id)[:5]
+            recent_publications.extend(
+                [
+                    {
+                        "brand_id": brand_id,
+                        "publication_id": p.publication_id,
+                        "status": p.status,
+                        "channel": p.channel,
+                        "published_at": p.published_at,
+                    }
+                    for p in pubs[:3]
+                ]
+            )
+            from Motor_Tecnico.accio_engine.campaign_infrastructure.facade import get_campaign_service
+
+            camps = get_campaign_service().list_campaigns(tenant_id, brand_id)
+            related_campaigns.extend(
+                [
+                    {
+                        "brand_id": brand_id,
+                        "campaign_id": c.campaign_id,
+                        "name": c.name,
+                        "status": c.status,
+                    }
+                    for c in camps[:3]
+                ]
+            )
+
+        kpis = {
+            "opportunities_open": len(opportunities),
+            "recommendations_pending": len(recommendations_pending),
+            "recommendations_approved_recent": len(approved_history),
+        }
+
         return {
             "tenant_id": tenant_id,
             "app_id": aid,
@@ -78,7 +126,11 @@ class MarketingContextBuilder:
             "products_services": products,
             "knowledge_matrix": matrix.to_dict(),
             "opportunities_detected": opportunities,
-            "recommendations_pending": recommendations,
+            "recommendations_pending": recommendations_pending,
+            "approved_recommendations": approved_history,
+            "related_campaigns": related_campaigns,
+            "recent_publications": recent_publications,
+            "kpis": kpis,
             "roadmap_today": roadmap_today,
             "editorial": {
                 "rule": EDITORIAL_RULE_LABEL,
@@ -129,6 +181,37 @@ class MarketingContextBuilder:
             "editorial": full.get("editorial"),
             "commercial": full.get("commercial"),
         }
+
+    def build_for_recommendation(
+        self,
+        tenant_id: str,
+        recommendation,
+        *,
+        limit: int = 12,
+    ) -> dict[str, Any]:
+        base = self.build_for_llm(
+            tenant_id,
+            purpose="enrich",
+            app_id=getattr(recommendation, "brand_id", None),
+            limit=limit,
+        )
+        refs = getattr(recommendation, "justification_refs", None) or {}
+        base["recommendation_context"] = {
+            "recommendation_id": getattr(recommendation, "recommendation_id", None),
+            "opportunity_score": refs.get("opportunity_score"),
+            "score_factors": refs.get("score_factors"),
+            "signal_type": refs.get("signal_type"),
+            "explain": getattr(recommendation, "explain", None),
+            "composed": getattr(recommendation, "composed", None),
+            "approved_history": base.get("recommendations_pending", [])[:3],
+            "similar_pending": [
+                r
+                for r in (self.build(tenant_id, limit=limit).get("recommendations_pending") or [])
+                if r.get("brand_id") == getattr(recommendation, "brand_id", None)
+                and r.get("recommendation_id") != getattr(recommendation, "recommendation_id", None)
+            ][:3],
+        }
+        return base
 
 
 _BUILDER: MarketingContextBuilder | None = None

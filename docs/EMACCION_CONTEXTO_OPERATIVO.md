@@ -275,7 +275,8 @@ Sitio referencia: https://relaticpanama.org/
 | M10.5 Approval Queue | ✅ | approve / reject / snooze |
 | AI Provider Manager | ✅ código · ⏳ CODITO prod | `ai_provider/` · `scripts/validate_codito_ai.py` |
 | Marketing Context Engine | ✅ | `marketing_context_engine/` · `GET .../marketing-context` |
-| M11 Marketing Brain | ✅ | IA enriquece con `MarketingContextBuilder` |
+| Marketing Intelligence Layer | ✅ | `docs/MARKETING_INTELLIGENCE_LAYER.md` · scorer + composer + explain |
+| M11 Marketing Brain | ✅ | IA enriquece con contexto + estructura composed |
 | Opportunity Engine F1–F4 | ✅ | detect → promote → roadmap → enrich |
 | M12 Business Intelligence | 📋 | ROI, CTA, horario, producto |
 | M13 Automation Brain | 📋 | ejecutar post-aprobación |
@@ -350,3 +351,13 @@ Incluye: company brain, brands, productos, knowledge matrix, oportunidades, reco
 `POST /api/v1/tenants/{tenant}/opportunities/run-pipeline`
 
 Respuesta incluye: `detected`, `promoted`, `roadmap_generated`, `llm_enriched`, `llm_skipped`, `llm_skip_reason`, `errors`.
+
+### Marketing Intelligence Layer (2026-06-30)
+
+Documento: `docs/MARKETING_INTELLIGENCE_LAYER.md`
+
+- **OpportunityScorer** — score 0–100 en cada oportunidad
+- **RecommendationComposer** — estructura ejecutiva antes de IA
+- **Explainability** — `explain` técnico en cada recomendación promovida
+- API v2: `/explain`, `/recompose`, `/similar`, `/rescore`
+- Consola: panel **¿Por qué recomendamos esto?**

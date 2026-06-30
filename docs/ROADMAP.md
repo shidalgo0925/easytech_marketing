@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-30 · **Código:** M10.5 ✅ · M11 ✅ · Opportunity F1–F4 ✅ · **AI Provider + Marketing Context Engine** en curso · **Siguiente:** conectar CODITO → Campaign Engine
+**Actualizado:** 2026-06-30 · **Código:** M10.5 ✅ · M11 ✅ · Opportunity F1–F4 ✅ · Marketing Intelligence Layer ✅ · **Siguiente:** CODITO prod → Campaign Engine
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -206,7 +206,8 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 | Módulo | Plan Maestro | Objetivo |
 |--------|--------------|----------|
-| — | Fase F Opportunity Engine | Detectar oportunidades de negocio |
+| — | Fase F Opportunity Engine | Detectar oportunidades de negocio | ✅ F1–F4 |
+| — | **Marketing Intelligence Layer** | Scorer + Composer + Explainability | ✅ [MARKETING_INTELLIGENCE_LAYER.md](MARKETING_INTELLIGENCE_LAYER.md) |
 | **M12** | Fases M + O BI | Medir, explicar, tableros gerencia |
 | **M13** | Fase K Automation Brain | Ejecutar acciones post-aprobación |
 
@@ -252,15 +253,15 @@ Fuente: [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md)
 | 🔴 4 | Infra | **AI Provider Manager** (LiteLLM/CODITO → Ollama) |
 | 🔴 5 | Código | **M11** Marketing Brain |
 | 🟠 6 | Knowledge | Matriz producto-sector-necesidad |
-| 🟠 7 | Código | **Opportunity Engine** (Fase F) |
-| 🟡 8 | UI | Workspace/Console unificado |
+| 🟠 7 | Código | **Opportunity Engine** + Intelligence Layer | ✅ |
+| 🟡 8 | UI | Workspace/Console + panel «¿Por qué?» | 🔄 |
 | 🟡 9 | Código | **M12** Business Intelligence + Analytics |
 | 🟢 10 | Futuro | **M13** Automation Brain + Learning continuo |
 
 ```
 Capa conocimiento M0–M9 ✅ (commit e8b7a53)
 M10 Decision Engine M10.1–M10.4 ✅ (commit 91a482d)
-M10.5 → AI Provider → M11 → Opportunity → Campaign → M12 BI → M13 Automation
+M10.5 → AI Provider → M11 → Opportunity + MIL → Campaign → M12 BI → M13 Automation
 ```
 
 **Regla activa:** gate conocimiento vs decisión · IA solo tras Provider Manager unificado.
@@ -440,7 +441,7 @@ VS1 no sustituye fases E–P; valida arquitectura y entrega el primer valor de p
 | **B** | Multi-Tenant Core | ✅ ~95% | Apps por tenant + login plataforma |
 | **C** | Configuration Center | ✅ ~98% | Guía anti-JSON-manual |
 | **D** | Knowledge Engine | 🔄 ~50% | Matriz producto-sector |
-| **E** | Opportunity Engine | 📋 | Alta (post-D) |
+| **E** | Opportunity Engine + Intelligence Layer | ✅ F1–F4 + MIL | Alta (post-D) |
 | **F** | Campaign Engine | 📋 | Alta |
 | **G** | Image Engine | 📋 | Media |
 | **H** | Publisher | 🔄 LI+FB parcial | Media |

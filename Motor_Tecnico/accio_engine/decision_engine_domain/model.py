@@ -90,6 +90,8 @@ class Recommendation:
     rejected_by: str | None = None
     executed_at: str | None = None
     result: dict[str, Any] | None = None
+    explain: dict[str, Any] | None = None
+    composed: dict[str, Any] | None = None
 
     def to_api_dict(self) -> dict[str, Any]:
         return {
@@ -119,6 +121,8 @@ class Recommendation:
             "rejected_by": self.rejected_by,
             "executed_at": self.executed_at,
             "result": self.result,
+            "explain": self.explain,
+            "composed": self.composed,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }

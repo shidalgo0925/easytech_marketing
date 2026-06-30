@@ -76,6 +76,8 @@ def recommendation_to_row(rec: Recommendation) -> dict[str, Any]:
         "rejected_by": rec.rejected_by,
         "executed_at": rec.executed_at,
         "result_json": json.dumps(rec.result) if rec.result is not None else None,
+        "explain_json": json.dumps(rec.explain, ensure_ascii=False) if rec.explain is not None else None,
+        "composed_json": json.dumps(rec.composed, ensure_ascii=False) if rec.composed is not None else None,
         "created_at": rec.created_at,
         "updated_at": rec.updated_at,
     }
@@ -108,6 +110,8 @@ def row_to_recommendation(row: Any) -> Recommendation:
         rejected_by=row["rejected_by"],
         executed_at=row["executed_at"],
         result=json.loads(row["result_json"]) if row["result_json"] else None,
+        explain=json.loads(row["explain_json"]) if "explain_json" in row.keys() and row["explain_json"] else None,
+        composed=json.loads(row["composed_json"]) if "composed_json" in row.keys() and row["composed_json"] else None,
         created_at=row["created_at"],
         updated_at=row["updated_at"],
     )

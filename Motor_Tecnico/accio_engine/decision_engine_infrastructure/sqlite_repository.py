@@ -36,6 +36,7 @@ class SqliteRecommendationRepository:
                   priority, priority_score, owner_role, owner_id, due_at,
                   status, source, confidence, justification_refs_json, dependencies_json,
                   created_by, approved_by, rejected_by, executed_at, result_json,
+                  explain_json, composed_json,
                   created_at, updated_at
                 ) VALUES (
                   :tenant_id, :recommendation_id, :company_id, :brand_id, :roadmap_id,
@@ -43,6 +44,7 @@ class SqliteRecommendationRepository:
                   :priority, :priority_score, :owner_role, :owner_id, :due_at,
                   :status, :source, :confidence, :justification_refs_json, :dependencies_json,
                   :created_by, :approved_by, :rejected_by, :executed_at, :result_json,
+                  :explain_json, :composed_json,
                   :created_at, :updated_at
                 )
                 """,
@@ -82,6 +84,8 @@ class SqliteRecommendationRepository:
                   rejected_by = :rejected_by,
                   executed_at = :executed_at,
                   result_json = :result_json,
+                  explain_json = :explain_json,
+                  composed_json = :composed_json,
                   updated_at = :updated_at
                 WHERE tenant_id = :tenant_id AND recommendation_id = :recommendation_id
                 """,

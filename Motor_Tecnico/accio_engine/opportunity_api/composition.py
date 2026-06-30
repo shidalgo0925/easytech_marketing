@@ -21,6 +21,7 @@ from Motor_Tecnico.accio_engine.opportunity_application.use_cases import (
 from Motor_Tecnico.accio_engine.opportunity_domain.promotion_service import OpportunityPromotionService
 from Motor_Tecnico.accio_engine.opportunity_domain.service import OpportunityDetectionService
 from Motor_Tecnico.accio_engine.opportunity_infrastructure.application_adapters import OpportunityRbacAdapter
+from Motor_Tecnico.accio_engine.opportunity_infrastructure.intelligence_bridge import OpportunityIntelligenceBridge
 from Motor_Tecnico.accio_engine.opportunity_infrastructure.knowledge_reader import CompositeOpportunityKnowledgeReader
 from Motor_Tecnico.accio_engine.opportunity_infrastructure.sqlite_repository import SqliteOpportunityRepository
 from Motor_Tecnico.accio_engine.platform_infrastructure.db import ensure_schema
@@ -42,22 +43,35 @@ def build_opportunity_promotion() -> OpportunityPromotionService:
     return OpportunityPromotionService(build_opportunity_repository())
 
 
+def build_opportunity_intelligence() -> OpportunityIntelligenceBridge:
+    return OpportunityIntelligenceBridge(CompositeOpportunityKnowledgeReader())
+
+
 class OpportunityUseCases:
     def __init__(self) -> None:
         detector = build_opportunity_detector()
         promotion = build_opportunity_promotion()
+        intelligence = build_opportunity_intelligence()
+        recommendations = build_recommendation_service()
         auth = OpportunityRbacAdapter()
         memory = get_memory_domain_service()
         de_auth = DecisionEngineRbacAdapter()
         create_recommendation = CreateRecommendationFromCandidate(
-            build_recommendation_service(),
+            recommendations,
             de_auth,
             memory,
         )
         self.detect_opportunities = DetectOpportunities(detector, auth, memory)
         self.list_opportunities = ListOpportunities(detector, auth)
         self.get_opportunity = GetOpportunity(detector, auth)
-        self.promote_opportunity = PromoteOpportunity(promotion, create_recommendation, auth, memory)
+        self.promote_opportunity = PromoteOpportunity(
+            promotion,
+            create_recommendation,
+            intelligence,
+            recommendations,
+            auth,
+            memory,
+        )
         self.dismiss_opportunity = DismissOpportunity(promotion, auth, memory)
         self.detect_and_promote = DetectAndPromoteOpportunities(
             self.detect_opportunities,

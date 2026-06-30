@@ -776,7 +776,7 @@
           const id = esc(o.opportunity_id);
           return `<article class="vs1-decision-item" data-opp-id="${id}">
             <p class="vs1-decision-item-title">${priorityPill(o.priority)}${esc(o.title)}</p>
-            <p class="vs1-decision-item-meta">${esc(o.sector || '')} · ${esc(o.product_slug || o.brand_id)} · ${esc(o.signal_type || '')}</p>
+            <p class="vs1-decision-item-meta">${esc(o.sector || '')} · ${esc(o.product_slug || o.brand_id)} · score ${esc(String(o.score ?? '—'))}</p>
             <div class="vs1-decision-item-actions">
               <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="promote-opp" data-id="${id}">Promover</button>
               <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="dismiss-opp" data-id="${id}">Descartar</button>
@@ -792,8 +792,9 @@
           const id = esc(r.recommendation_id);
           return `<article class="vs1-decision-item" data-rec-id="${id}">
             <p class="vs1-decision-item-title">${priorityPill(r.priority)}${esc(r.title)}</p>
-            <p class="vs1-decision-item-meta">${esc(r.brand_id)} · ${esc(r.action)} · ${esc(r.source || '')}</p>
+            <p class="vs1-decision-item-meta">${esc(r.brand_id)} · ${esc(r.action)} · score ${esc(String(Math.round((r.priority_score || 0) * 100)))}</p>
             <div class="vs1-decision-item-actions">
+              <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="explain-rec" data-id="${id}">¿Por qué?</button>
               <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="approve-rec" data-id="${id}">Aprobar</button>
               <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="enrich-rec" data-id="${id}">Enriquecer IA</button>
             </div>
@@ -817,6 +818,13 @@
             await tenantV1Api(`/opportunities/${encodeURIComponent(btn.dataset.id)}/dismiss`, { method: 'POST', body: '{}' });
             toast('Oportunidad descartada');
             await loadDecisionConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+      recList.querySelectorAll('[data-action="explain-rec"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await openRecommendationExplain(btn.dataset.id);
           } catch (e) { toast(e.message, true); }
         };
       });
@@ -860,6 +868,38 @@
         renderDecisionList(recList, [], e.message);
       }
     }
+  }
+
+  function closeExplainModal() {
+    const modal = $('vs1ExplainModal');
+    if (modal) modal.hidden = true;
+  }
+
+  async function openRecommendationExplain(recommendationId) {
+    const body = $('vs1ExplainBody');
+    const modal = $('vs1ExplainModal');
+    if (!body || !modal) return;
+    const resp = await tenantV1Api(`/recommendations/${encodeURIComponent(recommendationId)}/explain`);
+    const data = resp.data || {};
+    const explain = data.explain || {};
+    const composed = data.composed || {};
+    const ai = data.ai_enrichment || null;
+    const factors = explain.factors || {};
+    const rules = (explain.rules_triggered || []).map((r) => `<li>${esc(r.rule_id || r.signal_type || 'regla')}</li>`).join('');
+    const reasoning = (explain.reasoning || []).map((r) => `<li>${esc(r)}</li>`).join('');
+    const evidence = (composed.evidence || []).map((e) => `<li>${esc(e.type || '')}: ${esc(JSON.stringify(e))}</li>`).join('');
+    body.innerHTML = `
+      <div class="vs1-explain-grid">
+        <section><h4>Score</h4><p class="vs1-explain-score">${esc(String(explain.score ?? '—'))}</p><p>Prioridad: ${esc(explain.composed?.priority || composed.priority || '—')}</p></section>
+        <section><h4>Reglas disparadas</h4><ul>${rules || '<li>—</li>'}</ul></section>
+        <section><h4>Factores</h4><ul>${Object.entries(factors).map(([k,v]) => `<li>${esc(k)}: ${esc(String(v))}</li>`).join('') || '<li>—</li>'}</ul></section>
+        <section><h4>Razonamiento del motor</h4><ul>${reasoning || '<li>—</li>'}</ul></section>
+        <section><h4>Evidencias</h4><ul>${evidence || '<li>—</li>'}</ul></section>
+        <section><h4>Explicación IA</h4><p>${ai?.narrative ? esc(ai.narrative) : '<span class="vs1-muted">Sin enriquecimiento IA aún.</span>'}</p></section>
+      </div>`;
+    modal.hidden = false;
+    $('vs1ExplainClose').onclick = closeExplainModal;
+    $('vs1ExplainBackdrop').onclick = closeExplainModal;
   }
 
   function bindDecisionConsoleToolbar() {
