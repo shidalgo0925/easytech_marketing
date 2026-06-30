@@ -4,8 +4,10 @@
 **Visión:** Marketing OS — [EMACCION_PRODUCT_VISION_v2.2.md](EMACCION_PRODUCT_VISION_v2.2.md) **(CONGELADO)**  
 **Visión técnica (legacy):** Motor Comercial IA Multi-Tenant del Ecosistema EasyTech  
 **Versión:** 2.0  
-**Estado:** Plan Maestro — fuente de verdad estratégica  
+**Estado:** Plan Maestro histórico — **superseded por** [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md) v3.0 (prioridad estratégica jun 2026)  
 **Regla principal:** **No implementar una fase hasta cerrar completamente la anterior.**
+
+> **Seguimiento activo:** [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md) · [ROADMAP.md](ROADMAP.md)
 
 **Repo:** `github.com/shidalgo0925/easytech_marketing` · **VPS:** `/opt/easytech_marketing`  
 **Dashboard:** https://emaccion.etsrv.site/accio/dashboard/

@@ -264,7 +264,7 @@ Sitio referencia: https://relaticpanama.org/
 
 ## 11. Marketing OS — Decision Engine (M10)
 
-**Último commit plataforma:** `e8b7a53` (M4–M9) · **M10.1–M10.4** en working tree (jun 2026).
+**Último commit plataforma:** `91a482d` (M10.1–M10.4) · **Estrategia:** [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md)
 
 | Sub-fase | Estado | Módulo / API |
 |----------|--------|----------------|
@@ -273,9 +273,9 @@ Sitio referencia: https://relaticpanama.org/
 | M10.3 Recommendations | ✅ | schema v10 · `GET /api/v1/tenants/{id}/recommendations` |
 | M10.4 Daily Planner | ✅ | schema v11 · `POST/GET .../roadmaps/{date}` |
 | M10.5 Approval Queue | 📋 | approve / reject / snooze |
+| AI Provider Manager | 📋 🔴 | gate M11 — LiteLLM/CODITO |
+| M11 Marketing Brain | 📋 | IA enriquece recomendaciones |
+| M12 Business Intelligence | 📋 | ROI, CTA, horario, producto |
+| M13 Automation Brain | 📋 | ejecutar post-aprobación |
 
-**DB:** `Marketing/platform/marketing_os.db` (schemas v1–v11)  
-**Tests:** `tests/test_decision_engine_m101.py` … `m104.py` (15 tests)  
-**Sin IA en M10** — LLM queda para M11 Marketing Brain.
-
-**Operativo pendiente:** migraciones prod M4–M9 + `ACCIO_*_STORE=dual` + restart `easytech-accio-engine`.
+**Prioridad inmediata (v3):** migraciones prod M4–M9 → M10.5 → AI Provider → M11 → Opportunity Engine.

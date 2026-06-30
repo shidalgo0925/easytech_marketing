@@ -34,8 +34,12 @@
 | **—** | *Fin capa conocimiento* | — | — | M0–M9 completos |
 | **M10** | **Decision Engine** | — (nuevo) | `daily_roadmaps` + `recommendations` | Roadmap diario + aprobación; **reglas, sin IA** |
 | **M11** | Marketing Brain | — | — | IA enriquece Decision Engine; no reemplaza estructura |
+| **M12** | Business Intelligence | — | — | Analytics + BI gerencial; alimenta Brain |
+| **M13** | Automation Brain | — | — | Ejecuta acciones post-aprobación |
 
 **Orden obligatorio M1→M2→M3** antes de M4 (publications necesitan brand scope). M4–M9 cierran conocimiento. **M10+ = decisiones.**
+
+**Prioridad de mercado (Plan Maestro v3):** M10.5 → AI Provider → M11 → Opportunity → … → M12 → M13. Ver [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md).
 
 ### Gate post-M9
 

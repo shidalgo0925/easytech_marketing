@@ -20,13 +20,13 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 **Regla:** fase conceptual **cerrada** tras commit Constitución. Solo entregables técnicos verificables por sprint.
 
-**Plan maestro:** [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md) *(alineación pendiente — capa 4)*  
+**Plan maestro:** [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md) v3.0 *(propuesta estratégica — jun 2026)* · v2: [EMACCION_V2_PLAN_MAESTRO.md](EMACCION_V2_PLAN_MAESTRO.md)  
 **Estado vs código:** [EMACCION_V2_ESTADO.md](EMACCION_V2_ESTADO.md)  
 **Contexto operativo:** [EMACCION_CONTEXTO_OPERATIVO.md](EMACCION_CONTEXTO_OPERATIVO.md)  
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-30 · **M10.1–M10.4** implementados · **Siguiente:** M10.5 Approval Queue
+**Actualizado:** 2026-06-30 · **Plan Maestro v3** adoptado como prioridad estratégica · **Código:** M10.1–M10.4 ✅ · **Siguiente:** prod M4–M9 → M10.5 → AI Provider → M11
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -198,6 +198,20 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 |------|------------|
 | M11 | IA sobre Decision Engine (enriquece, no reemplaza) |
 
+**Gate:** AI Provider Manager operativo (Fase D Plan Maestro v3).
+
+---
+
+## Sprint 14+ — Extensiones Plan Maestro v3
+
+| Módulo | Plan Maestro | Objetivo |
+|--------|--------------|----------|
+| — | Fase F Opportunity Engine | Detectar oportunidades de negocio |
+| **M12** | Fases M + O BI | Medir, explicar, tableros gerencia |
+| **M13** | Fase K Automation Brain | Ejecutar acciones post-aprobación |
+
+Spec: pendiente GO por módulo. Ver [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md).
+
 ---
 
 ## Alineación a Product Vision v2.2
@@ -226,20 +240,34 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 
 ---
 
-## Prioridad actual (jun 2026)
+## Prioridad actual (jun 2026) — Plan Maestro v3
+
+Fuente: [EMACCION_PLAN_MAESTRO_v3.md](EMACCION_PLAN_MAESTRO_v3.md)
+
+| # | Prioridad | Entregable |
+|---|-----------|------------|
+| 🔴 1 | Ops | Migrar M4–M9 prod + `marketing_os.db` |
+| 🔴 2 | Ops | `ACCIO_*_STORE=dual` + restart servicio |
+| 🔴 3 | Código | **M10.5** Approval Queue |
+| 🔴 4 | Infra | **AI Provider Manager** (LiteLLM/CODITO → Ollama) |
+| 🔴 5 | Código | **M11** Marketing Brain |
+| 🟠 6 | Knowledge | Matriz producto-sector-necesidad |
+| 🟠 7 | Código | **Opportunity Engine** (Fase F) |
+| 🟡 8 | UI | Workspace/Console unificado |
+| 🟡 9 | Código | **M12** Business Intelligence + Analytics |
+| 🟢 10 | Futuro | **M13** Automation Brain + Learning continuo |
 
 ```
-Capa conocimiento M0–M9 ✅ commit e8b7a53
-M10 Decision Engine M10.1–M10.4 ✅ código + tests (15)
-M10.5 Approval Queue — siguiente
-M11 Marketing Brain — después de M10.5
+Capa conocimiento M0–M9 ✅ (commit e8b7a53)
+M10 Decision Engine M10.1–M10.4 ✅ (commit 91a482d)
+M10.5 → AI Provider → M11 → Opportunity → Campaign → M12 BI → M13 Automation
 ```
 
-**Regla activa:** gate conocimiento vs decisión · código M10 solo con GO por sub-fase.
+**Regla activa:** gate conocimiento vs decisión · IA solo tras Provider Manager unificado.
 
-**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — Console muestra DailyRoadmap + Recommendations.
+**Principio permanente:** [WORKSPACE_SHELL.md](WORKSPACE_SHELL.md) — Console muestra DailyRoadmap + Recommendations + Approval.
 
-**Forma de trabajo:** M10 = producto · reglas antes de IA · Memory en cada transición.
+**Forma de trabajo:** reglas antes de IA · Memory en cada transición · *¿ayuda a vender más?*
 
 ---
 
