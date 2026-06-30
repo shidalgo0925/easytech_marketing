@@ -116,6 +116,31 @@
               <div class="vs1-task-body panel-body accio-card-body" id="vs1DraftPlans"></div>
             </div>
           </section>
+
+          <section class="vs1-decision-console accio-card panel" id="vs1DecisionConsole" aria-label="Motor de decisiones">
+            <div class="vs1-decision-head panel-header">
+              <div>
+                <h2 class="vs1-section-head panel-title" style="margin:0">Motor de decisiones</h2>
+                <p class="vs1-page-sub" style="margin:4px 0 0">Oportunidades → recomendaciones → aprobación</p>
+              </div>
+              <div class="vs1-decision-toolbar">
+                <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1OppDetectBtn">Detectar</button>
+                <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1OppPromoteHighBtn">Promover alta</button>
+                <button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" id="vs1RoadmapGenBtn">Roadmap hoy</button>
+              </div>
+            </div>
+            <div class="vs1-decision-grid panel-body accio-card-body">
+              <div class="vs1-decision-col">
+                <h3 class="vs1-decision-col-title">Oportunidades detectadas</h3>
+                <div id="vs1OppList" class="vs1-decision-list"></div>
+              </div>
+              <div class="vs1-decision-col">
+                <h3 class="vs1-decision-col-title">Cola de aprobación</h3>
+                <div id="vs1RecList" class="vs1-decision-list"></div>
+              </div>
+            </div>
+            <p class="vs1-ts" id="vs1RoadmapSummary" hidden></p>
+          </section>
         </div>
 
         <!-- Plan (área estratégica) -->

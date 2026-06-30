@@ -533,6 +533,7 @@
     } catch (e) {
       renderPendingAttention(pendingAssistantOrders, []);
     }
+    await loadDecisionConsole();
   }
 
   function pickNextAction(posts, ctxPct) {
@@ -716,6 +717,186 @@
       throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
     }
     return data;
+  }
+
+  async function tenantV1Api(path, opts = {}) {
+    const res = await fetch(`/api/v1/tenants/${encodeURIComponent(TENANT_ID)}${path}`, {
+      ...opts,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Accio-Tenant': TENANT_ID,
+        ...(opts.headers || {}),
+      },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      location.href = `/accio/login/?next=${encodeURIComponent(location.pathname)}`;
+      throw new Error('Sesión expirada');
+    }
+    if (!res.ok) {
+      const msg = data.message || data.error?.message || data.error || res.statusText;
+      throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    }
+    return data;
+  }
+
+  function priorityPill(priority) {
+    const p = String(priority || 'medium').toLowerCase();
+    const cls = p === 'high' ? 'is-high' : p === 'low' ? 'is-low' : 'is-medium';
+    return `<span class="vs1-priority-pill ${cls}">${esc(p)}</span>`;
+  }
+
+  function renderDecisionList(el, rows, emptyText) {
+    if (!el) return;
+    if (!rows || !rows.length) {
+      el.innerHTML = `<p class="vs1-muted">${esc(emptyText)}</p>`;
+      return;
+    }
+    el.innerHTML = rows.join('');
+  }
+
+  async function loadDecisionConsole() {
+    const oppList = $('vs1OppList');
+    const recList = $('vs1RecList');
+    const roadmapSummary = $('vs1RoadmapSummary');
+    if (!oppList || !recList) return;
+
+    try {
+      const [oppResp, recResp] = await Promise.all([
+        tenantV1Api('/opportunities?status=detected&limit=20'),
+        tenantV1Api('/recommendations?status=pending_approval&limit=20'),
+      ]);
+      const opps = oppResp.data || [];
+      const recs = recResp.data || [];
+
+      renderDecisionList(
+        oppList,
+        opps.map((o) => {
+          const id = esc(o.opportunity_id);
+          return `<article class="vs1-decision-item" data-opp-id="${id}">
+            <p class="vs1-decision-item-title">${priorityPill(o.priority)}${esc(o.title)}</p>
+            <p class="vs1-decision-item-meta">${esc(o.sector || '')} · ${esc(o.product_slug || o.brand_id)} · ${esc(o.signal_type || '')}</p>
+            <div class="vs1-decision-item-actions">
+              <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="promote-opp" data-id="${id}">Promover</button>
+              <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="dismiss-opp" data-id="${id}">Descartar</button>
+            </div>
+          </article>`;
+        }),
+        'Sin oportunidades pendientes. Usa «Detectar» para escanear señales.',
+      );
+
+      renderDecisionList(
+        recList,
+        recs.map((r) => {
+          const id = esc(r.recommendation_id);
+          return `<article class="vs1-decision-item" data-rec-id="${id}">
+            <p class="vs1-decision-item-title">${priorityPill(r.priority)}${esc(r.title)}</p>
+            <p class="vs1-decision-item-meta">${esc(r.brand_id)} · ${esc(r.action)} · ${esc(r.source || '')}</p>
+            <div class="vs1-decision-item-actions">
+              <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="approve-rec" data-id="${id}">Aprobar</button>
+              <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="enrich-rec" data-id="${id}">Enriquecer IA</button>
+            </div>
+          </article>`;
+        }),
+        'Cola vacía. Promueve oportunidades o genera el roadmap del día.',
+      );
+
+      oppList.querySelectorAll('[data-action="promote-opp"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/opportunities/${encodeURIComponent(btn.dataset.id)}/promote`, { method: 'POST', body: '{}' });
+            toast('Oportunidad promovida a recomendación');
+            await loadDecisionConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+      oppList.querySelectorAll('[data-action="dismiss-opp"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/opportunities/${encodeURIComponent(btn.dataset.id)}/dismiss`, { method: 'POST', body: '{}' });
+            toast('Oportunidad descartada');
+            await loadDecisionConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+      recList.querySelectorAll('[data-action="approve-rec"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/recommendations/${encodeURIComponent(btn.dataset.id)}/approve`, { method: 'POST', body: '{}' });
+            toast('Recomendación aprobada');
+            await loadDecisionConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+      recList.querySelectorAll('[data-action="enrich-rec"]').forEach((btn) => {
+        btn.onclick = async () => {
+          try {
+            await tenantV1Api(`/recommendations/${encodeURIComponent(btn.dataset.id)}/enrich`, {
+              method: 'POST',
+              body: JSON.stringify({ persist: true }),
+            });
+            toast('Recomendación enriquecida con IA');
+            await loadDecisionConsole();
+          } catch (e) { toast(e.message, true); }
+        };
+      });
+
+      try {
+        const roadmap = await tenantV1Api('/roadmaps/today');
+        const summary = roadmap.data?.summary || {};
+        if (roadmapSummary && summary.total) {
+          roadmapSummary.hidden = false;
+          roadmapSummary.textContent = `Roadmap hoy: ${summary.total} recomendación(es) · alta: ${summary.by_priority?.high || 0}`;
+        } else if (roadmapSummary) {
+          roadmapSummary.hidden = true;
+        }
+      } catch (_) {
+        if (roadmapSummary) roadmapSummary.hidden = true;
+      }
+    } catch (e) {
+      if (e.message !== 'Sesión expirada') {
+        renderDecisionList(oppList, [], 'Motor de decisiones no disponible.');
+        renderDecisionList(recList, [], e.message);
+      }
+    }
+  }
+
+  function bindDecisionConsoleToolbar() {
+    const detectBtn = $('vs1OppDetectBtn');
+    const promoteHighBtn = $('vs1OppPromoteHighBtn');
+    const roadmapBtn = $('vs1RoadmapGenBtn');
+    if (detectBtn) {
+      detectBtn.onclick = async () => {
+        try {
+          const resp = await tenantV1Api('/opportunities/detect', { method: 'POST', body: '{}' });
+          toast(`Detectadas: ${resp.data.created_count} nuevas, ${resp.data.updated_count} actualizadas`);
+          await loadDecisionConsole();
+        } catch (e) { toast(e.message, true); }
+      };
+    }
+    if (promoteHighBtn) {
+      promoteHighBtn.onclick = async () => {
+        try {
+          const resp = await tenantV1Api('/opportunities/detect-and-promote', {
+            method: 'POST',
+            body: JSON.stringify({ priority: 'high', limit: 10 }),
+          });
+          toast(`Promovidas: ${resp.data.promoted_count} recomendación(es)`);
+          await loadDecisionConsole();
+        } catch (e) { toast(e.message, true); }
+      };
+    }
+    if (roadmapBtn) {
+      roadmapBtn.onclick = async () => {
+        try {
+          const resp = await tenantV1Api('/roadmaps/today/generate', { method: 'POST', body: '{}' });
+          const n = resp.data?.recommendations?.length || resp.data?.summary?.total || 0;
+          toast(`Roadmap del día: ${n} recomendación(es)`);
+          await loadDecisionConsole();
+        } catch (e) { toast(e.message, true); }
+      };
+    }
   }
 
   function renderGlobalStrategyBanner() {
@@ -1473,6 +1654,7 @@
     initNav();
     initWizardNav();
     initTopActions();
+    bindDecisionConsoleToolbar();
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && $('vs1ReviewModal') && !$('vs1ReviewModal').hidden) closeReviewModal();
     });

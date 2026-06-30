@@ -16,6 +16,7 @@ from .schema_v8_media_assets import _MEDIA_ASSETS_DDL
 from .schema_v9_leads import _LEADS_DDL
 from .schema_v10_recommendations import _RECOMMENDATIONS_DDL
 from .schema_v11_daily_roadmaps import _DAILY_ROADMAPS_DDL
+from .schema_v12_opportunities import _OPPORTUNITIES_DDL
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 DEFAULT_DB_PATH = BASE_DIR / "Marketing" / "platform" / "marketing_os.db"
@@ -59,6 +60,7 @@ _SCHEMA_SCRIPTS: dict[int, str] = {
     9: _LEADS_DDL,
     10: _RECOMMENDATIONS_DDL,
     11: _DAILY_ROADMAPS_DDL,
+    12: _OPPORTUNITIES_DDL,
 }
 
 

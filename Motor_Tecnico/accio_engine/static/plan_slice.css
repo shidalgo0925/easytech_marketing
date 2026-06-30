@@ -754,6 +754,89 @@
 
 .vs1-task-body { min-height: 120px; }
 
+/* Motor de decisiones — Console workspace */
+.vs1-decision-console {
+  margin-top: var(--space-xl);
+}
+
+.vs1-decision-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 0.5px solid var(--border);
+}
+
+.vs1-decision-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.vs1-decision-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  margin-top: var(--space-lg);
+}
+
+.vs1-decision-col-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 var(--space-md);
+  color: var(--text-primary);
+}
+
+.vs1-decision-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-height: 80px;
+}
+
+.vs1-decision-item {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--bg-elevated);
+}
+
+.vs1-decision-item-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 4px;
+  color: var(--text-primary);
+}
+
+.vs1-decision-item-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-sm);
+  line-height: 1.4;
+}
+
+.vs1-decision-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.vs1-priority-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border);
+  margin-right: 6px;
+}
+
+.vs1-priority-pill.is-high { color: var(--danger); border-color: var(--danger-border); background: var(--danger-bg); }
+.vs1-priority-pill.is-medium { color: var(--warning); border-color: var(--warning-border); background: var(--warning-bg); }
+.vs1-priority-pill.is-low { color: var(--text-muted); }
+
 .vs1-queue-list,
 .vs1-draft-list {
   list-style: none;
@@ -1754,6 +1837,7 @@
   .vs1-wizard-steps { width: 100%; position: static; max-height: none; }
   .vs1-signals-grid { grid-template-columns: 1fr 1fr; }
   .vs1-tasks-grid { grid-template-columns: 1fr; }
+  .vs1-decision-grid { grid-template-columns: 1fr; }
   .vs1-grid-2 { grid-template-columns: 1fr; }
   .vs1-proposal-layout { flex-direction: column; }
   .vs1-proposal-aside { width: 100%; position: static; }

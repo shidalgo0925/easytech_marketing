@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "updated_at": "2026-06-30",
+  "sectors": [
+    {
+      "sector_id": "educacion_superior",
+      "label": "Educación superior",
+      "keywords": ["universidad", "congreso", "tesis", "académico", "facultad", "posgrado"],
+      "products": [
+        {
+          "slug": "en1",
+          "name": "EN1",
+          "needs": ["gestión académica", "eventos", "plataforma unificada"],
+          "cta": "DEMO",
+          "landing_path": "https://n8n.etsrv.site/en1/"
+        },
+        {
+          "slug": "eclassone",
+          "name": "EClassOne",
+          "needs": ["matrícula", "notas", "aula virtual"],
+          "cta": "DEMO",
+          "landing_path": "https://n8n.etsrv.site/eclassone/"
+        }
+      ]
+    },
+    {
+      "sector_id": "retail",
+      "label": "Retail y comercio",
+      "keywords": ["pos", "inventario", "tienda", "retail", "punto de venta", "restaurante"],
+      "products": [
+        {
+          "slug": "eposone",
+          "name": "ePOSOne",
+          "needs": ["punto de venta", "inventario", "facturación en caja"],
+          "cta": "DIAGNÓSTICO",
+          "landing_path": "https://n8n.etsrv.site/eposone/"
+        }
+      ]
+    },
+    {
+      "sector_id": "rrhh",
+      "label": "Recursos humanos",
+      "keywords": ["planilla", "nómina", "css", "recursos humanos", "quincena", "salario"],
+      "products": [
+        {
+          "slug": "epayroll",
+          "name": "EPayRoll",
+          "needs": ["planilla", "nómina", "cumplimiento laboral"],
+          "cta": "PLANILLA",
+          "landing_path": "https://n8n.etsrv.site/epayroll/"
+        }
+      ]
+    },
+    {
+      "sector_id": "pyme_general",
+      "label": "PYME general",
+      "keywords": ["erp", "facturación electrónica", "fe", "integración", "pyme", "empresa"],
+      "products": [
+        {
+          "slug": "odoo-fe",
+          "name": "Odoo + FE",
+          "needs": ["erp", "facturación electrónica", "procesos integrados"],
+          "cta": "DIAGNÓSTICO",
+          "landing_path": "https://n8n.etsrv.site/guia/"
+        }
+      ]
+    },
+    {
+      "sector_id": "servicios",
+      "label": "Servicios B2B",
+      "keywords": ["crm", "servicios", "consultoría", "b2b", "plataforma", "automatización"],
+      "products": [
+        {
+          "slug": "en1",
+          "name": "EN1",
+          "needs": ["plataforma unificada", "crm", "operaciones"],
+          "cta": "DEMO",
+          "landing_path": "https://n8n.etsrv.site/en1/"
+        },
+        {
+          "slug": "default",
+          "name": "EasyTech",
+          "needs": ["transformación digital", "diagnóstico"],
+          "cta": "DIAGNÓSTICO",
+          "landing_path": "https://n8n.etsrv.site/guia/"
+        }
+      ]
+    },
+    {
+      "sector_id": "edtech_k12",
+      "label": "EdTech K-12",
+      "keywords": ["colegio", "k-12", "escuela", "matrícula escolar", "notas escolares"],
+      "products": [
+        {
+          "slug": "eclassone",
+          "name": "EClassOne",
+          "needs": ["gestión escolar", "comunicación padres"],
+          "cta": "DEMO",
+          "landing_path": "https://n8n.etsrv.site/eclassone/"
+        }
+      ]
+    }
+  ],
+  "brand_defaults": {
+    "default": {"sector_id": "servicios", "product_slug": "default"},
+    "en1": {"sector_id": "servicios", "product_slug": "en1"},
+    "eposone": {"sector_id": "retail", "product_slug": "eposone"},
+    "epayroll": {"sector_id": "rrhh", "product_slug": "epayroll"},
+    "eclassone": {"sector_id": "edtech_k12", "product_slug": "eclassone"},
+    "ethesisone": {"sector_id": "educacion_superior", "product_slug": "ethesisone"},
+    "odoo-fe": {"sector_id": "pyme_general", "product_slug": "odoo-fe"},
+    "consultoria": {"sector_id": "servicios", "product_slug": "default"},
+    "desarrollo": {"sector_id": "servicios", "product_slug": "default"}
+  }
+}
