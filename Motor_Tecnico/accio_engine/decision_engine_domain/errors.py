@@ -28,3 +28,30 @@ class DailyRoadmapNotFound(DecisionEngineError):
             f"Roadmap no encontrado para la fecha: {roadmap_date}",
             http_status=404,
         )
+
+
+class InvalidRecommendationTransition(DecisionEngineError):
+    def __init__(self, recommendation_id: str, status: str, action: str) -> None:
+        super().__init__(
+            "invalid_recommendation_transition",
+            f"No se puede {action} recomendación {recommendation_id} en estado {status}",
+            http_status=409,
+        )
+
+
+class RejectionReasonRequired(DecisionEngineError):
+    def __init__(self) -> None:
+        super().__init__(
+            "rejection_reason_required",
+            "El rechazo exige un motivo (reason)",
+            http_status=400,
+        )
+
+
+class SnoozeUntilRequired(DecisionEngineError):
+    def __init__(self) -> None:
+        super().__init__(
+            "snooze_until_required",
+            "Posponer exige fecha until (ISO-8601)",
+            http_status=400,
+        )

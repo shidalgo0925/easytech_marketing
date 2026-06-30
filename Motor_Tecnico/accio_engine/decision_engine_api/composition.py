@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from Motor_Tecnico.accio_engine.decision_engine_application.context import TenantContext
 from Motor_Tecnico.accio_engine.decision_engine_application.use_cases import (
+    ApproveRecommendation,
     BuildRecommendationCandidates,
     CreateRecommendationFromCandidate,
     GenerateDailyRoadmap,
     GetDailyRoadmap,
     GetRecommendation,
     ListRecommendations,
+    RejectRecommendation,
+    SnoozeRecommendation,
 )
 from Motor_Tecnico.accio_engine.decision_engine_domain.daily_roadmap_service import DailyRoadmapDomainService
 from Motor_Tecnico.accio_engine.decision_engine_domain.recommendation_service import RecommendationDomainService
@@ -49,6 +52,9 @@ class DecisionEngineUseCases:
         self.get_recommendation = GetRecommendation(recommendations, auth)
         self.generate_daily_roadmap = GenerateDailyRoadmap(roadmaps, auth, memory)
         self.get_daily_roadmap = GetDailyRoadmap(roadmaps, auth)
+        self.approve_recommendation = ApproveRecommendation(recommendations, auth, memory)
+        self.reject_recommendation = RejectRecommendation(recommendations, auth, memory)
+        self.snooze_recommendation = SnoozeRecommendation(recommendations, auth)
 
 
 _USE_CASES: DecisionEngineUseCases | None = None

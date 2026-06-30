@@ -66,3 +66,65 @@ def record_daily_roadmap_generated(
             summary=f"Roadmap diario generado: {roadmap.roadmap_date} ({recommendation_count} recomendaciones)",
         )
     )
+
+
+def record_recommendation_accepted(
+    memory: CorporateMemoryDomainService | None,
+    *,
+    recommendation: Recommendation,
+    actor_id: str,
+) -> None:
+    if memory is None:
+        return
+    memory.record(
+        MemoryEvent(
+            event_id="",
+            tenant_id=recommendation.tenant_id,
+            brand_id=recommendation.brand_id,
+            event_type="RecommendationAccepted",
+            actor=Actor(type="user", id=actor_id),
+            timestamp="",
+            entity_refs=(
+                EntityRef(type="Recommendation", id=recommendation.recommendation_id),
+                EntityRef(type="Brand", id=recommendation.brand_id),
+            ),
+            payload={
+                "title": recommendation.title,
+                "action": recommendation.action,
+                "status": recommendation.status,
+            },
+            summary=f"Recomendación aprobada: {recommendation.title}",
+        )
+    )
+
+
+def record_recommendation_rejected(
+    memory: CorporateMemoryDomainService | None,
+    *,
+    recommendation: Recommendation,
+    actor_id: str,
+    reason: str,
+) -> None:
+    if memory is None:
+        return
+    memory.record(
+        MemoryEvent(
+            event_id="",
+            tenant_id=recommendation.tenant_id,
+            brand_id=recommendation.brand_id,
+            event_type="RecommendationRejected",
+            actor=Actor(type="user", id=actor_id),
+            timestamp="",
+            entity_refs=(
+                EntityRef(type="Recommendation", id=recommendation.recommendation_id),
+                EntityRef(type="Brand", id=recommendation.brand_id),
+            ),
+            payload={
+                "title": recommendation.title,
+                "action": recommendation.action,
+                "status": recommendation.status,
+                "reason": reason,
+            },
+            summary=f"Recomendación rechazada: {recommendation.title}",
+        )
+    )

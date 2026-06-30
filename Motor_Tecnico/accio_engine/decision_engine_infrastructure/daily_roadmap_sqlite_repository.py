@@ -42,6 +42,26 @@ class SqliteDailyRoadmapRepository:
             if self._external is None:
                 conn.close()
 
+    def update(self, roadmap: DailyRoadmap) -> None:
+        conn = self._conn()
+        try:
+            conn.execute(
+                """
+                UPDATE daily_roadmaps SET
+                  company_id = :company_id,
+                  roadmap_date = :roadmap_date,
+                  generated_at = :generated_at,
+                  generator_version = :generator_version,
+                  summary_json = :summary_json
+                WHERE tenant_id = :tenant_id AND roadmap_id = :roadmap_id
+                """,
+                roadmap_to_row(roadmap),
+            )
+            conn.commit()
+        finally:
+            if self._external is None:
+                conn.close()
+
     def get_by_date(self, tenant_id: str, company_id: str, roadmap_date: str) -> DailyRoadmap | None:
         conn = self._conn()
         try:

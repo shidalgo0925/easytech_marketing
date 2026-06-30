@@ -96,3 +96,20 @@ class DailyRoadmapDomainService:
         )
         self._roadmaps.save(roadmap)
         return DailyRoadmapBundle(roadmap=roadmap, recommendations=persisted, created=True)
+
+    def apply_ai_enrichment_summary(
+        self,
+        tenant_id: str,
+        roadmap_id: str,
+        ai_summary: dict,
+    ) -> DailyRoadmap:
+        from dataclasses import replace
+
+        roadmap = self._roadmaps.get_by_id(tenant_id, roadmap_id)
+        if roadmap is None:
+            raise DailyRoadmapNotFound(roadmap_id)
+        summary = dict(roadmap.summary or {})
+        summary["ai_enrichment"] = ai_summary
+        updated = replace(roadmap, summary=summary)
+        self._roadmaps.update(updated)
+        return updated

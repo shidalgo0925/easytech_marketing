@@ -40,6 +40,38 @@ class AIProviderTests(unittest.TestCase):
         with mock.patch.dict(os.environ, {"AI_ASSISTANT_ENABLED": "true", "ACCIO_AI_BASE_URL": ""}, clear=True):
             self.assertFalse(ai_provider.llm_available("easytech", {"enabled": True}))
 
+    def test_assistant_enabled_env_false(self):
+        with mock.patch.dict(os.environ, {"AI_ASSISTANT_ENABLED": "false"}, clear=True):
+            self.assertFalse(ai_provider.assistant_enabled())
+
+    @mock.patch("Motor_Tecnico.accio_engine.ai_provider.manager.litellm_client.ping")
+    def test_provider_status_reachable(self, ping):
+        env = {"ACCIO_AI_BASE_URL": "http://codito:4000", "ACCIO_AI_PROVIDER": "litellm"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            ping.return_value = {"ok": True, "models": ["qwen2.5-coder:14b"]}
+            status = ai_provider.provider_status()
+        self.assertTrue(status["configured"])
+        self.assertTrue(status["reachable"])
+        self.assertEqual(status["provider"], "litellm")
+
+    @mock.patch("Motor_Tecnico.accio_engine.ai_provider.manager.litellm_client.chat_completions")
+    def test_chat_completion_returns_message(self, chat):
+        env = {
+            "ACCIO_AI_BASE_URL": "http://codito:4000",
+            "AI_ASSISTANT_ENABLED": "true",
+        }
+        chat.return_value = {
+            "choices": [{"message": {"role": "assistant", "content": "Hola"}}],
+            "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            msg, model, cost = ai_provider.chat_completion(
+                "easytech",
+                [{"role": "user", "content": "test"}],
+            )
+        self.assertEqual(msg["content"], "Hola")
+        self.assertIsNotNone(cost)
+
 
 if __name__ == "__main__":
     unittest.main()

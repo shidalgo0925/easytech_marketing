@@ -53,6 +53,47 @@ class SqliteRecommendationRepository:
             if self._external is None:
                 conn.close()
 
+    def update(self, recommendation: Recommendation) -> None:
+        conn = self._conn()
+        try:
+            conn.execute(
+                """
+                UPDATE recommendations SET
+                  company_id = :company_id,
+                  brand_id = :brand_id,
+                  roadmap_id = :roadmap_id,
+                  title = :title,
+                  description = :description,
+                  action = :action,
+                  reason = :reason,
+                  expected_roi = :expected_roi,
+                  priority = :priority,
+                  priority_score = :priority_score,
+                  owner_role = :owner_role,
+                  owner_id = :owner_id,
+                  due_at = :due_at,
+                  status = :status,
+                  source = :source,
+                  confidence = :confidence,
+                  justification_refs_json = :justification_refs_json,
+                  dependencies_json = :dependencies_json,
+                  created_by = :created_by,
+                  approved_by = :approved_by,
+                  rejected_by = :rejected_by,
+                  executed_at = :executed_at,
+                  result_json = :result_json,
+                  updated_at = :updated_at
+                WHERE tenant_id = :tenant_id AND recommendation_id = :recommendation_id
+                """,
+                recommendation_to_row(recommendation),
+            )
+            if conn.total_changes == 0:
+                raise ValueError(f"Recommendation not found for update: {recommendation.recommendation_id}")
+            conn.commit()
+        finally:
+            if self._external is None:
+                conn.close()
+
     def get(self, tenant_id: str, recommendation_id: str) -> Recommendation | None:
         conn = self._conn()
         try:

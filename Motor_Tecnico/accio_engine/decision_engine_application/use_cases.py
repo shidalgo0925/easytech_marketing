@@ -12,7 +12,9 @@ from Motor_Tecnico.accio_engine.decision_engine_domain.recommendation_service im
 from Motor_Tecnico.accio_engine.decision_engine_domain.service import RoadmapBuilderService
 from Motor_Tecnico.accio_engine.decision_engine_infrastructure.memory_bridge import (
     record_daily_roadmap_generated,
+    record_recommendation_accepted,
     record_recommendation_created,
+    record_recommendation_rejected,
 )
 from Motor_Tecnico.accio_engine.memory_domain.service import CorporateMemoryDomainService
 from Motor_Tecnico.accio_engine.platform_infrastructure.db import memory_sql_enabled
@@ -141,5 +143,94 @@ class GetDailyRoadmap:
         self._authorization.require_permission(ctx, "read")
         try:
             return self._roadmaps.get_daily_roadmap(ctx.tenant_id, roadmap_date)
+        except DecisionEngineError as exc:
+            raise ApplicationError.from_domain(exc) from exc
+
+
+class ApproveRecommendation:
+    """M10.5 — pending_approval|snoozed → approved."""
+
+    def __init__(
+        self,
+        recommendations: RecommendationDomainService,
+        authorization: AuthorizationPort,
+        memory: CorporateMemoryDomainService | None = None,
+    ) -> None:
+        self._recommendations = recommendations
+        self._authorization = authorization
+        self._memory = memory if memory_sql_enabled() else None
+
+    def __call__(self, ctx: TenantContext, recommendation_id: str, *, actor_id: str) -> Recommendation:
+        self._authorization.require_permission(ctx, "write")
+        try:
+            row = self._recommendations.approve_recommendation(
+                ctx.tenant_id,
+                recommendation_id,
+                actor_id=actor_id,
+            )
+        except DecisionEngineError as exc:
+            raise ApplicationError.from_domain(exc) from exc
+        record_recommendation_accepted(self._memory, recommendation=row, actor_id=actor_id)
+        return row
+
+
+class RejectRecommendation:
+    """M10.5 — reject with mandatory reason."""
+
+    def __init__(
+        self,
+        recommendations: RecommendationDomainService,
+        authorization: AuthorizationPort,
+        memory: CorporateMemoryDomainService | None = None,
+    ) -> None:
+        self._recommendations = recommendations
+        self._authorization = authorization
+        self._memory = memory if memory_sql_enabled() else None
+
+    def __call__(
+        self,
+        ctx: TenantContext,
+        recommendation_id: str,
+        *,
+        actor_id: str,
+        reason: str,
+    ) -> Recommendation:
+        self._authorization.require_permission(ctx, "write")
+        try:
+            row = self._recommendations.reject_recommendation(
+                ctx.tenant_id,
+                recommendation_id,
+                actor_id=actor_id,
+                reason=reason,
+            )
+        except DecisionEngineError as exc:
+            raise ApplicationError.from_domain(exc) from exc
+        record_recommendation_rejected(self._memory, recommendation=row, actor_id=actor_id, reason=reason)
+        return row
+
+
+class SnoozeRecommendation:
+    """M10.5 — postpone until ISO date."""
+
+    def __init__(self, recommendations: RecommendationDomainService, authorization: AuthorizationPort) -> None:
+        self._recommendations = recommendations
+        self._authorization = authorization
+
+    def __call__(
+        self,
+        ctx: TenantContext,
+        recommendation_id: str,
+        *,
+        actor_id: str,
+        until: str,
+    ) -> Recommendation:
+        self._authorization.require_permission(ctx, "write")
+        try:
+            return self._recommendations.snooze_recommendation(
+                ctx.tenant_id,
+                recommendation_id,
+                actor_id=actor_id,
+                until=until,
+            )
         except DecisionEngineError as exc:
             raise ApplicationError.from_domain(exc) from exc

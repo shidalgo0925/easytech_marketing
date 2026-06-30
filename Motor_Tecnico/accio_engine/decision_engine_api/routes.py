@@ -37,6 +37,12 @@ def _roadmap_response(bundle: DailyRoadmapBundle) -> dict:
     return bundle.roadmap.to_api_dict(recommendations=bundle.recommendations)
 
 
+def _actor_id() -> str:
+    from flask import session
+
+    return str(session.get("user_id") or "system")
+
+
 def register_decision_engine_api(app, auth_decorator) -> None:
     base = "/api/v1/tenants/<tenant_id>/recommendations"
     roadmap_base = "/api/v1/tenants/<tenant_id>/roadmaps"
@@ -109,3 +115,49 @@ def register_decision_engine_api(app, auth_decorator) -> None:
         ctx = tenant_context(tenant_id)
         bundle = decision_engine_use_cases().get_daily_roadmap(ctx, roadmap_date)
         return _success(_roadmap_response(bundle))
+
+    @app.post(f"{base}/<recommendation_id>/approve")
+    @auth_decorator
+    @_handle
+    def api_approve_recommendation(tenant_id: str, recommendation_id: str):
+        ctx = tenant_context(tenant_id)
+        row = decision_engine_use_cases().approve_recommendation(
+            ctx,
+            recommendation_id,
+            actor_id=_actor_id(),
+        )
+        return _success(_recommendation_response(row))
+
+    @app.post(f"{base}/<recommendation_id>/reject")
+    @auth_decorator
+    @_handle
+    def api_reject_recommendation(tenant_id: str, recommendation_id: str):
+        from flask import request
+
+        body = request.get_json(silent=True) or {}
+        reason = str(body.get("reason") or "")
+        ctx = tenant_context(tenant_id)
+        row = decision_engine_use_cases().reject_recommendation(
+            ctx,
+            recommendation_id,
+            actor_id=_actor_id(),
+            reason=reason,
+        )
+        return _success(_recommendation_response(row))
+
+    @app.post(f"{base}/<recommendation_id>/snooze")
+    @auth_decorator
+    @_handle
+    def api_snooze_recommendation(tenant_id: str, recommendation_id: str):
+        from flask import request
+
+        body = request.get_json(silent=True) or {}
+        until = str(body.get("until") or "")
+        ctx = tenant_context(tenant_id)
+        row = decision_engine_use_cases().snooze_recommendation(
+            ctx,
+            recommendation_id,
+            actor_id=_actor_id(),
+            until=until,
+        )
+        return _success(_recommendation_response(row))
