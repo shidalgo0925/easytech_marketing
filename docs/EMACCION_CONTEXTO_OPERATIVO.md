@@ -278,12 +278,13 @@ Sitio referencia: https://relaticpanama.org/
 | Marketing Intelligence Layer | ✅ | `docs/MARKETING_INTELLIGENCE_LAYER.md` · scorer + composer + explain |
 | Campaign Engine | ✅ | `docs/CAMPAIGN_ENGINE.md` · planner + builder + explain |
 | Content Engine | ✅ | `docs/CONTENT_ENGINE.md` · planner + builder + explain · schema v15 |
+| VS2 Primera campaña publicada | ✅ | `docs/VS2_PRIMERA_CAMPANA_PUBLICADA.md` · approve → queue → LinkedIn |
 | M11 Marketing Brain | ✅ | IA enriquece con contexto + estructura composed |
 | Opportunity Engine F1–F4 | ✅ | detect → promote → roadmap → enrich |
 | M12 Business Intelligence | 📋 | ROI, CTA, horario, producto |
 | M13 Automation Brain | 📋 | ejecutar post-aprobación |
 
-**Prioridad inmediata (v3):** Publisher + Approval Queue editorial (post-Content Engine).
+**Prioridad inmediata (v3):** Demo VS2 en prod · luego M12 BI o conectores adicionales.
 
 ---
 

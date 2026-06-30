@@ -10,11 +10,17 @@ CONTENT_STATUSES = frozenset(
         "draft",
         "pending_approval",
         "approved",
-        "scheduled",
+        "rejected",
+        "queued",
+        "publishing",
         "published",
+        "failed",
         "archived",
+        "scheduled",
         "cancelled",
     }
 )
+
+PUBLISH_QUEUE_STATUSES = frozenset({"queued", "publishing", "failed", "published"})
 
 CONTENT_FORMATS = frozenset({"post", "article", "carousel", "email", "whatsapp", "script"})

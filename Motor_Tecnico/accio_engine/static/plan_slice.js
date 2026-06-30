@@ -913,6 +913,7 @@
             <div class="vs1-decision-item-actions">
               <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="explain-camp" data-id="${id}">¿Por qué?</button>
               ${c.status === 'approved' ? `<button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" data-action="gen-content" data-id="${id}">Generar contenido</button>` : ''}
+              <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="view-contents" data-id="${id}">Ver contenidos</button>
               <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="enrich-camp" data-id="${id}">IA</button>
               <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="approve-camp" data-id="${id}">Aprobar</button>
             </div>
@@ -963,8 +964,17 @@
           try {
             await tenantV1Api(`/content/from-campaign/${encodeURIComponent(btn.dataset.id)}`, { method: 'POST', body: '{}' });
             toast('Contenido generado');
+            contentCampaignFilter = btn.dataset.id;
             await loadContentConsole();
           } catch (e) { toast(e.message, true); }
+        };
+      });
+      campList.querySelectorAll('[data-action="view-contents"]').forEach((btn) => {
+        btn.onclick = async () => {
+          contentCampaignFilter = btn.dataset.id;
+          await loadContentConsole();
+          const col = $('vs1ContentList');
+          if (col) col.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         };
       });
 
@@ -980,44 +990,208 @@
     }
   }
 
+  let contentCampaignFilter = null;
+
+  function contentStatusBadge(status, publishStatus) {
+    const labels = {
+      draft: 'Borrador',
+      pending_approval: 'Pendiente',
+      approved: 'Aprobado',
+      rejected: 'Rechazado',
+      queued: 'En cola',
+      publishing: 'Publicando…',
+      published: publishStatus === 'dry_run' ? 'Publicado (dry-run)' : 'Publicado',
+      failed: 'Falló',
+      archived: 'Archivado',
+    };
+    const label = labels[status] || status;
+    const cls = status === 'published' ? 'vs1-badge--ok'
+      : status === 'failed' ? 'vs1-badge--err'
+      : status === 'queued' || status === 'approved' ? 'vs1-badge--warn'
+      : 'vs1-muted';
+    return `<span class="vs1-badge ${cls}">${esc(label)}</span>`;
+  }
+
+  function contentActionButtons(c) {
+    const id = esc(c.content_id);
+    const st = c.status;
+    const parts = [
+      `<button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="explain-content" data-id="${id}">¿Por qué?</button>`,
+    ];
+    if (st === 'draft' || st === 'pending_approval') {
+      parts.push(`<button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="approve-content" data-id="${id}">Aprobar</button>`);
+      parts.push(`<button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="reject-content" data-id="${id}">Rechazar</button>`);
+    }
+    if (st === 'approved') {
+      parts.push(`<button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" data-action="queue-content" data-id="${id}">Enviar a cola</button>`);
+      parts.push(`<button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="publish-content" data-id="${id}">Publicar ahora</button>`);
+    }
+    if (st === 'queued') {
+      parts.push(`<button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="publish-content" data-id="${id}">Publicar ahora</button>`);
+    }
+    if (st === 'published') {
+      parts.push(`<button type="button" class="vs1-btn vs1-btn--secondary vs1-btn--sm" data-action="result-content" data-id="${id}">Ver resultado</button>`);
+    }
+    if (st === 'failed') {
+      parts.push(`<button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="result-content" data-id="${id}">Ver error</button>`);
+      parts.push(`<button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="publish-content" data-id="${id}">Reintentar</button>`);
+    }
+    parts.push(`<button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="history-content" data-id="${id}">Auditoría</button>`);
+    return parts.join('');
+  }
+
   async function loadContentConsole() {
     const list = $('vs1ContentList');
     if (!list) return;
     try {
-      const resp = await tenantV1Api('/content?limit=20');
+      const q = contentCampaignFilter
+        ? `/content?limit=20&campaign_id=${encodeURIComponent(contentCampaignFilter)}`
+        : '/content?limit=20';
+      const resp = await tenantV1Api(q);
       const rows = resp.data || [];
+      const filterHint = contentCampaignFilter
+        ? `<p class="vs1-muted vs1-content-filter">Filtrando campaña ${esc(contentCampaignFilter)} · <button type="button" class="vs1-link-btn" id="vs1ClearContentFilter">Ver todo</button></p>`
+        : '';
       renderDecisionList(
         list,
         rows.map((c) => {
           const id = esc(c.content_id);
-          return `<article class="vs1-decision-item">
+          const urlLine = c.external_url
+            ? `<p class="vs1-decision-item-meta"><a href="${esc(c.external_url)}" target="_blank" rel="noopener">Ver en LinkedIn</a></p>`
+            : c.dry_run
+              ? '<p class="vs1-decision-item-meta vs1-muted">Simulación dry-run</p>'
+              : '';
+          const errLine = c.error_message && c.status === 'failed'
+            ? `<p class="vs1-decision-item-meta vs1-badge--err">${esc(c.error_message)}</p>`
+            : '';
+          return `<article class="vs1-decision-item" data-content-id="${id}">
             <p class="vs1-decision-item-title">${esc(c.title)}</p>
-            <p class="vs1-decision-item-meta">${esc(c.status)} · ${esc(c.channel)} · ${esc(c.content_type)}</p>
-            <div class="vs1-decision-item-actions">
-              <button type="button" class="vs1-btn vs1-btn--ghost vs1-btn--sm" data-action="explain-content" data-id="${id}">¿Por qué?</button>
-              <button type="button" class="vs1-btn vs1-btn--primary vs1-btn--sm" data-action="approve-content" data-id="${id}">Aprobar</button>
-            </div>
+            <p class="vs1-decision-item-meta">${contentStatusBadge(c.status, c.publish_status)} · ${esc(c.channel)} · ${esc(c.content_type)}</p>
+            ${urlLine}${errLine}
+            <div class="vs1-decision-item-actions">${contentActionButtons(c)}</div>
           </article>`;
         }),
         'Sin contenido generado. Aprueba una campaña y usa «Generar contenido».',
       );
-      list.querySelectorAll('[data-action="explain-content"]').forEach((btn) => {
-        btn.onclick = async () => {
-          try { await openContentExplain(btn.dataset.id); } catch (e) { toast(e.message, true); }
+      if (filterHint) list.insertAdjacentHTML('afterbegin', filterHint);
+      const clearBtn = $('vs1ClearContentFilter');
+      if (clearBtn) {
+        clearBtn.onclick = async () => {
+          contentCampaignFilter = null;
+          await loadContentConsole();
         };
-      });
-      list.querySelectorAll('[data-action="approve-content"]').forEach((btn) => {
-        btn.onclick = async () => {
-          try {
-            await tenantV1Api(`/content/${encodeURIComponent(btn.dataset.id)}/approve`, { method: 'POST', body: '{}' });
-            toast('Contenido aprobado');
-            await loadContentConsole();
-          } catch (e) { toast(e.message, true); }
-        };
-      });
+      }
+      bindContentActions(list);
     } catch (e) {
       if (e.message !== 'Sesión expirada') renderDecisionList(list, [], e.message);
     }
+  }
+
+  function bindContentActions(list) {
+    list.querySelectorAll('[data-action="explain-content"]').forEach((btn) => {
+      btn.onclick = async () => {
+        try { await openContentExplain(btn.dataset.id); } catch (e) { toast(e.message, true); }
+      };
+    });
+    list.querySelectorAll('[data-action="approve-content"]').forEach((btn) => {
+      btn.onclick = async () => {
+        try {
+          await tenantV1Api(`/content/${encodeURIComponent(btn.dataset.id)}/approve`, { method: 'POST', body: '{}' });
+          toast('Contenido aprobado — listo para cola o publicación');
+          await loadContentConsole();
+        } catch (e) { toast(e.message, true); }
+      };
+    });
+    list.querySelectorAll('[data-action="reject-content"]').forEach((btn) => {
+      btn.onclick = async () => {
+        const reason = window.prompt('Motivo del rechazo (opcional):') || '';
+        try {
+          await tenantV1Api(`/content/${encodeURIComponent(btn.dataset.id)}/reject`, {
+            method: 'POST',
+            body: JSON.stringify({ reason }),
+          });
+          toast('Contenido rechazado');
+          await loadContentConsole();
+        } catch (e) { toast(e.message, true); }
+      };
+    });
+    list.querySelectorAll('[data-action="queue-content"]').forEach((btn) => {
+      btn.onclick = async () => {
+        try {
+          await tenantV1Api(`/content/${encodeURIComponent(btn.dataset.id)}/queue`, { method: 'POST', body: '{}' });
+          toast('Contenido en cola de publicación');
+          await loadContentConsole();
+        } catch (e) { toast(e.message, true); }
+      };
+    });
+    list.querySelectorAll('[data-action="publish-content"]').forEach((btn) => {
+      btn.onclick = async () => {
+        if (!window.confirm('¿Publicar ahora en LinkedIn? (respeta ACCIO_PUBLISH_DRY_RUN si está activo)')) return;
+        try {
+          const resp = await tenantV1Api(`/content/${encodeURIComponent(btn.dataset.id)}/publish-now`, {
+            method: 'POST',
+            body: '{}',
+          });
+          const d = resp.data || {};
+          if (d.dry_run) toast('Dry-run: publicación simulada');
+          else if (d.status === 'published') toast('Publicado en LinkedIn');
+          else toast(d.error_message || 'Error al publicar', true);
+          await openContentResult(btn.dataset.id);
+          await loadContentConsole();
+        } catch (e) { toast(e.message, true); }
+      };
+    });
+    list.querySelectorAll('[data-action="result-content"]').forEach((btn) => {
+      btn.onclick = async () => {
+        try { await openContentResult(btn.dataset.id); } catch (e) { toast(e.message, true); }
+      };
+    });
+    list.querySelectorAll('[data-action="history-content"]').forEach((btn) => {
+      btn.onclick = async () => {
+        try { await openContentHistory(btn.dataset.id); } catch (e) { toast(e.message, true); }
+      };
+    });
+  }
+
+  async function openContentResult(contentId) {
+    const body = $('vs1ExplainBody');
+    const modal = $('vs1ExplainModal');
+    const title = $('vs1ExplainTitle');
+    if (!body || !modal) return;
+    if (title) title.textContent = 'Resultado de publicación';
+    const resp = await tenantV1Api(`/content/${encodeURIComponent(contentId)}`);
+    const c = resp.data || {};
+    const pr = c.publish_result || {};
+    body.innerHTML = `
+      <div class="vs1-explain-grid">
+        <section><h4>Estado</h4><p>${contentStatusBadge(c.status, c.publish_status)}</p></section>
+        <section><h4>Canal</h4><p>${esc(c.channel || '—')}</p></section>
+        <section><h4>Publicado</h4><p>${esc(c.published_at || '—')}</p></section>
+        <section><h4>Dry-run</h4><p>${c.dry_run || pr.dry_run ? 'Sí (simulado)' : 'No'}</p></section>
+        <section><h4>ID externo</h4><p>${esc(c.external_post_id || pr.external_post_id || '—')}</p></section>
+        <section><h4>URL</h4><p>${c.external_url ? `<a href="${esc(c.external_url)}" target="_blank" rel="noopener">${esc(c.external_url)}</a>` : '—'}</p></section>
+        <section><h4>Error</h4><p class="${c.error_message ? 'vs1-badge--err' : ''}">${esc(c.error_message || '—')}</p></section>
+      </div>`;
+    modal.hidden = false;
+    const reset = () => { closeExplainModal(); if (title) title.textContent = 'Por qué recomendamos esto'; };
+    $('vs1ExplainClose').onclick = reset;
+    $('vs1ExplainBackdrop').onclick = reset;
+  }
+
+  async function openContentHistory(contentId) {
+    const body = $('vs1ExplainBody');
+    const modal = $('vs1ExplainModal');
+    const title = $('vs1ExplainTitle');
+    if (!body || !modal) return;
+    if (title) title.textContent = 'Auditoría del contenido';
+    const resp = await tenantV1Api(`/content/${encodeURIComponent(contentId)}/history`);
+    const rows = resp.data || [];
+    const items = rows.map((r) => `<li><strong>${esc(r.event_type)}</strong> · ${esc(r.created_at)} · ${esc(r.actor_id || '—')}</li>`).join('');
+    body.innerHTML = `<ul class="vs1-explain-list">${items || '<li>Sin eventos</li>'}</ul>`;
+    modal.hidden = false;
+    const reset = () => { closeExplainModal(); if (title) title.textContent = 'Por qué recomendamos esto'; };
+    $('vs1ExplainClose').onclick = reset;
+    $('vs1ExplainBackdrop').onclick = reset;
   }
 
   async function openContentExplain(contentId) {

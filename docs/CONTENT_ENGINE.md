@@ -56,11 +56,13 @@ Sección **Contenido** en `/accio/plan/{tenant}/` con botón **Generar contenido
 
 ## No incluido
 
-- Publisher automático
-- Encolado directo en `content_queue.json` (bloque siguiente)
+- Publisher automático sin acción humana
+- Otros canales (Meta, Instagram…) — ver VS2 limitaciones
+
+**VS2 (cerrado):** aprobación → cola → LinkedIn vía `ContentPublisherBridge`. Ver [VS2_PRIMERA_CAMPANA_PUBLICADA.md](VS2_PRIMERA_CAMPANA_PUBLICADA.md).
 
 ---
 
 ## Tests
 
-`tests/test_content_engine.py`
+`tests/test_content_engine.py` · `tests/test_vs2_content_publish.py`

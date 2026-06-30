@@ -223,7 +223,9 @@ Campaña → Objetivo → Audiencia → Canales → KPIs → (futuro) Contenido 
 
 Genera: posts · artículos · carruseles · videos · emails · WhatsApp · landings · scripts · presentaciones.
 
-**Estado código:** `content_engine_*` · schema v15 · API `/content/*` · consola `/accio/plan/` · doc [CONTENT_ENGINE.md](CONTENT_ENGINE.md).
+**Estado código:** `content_engine_*` · schema v15–v16 · API `/content/*` · consola `/accio/plan/` · doc [CONTENT_ENGINE.md](CONTENT_ENGINE.md).
+
+**VS2 cerrado:** flujo visible hasta publicación LinkedIn — [VS2_PRIMERA_CAMPANA_PUBLICADA.md](VS2_PRIMERA_CAMPANA_PUBLICADA.md).
 
 ---
 

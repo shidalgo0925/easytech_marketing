@@ -20,6 +20,7 @@ from .schema_v12_opportunities import _OPPORTUNITIES_DDL
 from .schema_v13_intelligence import apply_schema_v13
 from .schema_v14_campaign_engine import apply_schema_v14
 from .schema_v15_content_engine import apply_schema_v15
+from .schema_v16_content_publish import apply_schema_v16
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 DEFAULT_DB_PATH = BASE_DIR / "Marketing" / "platform" / "marketing_os.db"
@@ -67,6 +68,7 @@ _SCHEMA_SCRIPTS: dict[int, str] = {
     13: "",
     14: "",
     15: "",
+    16: "",
 }
 
 
@@ -218,6 +220,8 @@ def ensure_schema(conn: sqlite3.Connection | None = None) -> None:
                 apply_schema_v14(conn)
             if version == 15:
                 apply_schema_v15(conn)
+            if version == 16:
+                apply_schema_v16(conn)
             row = conn.execute(
                 "SELECT version FROM schema_migrations WHERE version = ?",
                 (version,),

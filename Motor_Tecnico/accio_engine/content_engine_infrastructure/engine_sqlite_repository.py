@@ -16,12 +16,16 @@ INSERT INTO content_pieces (
   tenant_id, content_id, campaign_id, recommendation_id, brand_id, title, format,
   channel, content_type, status, headline, body, call_to_action, hashtags_json,
   flyer_ref, objective, explain_json, llm_enrichment_json, llm_skipped,
-  planner_version, builder_version, payload_json, created_at, updated_at
+  planner_version, builder_version, payload_json, created_at, updated_at,
+  approved_by, approved_at, rejected_reason, publish_channel, publish_status,
+  published_at, publish_result_json, error_message, queue_post_id
 ) VALUES (
   :tenant_id, :content_id, :campaign_id, :recommendation_id, :brand_id, :title, :format,
   :channel, :content_type, :status, :headline, :body, :call_to_action, :hashtags_json,
   :flyer_ref, :objective, :explain_json, :llm_enrichment_json, :llm_skipped,
-  :planner_version, :builder_version, :payload_json, :created_at, :updated_at
+  :planner_version, :builder_version, :payload_json, :created_at, :updated_at,
+  :approved_by, :approved_at, :rejected_reason, :publish_channel, :publish_status,
+  :published_at, :publish_result_json, :error_message, :queue_post_id
 )
 ON CONFLICT(tenant_id, content_id) DO UPDATE SET
   campaign_id=excluded.campaign_id, recommendation_id=excluded.recommendation_id,
@@ -32,7 +36,11 @@ ON CONFLICT(tenant_id, content_id) DO UPDATE SET
   explain_json=excluded.explain_json, llm_enrichment_json=excluded.llm_enrichment_json,
   llm_skipped=excluded.llm_skipped, planner_version=excluded.planner_version,
   builder_version=excluded.builder_version, payload_json=excluded.payload_json,
-  updated_at=excluded.updated_at
+  approved_by=excluded.approved_by, approved_at=excluded.approved_at,
+  rejected_reason=excluded.rejected_reason, publish_channel=excluded.publish_channel,
+  publish_status=excluded.publish_status, published_at=excluded.published_at,
+  publish_result_json=excluded.publish_result_json, error_message=excluded.error_message,
+  queue_post_id=excluded.queue_post_id, updated_at=excluded.updated_at
 """
 
 
@@ -76,6 +84,7 @@ class SqliteContentEngineRepository:
         tenant_id: str,
         *,
         status: str | None = None,
+        statuses: tuple[str, ...] | None = None,
         campaign_id: str | None = None,
         brand_id: str | None = None,
         limit: int = 50,
@@ -87,6 +96,10 @@ class SqliteContentEngineRepository:
             if status:
                 sql += " AND status = ?"
                 params.append(status)
+            elif statuses:
+                placeholders = ",".join("?" * len(statuses))
+                sql += f" AND status IN ({placeholders})"
+                params.extend(statuses)
             if campaign_id:
                 sql += " AND campaign_id = ?"
                 params.append(campaign_id)
@@ -129,6 +142,35 @@ class SqliteContentEngineRepository:
                 ),
             )
             conn.commit()
+        finally:
+            if self._external is None:
+                conn.close()
+
+    def list_history(self, tenant_id: str, content_id: str, *, limit: int = 50) -> list[dict]:
+        conn = self._conn()
+        try:
+            rows = conn.execute(
+                """
+                SELECT history_id, event_type, actor_id, payload_json, created_at
+                FROM content_history
+                WHERE tenant_id = ? AND content_id = ?
+                ORDER BY created_at DESC
+                LIMIT ?
+                """,
+                (tenant_id, content_id, max(1, min(limit, 100))),
+            ).fetchall()
+            out = []
+            for row in rows:
+                out.append(
+                    {
+                        "history_id": row["history_id"],
+                        "event_type": row["event_type"],
+                        "actor_id": row["actor_id"],
+                        "payload": json.loads(row["payload_json"] or "{}"),
+                        "created_at": row["created_at"],
+                    }
+                )
+            return out
         finally:
             if self._external is None:
                 conn.close()
