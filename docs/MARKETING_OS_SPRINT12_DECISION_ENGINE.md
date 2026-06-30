@@ -1,9 +1,9 @@
 # M10 — Decision Engine V1 (Sprint 12)
 
-**Estado:** 🟢 GO documental · **Sin código hasta cierre M10.1**  
-**Versión:** 1.0 · 2026-06-26  
+**Estado:** 🟢 M10.1–M10.4 en código · **Pendiente:** M10.5 Approval Queue  
+**Versión:** 1.1 · 2026-06-30  
 **Dominio:** [MARKETING_OS_DOMAIN_MODEL.md](MARKETING_OS_DOMAIN_MODEL.md) §1.9 · [MARKETING_OS_DOMAIN_SERVICES.md](MARKETING_OS_DOMAIN_SERVICES.md) RoadmapService  
-**Precede:** Capa de conocimiento M0–M9 (implementada localmente, sin commit)
+**Precede:** Capa de conocimiento M0–M9 (commit `e8b7a53`)
 
 ---
 
@@ -183,57 +183,39 @@ Priority Engine usa pesos configurables; no mutan Plan v1.1.
 
 ## Sub-fases de implementación
 
-### M10.1 — Roadmap Builder ✅ criterio primero
+### M10.1 — Roadmap Builder ✅
 
-**Entregable:** `decision_engine/` slice + `KnowledgeSnapshot` por tenant  
+**Entregable:** `decision_engine_*` slice + `KnowledgeSnapshot` por tenant  
 **IA:** No
 
 - Port `KnowledgeReader` — compone snapshot desde repos M1–M9
 - Regla V1: **`brand_publication_gap`**
-  - Input: `brand_id`, umbral días (default 7)
-  - Lee: `publications` última `published_at` o `scheduled_at` pendiente
-  - Output: candidatos `Recommendation` en estado `draft`
+- Tests: `tests/test_decision_engine_m101.py`
 
-**Cierre:** test integración easytech — detecta EN1 sin post en N días.
+### M10.2 — Priority Engine ✅
 
-### M10.2 — Priority Engine
-
-**Entregable:** `PriorityScorer`  
+**Entregable:** `PriorityScorer` en `decision_engine_infrastructure/priority_scorer.py`  
 **IA:** No
 
-Factores V1 (pesos en config):
+- Pesos V1: inactividad 40% · alineación Brain 25% · leads 20% · editorial 15%
+- Tests: `tests/test_decision_engine_m102.py`
 
-| Factor | Peso inicial |
-|--------|--------------|
-| Días sin actividad marca | 40% |
-| Alineación producto prioritario (Brain) | 25% |
-| Leads recientes sin contacto | 20% |
-| Proximidad editorial (3 valor + 1 venta) | 15% |
+### M10.3 — Recommendation Engine ✅
 
-Output: `priority_score` + `priority` enum.
-
-**Cierre:** misma lista de candidatos ordenada de forma determinista.
-
-### M10.3 — Recommendation Engine
-
-**Entregable:** persistencia `recommendations` + domain service  
+**Entregable:** persistencia `recommendations` (schema v10) + API GET  
 **IA:** No
 
-- `createFromCandidate()` — objeto completo con `justification_refs`
-- Emite `RecommendationCreated` → `memory_events`
+- `createFromCandidate()` · evento `RecommendationCreated`
+- Tests: `tests/test_decision_engine_m103.py`
 
-**Cierre:** objeto JSON API cumple contrato § Entidades.
+### M10.4 — Daily Planner ✅
 
-### M10.4 — Daily Planner
-
-**Entregable:** `daily_roadmaps` + `generateDailyRoadmap(tenant, date)`  
+**Entregable:** `daily_roadmaps` (schema v11) + `generateDailyRoadmap` idempotente  
 **IA:** No
 
-- Idempotente por `(tenant_id, company_id, roadmap_date)`
-- Asigna `roadmap_id` a recommendations del día
-- Emite `DailyRoadmapGenerated`
-
-**Cierre:** `GET /roadmaps/{date}` devuelve roadmap + N recommendations ordenadas.
+- API `POST/GET .../roadmaps/{date}` · alias `/today`
+- Evento `DailyRoadmapGenerated`
+- Tests: `tests/test_decision_engine_m104.py`
 
 ### M10.5 — Approval Queue
 
@@ -391,14 +373,14 @@ ENTONCES Recommendation:
 
 ---
 
-## Relación con commit pendiente M4–M9
+## Relación con runtime M4–M9
 
 M10 **depende** de adapters M1–M9 en runtime.  
-Recomendación operativa:
+Estado operativo (jun 2026):
 
-1. Commit **“M4–M9 knowledge layer”** (sin runtime tenant)
-2. Migraciones prod + flags `ACCIO_*_STORE=dual`
-3. GO implementación **M10.1** únicamente
+1. Código M4–M9 y M10.1–M10.4 en `main`
+2. Migraciones prod M4–M9 + flags `ACCIO_*_STORE=dual` — **pendiente**
+3. Implementar **M10.5** Approval Queue
 
 ---
 

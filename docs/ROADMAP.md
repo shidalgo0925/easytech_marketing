@@ -26,7 +26,7 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 **Regla:** **No implementar una fase hasta cerrar completamente la anterior.**  
 **Runtime:** requiere **GO explícito** por fase.
 
-**Actualizado:** 2026-06-26 · **M10 Decision Engine** spec GO · **Implementar:** M10.1
+**Actualizado:** 2026-06-30 · **M10.1–M10.4** implementados · **Siguiente:** M10.5 Approval Queue
 
 **Forma de trabajo:** no más docs de visión · no redefinir producto · entregables verificables por sprint · Principio 19 antes de codear.
 
@@ -182,11 +182,11 @@ Constitución  →  Product Vision  →  Domain Model  →  Arquitectura  →  R
 
 | Sub-fase | Entregable | Estado |
 |----------|------------|--------|
-| M10.1 | Roadmap Builder + regla `brand_publication_gap` | 📋 spec |
-| M10.2 | Priority Engine | 📋 spec |
-| M10.3 | Recommendation Engine + persistencia | 📋 spec |
-| M10.4 | Daily Planner (`daily_roadmaps`) | 📋 spec |
-| M10.5 | Approval Queue | 📋 spec |
+| M10.1 | Roadmap Builder + regla `brand_publication_gap` | ✅ |
+| M10.2 | Priority Engine (`PriorityScorer`) | ✅ |
+| M10.3 | Recommendation Engine + persistencia schema v10 | ✅ |
+| M10.4 | Daily Planner (`daily_roadmaps` schema v11) | ✅ |
+| M10.5 | Approval Queue | 📋 pendiente |
 
 **Gate:** no más tablas de conocimiento sin preguntar *¿almacena conocimiento o toma decisiones?*
 
@@ -214,7 +214,7 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 | 4 Brand Center | Crear | 🔄 M3 (`brands` + API) |
 | 5 Asset Manager | Crear · Ejecutar | Parcial (`flyers/`, cola) |
 | 6 Marketing Brain | Analizar · Planificar | Parcial → **M11** (IA) |
-| 7 Roadmap Engine | Planificar | **M10 Decision Engine** (GO spec) |
+| 7 Roadmap Engine | Planificar | **M10 Decision Engine** M10.1–M10.4 ✅ |
 | 8 AI Provider Manager | Crear | En curso (`ai_provider/`) |
 | 9 Automation Engine | Ejecutar | Parcial (publicador, órdenes) |
 | 10 ROI Engine | Medir · Aprender | ❌ Fragmentado (métricas básicas) |
@@ -229,8 +229,9 @@ Conceptos transversales: **Empresa Viva** (§5) · **todo observable** · **todo
 ## Prioridad actual (jun 2026)
 
 ```
-Capa conocimiento M0–M9 ✅ código local (sin commit)
-M10 Decision Engine ✅ spec GO — implementar M10.1 primero
+Capa conocimiento M0–M9 ✅ commit e8b7a53
+M10 Decision Engine M10.1–M10.4 ✅ código + tests (15)
+M10.5 Approval Queue — siguiente
 M11 Marketing Brain — después de M10.5
 ```
 

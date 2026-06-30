@@ -1,6 +1,6 @@
 # EM+Acción — Contexto operativo (snapshot)
 
-**Fecha:** 2026-06-29  
+**Fecha:** 2026-06-30  
 **Repo:** `/opt/easytech_marketing` · **Servicio:** `easytech-accio-engine` (:8092)  
 **Bitácora:** `docs/sessions/2026-06-29-vs1-ux.md`
 
@@ -259,3 +259,23 @@ Sitio referencia: https://relaticpanama.org/
 | OAuth / n8n proxy | https://n8n.etsrv.site/accio/ |
 
 **Contacto:** info@easytech.services · WhatsApp +507 6688-4938
+
+---
+
+## 11. Marketing OS — Decision Engine (M10)
+
+**Último commit plataforma:** `e8b7a53` (M4–M9) · **M10.1–M10.4** en working tree (jun 2026).
+
+| Sub-fase | Estado | Módulo / API |
+|----------|--------|----------------|
+| M10.1 Roadmap Builder | ✅ | `decision_engine_*` · regla `brand_publication_gap` |
+| M10.2 Priority Engine | ✅ | `PriorityScorer` |
+| M10.3 Recommendations | ✅ | schema v10 · `GET /api/v1/tenants/{id}/recommendations` |
+| M10.4 Daily Planner | ✅ | schema v11 · `POST/GET .../roadmaps/{date}` |
+| M10.5 Approval Queue | 📋 | approve / reject / snooze |
+
+**DB:** `Marketing/platform/marketing_os.db` (schemas v1–v11)  
+**Tests:** `tests/test_decision_engine_m101.py` … `m104.py` (15 tests)  
+**Sin IA en M10** — LLM queda para M11 Marketing Brain.
+
+**Operativo pendiente:** migraciones prod M4–M9 + `ACCIO_*_STORE=dual` + restart `easytech-accio-engine`.

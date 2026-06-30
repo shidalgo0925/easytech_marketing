@@ -31,6 +31,7 @@ from Motor_Tecnico.accio_engine.knowledge_article_api import register_knowledge_
 from Motor_Tecnico.accio_engine.campaign_api import register_campaign_api  # noqa: E402
 from Motor_Tecnico.accio_engine.media_asset_api import register_media_asset_api  # noqa: E402
 from Motor_Tecnico.accio_engine.lead_api import register_lead_api  # noqa: E402
+from Motor_Tecnico.accio_engine.decision_engine_api import register_decision_engine_api  # noqa: E402
 from Motor_Tecnico.accio_engine.tenant import DEFAULT_TENANT, TenantNotFoundError, list_tenants, resolve_tenant  # noqa: E402
 
 ACCIO_ENV = load_accio_env(BASE_DIR)
@@ -2127,6 +2128,7 @@ register_knowledge_article_api(app, require_api_key)
 register_campaign_api(app, require_api_key)
 register_media_asset_api(app, require_api_key)
 register_lead_api(app, require_api_key)
+register_decision_engine_api(app, require_api_key)
 
 
 # --- Legacy routes (default easytech) ---

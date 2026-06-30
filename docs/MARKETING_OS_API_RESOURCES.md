@@ -125,13 +125,15 @@ Dominio congelado v1.1 — sin expandir campos.
 
 Roadmap diario + recomendaciones priorizadas. Spec: [MARKETING_OS_SPRINT12_DECISION_ENGINE.md](MARKETING_OS_SPRINT12_DECISION_ENGINE.md)
 
+**Implementado (M10.1–M10.4):** rutas marcadas ✅. **Pendiente (M10.5):** approve / reject / snooze.
+
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `tenants/{tenant_id}/roadmaps/{date}/generate` | Generar roadmap (reglas) |
-| GET | `tenants/{tenant_id}/roadmaps/{date}` | DailyRoadmap + recommendations |
-| GET | `tenants/{tenant_id}/roadmaps/today` | Alias fecha tenant |
-| GET | `tenants/{tenant_id}/recommendations` | Inbox (`status`, `brand_id`) |
-| GET | `tenants/{tenant_id}/recommendations/{id}` | Detalle |
+| POST | `tenants/{tenant_id}/roadmaps/{date}/generate` | Generar roadmap (reglas) ✅ |
+| GET | `tenants/{tenant_id}/roadmaps/{date}` | DailyRoadmap + recommendations ✅ |
+| GET | `tenants/{tenant_id}/roadmaps/today` | Alias fecha tenant ✅ |
+| GET | `tenants/{tenant_id}/recommendations` | Inbox (`status`, `brand_id`) ✅ |
+| GET | `tenants/{tenant_id}/recommendations/{id}` | Detalle ✅ |
 | POST | `tenants/{tenant_id}/recommendations/{id}/approve` | M10.5 |
 | POST | `tenants/{tenant_id}/recommendations/{id}/reject` | body: `reason` |
 | POST | `tenants/{tenant_id}/recommendations/{id}/snooze` | body: `until` |
